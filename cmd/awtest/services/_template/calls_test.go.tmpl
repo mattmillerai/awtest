@@ -1,0 +1,104 @@
+// TODO: Replace SERVICENAME with your service's package name (lowercase, no underscores)
+package SERVICENAME
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/AWSSDKPACKAGE"
+)
+
+// NOTE: `make test` runs with -race flag by default.
+// Race conditions in tests will be caught automatically.
+// Services must NOT import sync or sync/atomic.
+
+// TODO: Replace DISPLAYNAME with PascalCase service name (e.g., CertificateManager)
+// TODO: Replace APIMETHOD with the API method name (e.g., ListCertificates)
+// TODO: Replace SERVICECalls with DISPLAYNAMECalls (e.g., CertificateManagerCalls)
+func TestDISPLAYNAME_APIMETHOD_Process(t *testing.T) {
+	process := SERVICECalls[0].Process
+
+	tests := []struct {
+		name             string
+		output           interface{}
+		err              error
+		wantLen          int
+		wantError        bool
+		wantResourceName string
+	}{
+		{
+			// TODO: Replace RESULTTYPE with the SDK type for response items
+			// TODO: Replace NAMEFIELD with the field used for resource name
+			// TODO: Populate the struct with realistic test data
+			name: "successful response with results",
+			output: []*AWSSDKPACKAGE.RESULTTYPE{
+				{
+					NAMEFIELD: aws.String("my-resource"),
+				},
+			},
+			wantLen:          1,
+			wantResourceName: "my-resource",
+		},
+		{
+			name:      "error response",
+			output:    nil,
+			err:       fmt.Errorf("AccessDeniedException: User is not authorized"),
+			wantLen:   1,
+			wantError: true,
+		},
+		{
+			name:    "empty results",
+			output:  []*AWSSDKPACKAGE.RESULTTYPE{},
+			wantLen: 0,
+		},
+		{
+			name:    "wrong type assertion",
+			output:  "unexpected",
+			wantLen: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			results := process(tt.output, tt.err, false)
+
+			if len(results) != tt.wantLen {
+				t.Fatalf("expected %d results, got %d", tt.wantLen, len(results))
+			}
+
+			if tt.wantError {
+				if len(results) == 0 {
+					t.Fatal("expected error result, got no results")
+				}
+				if results[0].Error == nil {
+					t.Error("expected error in result, got nil")
+				}
+				// TODO: Replace DISPLAYNAME and AWSPREFIX:APIMETHOD with actual values
+				if results[0].ServiceName != "DISPLAYNAME" {
+					t.Errorf("expected ServiceName 'DISPLAYNAME', got '%s'", results[0].ServiceName)
+				}
+				if results[0].MethodName != "AWSPREFIX:APIMETHOD" {
+					t.Errorf("expected MethodName 'AWSPREFIX:APIMETHOD', got '%s'", results[0].MethodName)
+				}
+				return
+			}
+
+			if tt.wantLen > 0 {
+				// TODO: Replace DISPLAYNAME, AWSPREFIX:APIMETHOD, and RESOURCETYPE with actual values
+				if results[0].ServiceName != "DISPLAYNAME" {
+					t.Errorf("expected ServiceName 'DISPLAYNAME', got '%s'", results[0].ServiceName)
+				}
+				if results[0].MethodName != "AWSPREFIX:APIMETHOD" {
+					t.Errorf("expected MethodName 'AWSPREFIX:APIMETHOD', got '%s'", results[0].MethodName)
+				}
+				if results[0].ResourceType != "RESOURCETYPE" {
+					t.Errorf("expected ResourceType 'RESOURCETYPE', got '%s'", results[0].ResourceType)
+				}
+				if results[0].ResourceName != tt.wantResourceName {
+					t.Errorf("expected ResourceName '%s', got '%s'", tt.wantResourceName, results[0].ResourceName)
+				}
+			}
+		})
+	}
+}

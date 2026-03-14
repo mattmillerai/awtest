@@ -1,0 +1,8 @@
+# Compiled binary
+/awtest
+
+# GoReleaser output
+/dist/
+
+# Test coverage
+coverage.out
