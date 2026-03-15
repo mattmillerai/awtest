@@ -159,7 +159,7 @@ development_status:
 
   # Epic 13: Public Distribution & Discoverability (Phase 3 Epic 3)
   epic-13: in-progress
-  13-1-readme-repository-optimization: review
+  13-1-readme-repository-optimization: done
   13-2-security-tool-directory-submissions: backlog
   13-3-homebrew-core-submission: backlog
   epic-13-retrospective: optional

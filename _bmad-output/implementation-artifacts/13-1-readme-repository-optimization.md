@@ -1,6 +1,6 @@
 # Story 13.1: README & Repository Optimization
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
