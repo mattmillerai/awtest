@@ -152,14 +152,14 @@ development_status:
   epic-11-retrospective: optional
 
   # Epic 12: macOS Code Signing & Notarization (Phase 3 Epic 2)
-  epic-12: in-progress
-  12-1-apple-developer-certificate-setup-goreleaser-signing: review
-  12-2-apple-notarization-in-cicd: backlog
+  epic-12: done
+  12-1-apple-developer-certificate-setup-goreleaser-signing: done
+  12-2-apple-notarization-in-cicd: done
   epic-12-retrospective: optional
 
   # Epic 13: Public Distribution & Discoverability (Phase 3 Epic 3)
-  epic-13: backlog
-  13-1-readme-repository-optimization: backlog
+  epic-13: in-progress
+  13-1-readme-repository-optimization: review
   13-2-security-tool-directory-submissions: backlog
   13-3-homebrew-core-submission: backlog
   epic-13-retrospective: optional

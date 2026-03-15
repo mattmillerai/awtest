@@ -1,6 +1,6 @@
 # Story 12.1: Apple Developer Certificate Setup & GoReleaser Signing
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
