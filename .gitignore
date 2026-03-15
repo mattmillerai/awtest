@@ -1,0 +1,14 @@
+# Compiled binary
+/awtest
+
+# GoReleaser output
+/dist/
+
+# Test coverage
+coverage.out
+
+# Apple signing credentials
+*.p12
+*.cer
+*.certSigningRequest
+*.p8

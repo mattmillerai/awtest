@@ -1,0 +1,62 @@
+version: 2
+
+builds:
+  - binary: awtest
+    main: ./cmd/awtest
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.BuildDate={{.Date}}
+
+archives:
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+homebrew_casks:
+  - name: awtest
+    binaries:
+      - awtest
+    repository:
+      owner: MillerMedia
+      name: homebrew-tap
+    description: "AWS credential enumeration for security assessments"
+    homepage: "https://github.com/MillerMedia/awtest"
+    license: "MIT"
+
+notarize:
+  macos:
+    - ids:
+        - awtest
+      enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      sign:
+        certificate: "{{.Env.MACOS_SIGN_P12}}"
+        password: "{{.Env.MACOS_SIGN_PASSWORD}}"
+      notarize:
+        issuer_id: "{{.Env.MACOS_NOTARY_ISSUER_ID}}"
+        key_id: "{{.Env.MACOS_NOTARY_KEY_ID}}"
+        key: "{{.Env.MACOS_NOTARY_KEY}}"
+        wait: true
+        timeout: 20m
+
+release:
+  github:
+    owner: MillerMedia
+    name: awtest

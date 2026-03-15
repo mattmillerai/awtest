@@ -1,0 +1,129 @@
+// TODO: Replace SERVICENAME with your service's package name (lowercase, no underscores)
+// Examples: certificatemanager, stepfunctions, elasticache
+package SERVICENAME
+
+// CONCURRENT SAFETY: This service is concurrency-unaware by design.
+// The worker pool (worker_pool.go) executes services concurrently at --speed=fast/insane.
+// The safeScan wrapper handles panic recovery and error classification automatically.
+// DO NOT import "sync", "sync/atomic", or spawn goroutines in this file.
+// DO NOT use global mutable state. Each Call() invocation must be self-contained.
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/MillerMedia/awtest/cmd/awtest/utils"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+
+	// TODO: Replace AWSSDKPACKAGE with the AWS SDK v1 service package
+	// Examples: "github.com/aws/aws-sdk-go/service/acm"
+	//           "github.com/aws/aws-sdk-go/service/sfn"
+	//           "github.com/aws/aws-sdk-go/service/elasticache"
+	AWSSDKPACKAGE "github.com/aws/aws-sdk-go/service/AWSSDKPACKAGE"
+)
+
+// TODO: Replace DISPLAYNAME with PascalCase service name (e.g., CertificateManager, StepFunctions)
+// TODO: Replace SERVICECalls with DISPLAYNAMECalls (e.g., CertificateManagerCalls, StepFunctionsCalls)
+var SERVICECalls = []types.AWSService{
+	{
+		// TODO: Replace AWSPREFIX:APIMethod with the actual API call identifier
+		// Format: "awsprefix:APIMethod" (e.g., "acm:ListCertificates", "sfn:ListStateMachines")
+		Name: "AWSPREFIX:APIMETHOD",
+
+		// Call is invoked via the safeScan wrapper which handles panic recovery and error classification.
+		// No concurrency-related code is needed here — just implement the AWS API call.
+		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+			// TODO: Replace RESULTTYPE with the SDK type for individual items in the response
+			// Examples: *acm.CertificateSummary, *sfn.StateMachineListItem
+			var allResults []*AWSSDKPACKAGE.RESULTTYPE
+
+			// TODO: For GLOBAL services (e.g., IAM, Route53, CloudFront, S3 bucket listing),
+			// remove this region loop and call the API once with a single region (e.g., "us-east-1").
+			// Only REGIONAL services need to iterate over types.Regions.
+			for _, region := range types.Regions {
+				sess.Config.Region = aws.String(region)
+
+				// TODO: Replace AWSSDKPACKAGE.New with the correct SDK client constructor
+				// Examples: acm.New(sess), sfn.New(sess), elasticache.New(sess)
+				svc := AWSSDKPACKAGE.New(sess)
+
+				// TODO: Replace with the actual API call using WithContext variant
+				// - Always use the WithContext variant for timeout support
+				// - Replace APIMETHODINPUT with the correct input struct
+				// Examples:
+				//   svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})
+				//   svc.ListStateMachinesWithContext(ctx, &sfn.ListStateMachinesInput{})
+				output, err := svc.APIMethodWithContext(ctx, &AWSSDKPACKAGE.APIMETHODINPUT{})
+				if err != nil {
+					return nil, err
+				}
+
+				// TODO: Replace RESPONSEFIELD with the actual field from the API response
+				// Examples: output.CertificateSummaryList, output.StateMachines
+				allResults = append(allResults, output.RESPONSEFIELD...)
+			}
+			return allResults, nil
+		},
+
+		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
+			var results []types.ScanResult
+
+			// Handle errors using the standard error handler
+			if err != nil {
+				// TODO: Replace AWSPREFIX:APIMETHOD with the same value used in Name above
+				utils.HandleAWSError(debug, "AWSPREFIX:APIMETHOD", err)
+				return []types.ScanResult{
+					{
+						// TODO: Replace DISPLAYNAME with the PascalCase service name
+						ServiceName: "DISPLAYNAME",
+						MethodName:  "AWSPREFIX:APIMETHOD",
+						Error:       err,
+						Timestamp:   time.Now(),
+					},
+				}
+			}
+
+			// TODO: Replace RESULTTYPE with the same SDK type used in Call()
+			if items, ok := output.([]*AWSSDKPACKAGE.RESULTTYPE); ok {
+				for _, item := range items {
+					// TODO: Extract the resource name from the API response item
+					// Use nil-safe access for pointer fields:
+					//   name := ""
+					//   if item.Name != nil {
+					//       name = *item.Name
+					//   }
+					resourceName := ""
+					if item.NAMEFIELD != nil {
+						resourceName = *item.NAMEFIELD
+					}
+
+					results = append(results, types.ScanResult{
+						// TODO: Replace these fields with actual values
+						ServiceName:  "DISPLAYNAME",
+						MethodName:   "AWSPREFIX:APIMETHOD",
+						ResourceType: "RESOURCETYPE", // lowercase singular (e.g., "certificate", "statemachine")
+						ResourceName: resourceName,
+						// TODO: Populate Details with relevant resource metadata (e.g., ARN, region, status)
+						Details:      map[string]interface{}{},
+						Timestamp:    time.Now(),
+					})
+
+					// TODO: Customize the PrintResult output format
+					// ColorizeItem highlights the resource name in the console
+					utils.PrintResult(debug, "", "AWSPREFIX:APIMETHOD",
+						fmt.Sprintf("DISPLAYNAME: %s", utils.ColorizeItem(resourceName)), nil)
+				}
+			} else if output != nil {
+				// Type assertion failed -- Call() return type may not match Process() expectation
+				utils.HandleAWSError(debug, "AWSPREFIX:APIMETHOD", fmt.Errorf("unexpected output type %T", output))
+			}
+			return results
+		},
+
+		ModuleName: types.DefaultModuleName,
+	},
+}
