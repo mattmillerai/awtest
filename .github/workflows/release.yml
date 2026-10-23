@@ -12,20 +12,22 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Signing secrets only live in the public repo; this must not run from the private repo.
+    if: github.repository == 'mattmillerai/awtest'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
-          go-version: '1.24'
+          go-version-file: go.mod
 
       - name: Run tests
         run: go test ./...
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: '~> v2'
           args: release --clean

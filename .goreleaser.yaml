@@ -35,10 +35,10 @@ homebrew_casks:
     binaries:
       - awtest
     repository:
-      owner: MillerMedia
+      owner: mattmillerai
       name: homebrew-tap
     description: "AWS credential enumeration for security assessments"
-    homepage: "https://github.com/MillerMedia/awtest"
+    homepage: "https://github.com/mattmillerai/awtest"
     license: "MIT"
 
 notarize:
@@ -58,5 +58,5 @@ notarize:
 
 release:
   github:
-    owner: MillerMedia
+    owner: mattmillerai
     name: awtest
