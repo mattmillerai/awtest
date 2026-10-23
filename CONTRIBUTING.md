@@ -6,17 +6,31 @@ Thank you for your interest in contributing to awtest! The most common contribut
 
 ### Prerequisites
 
-- **Go:** 1.19+ (must match version in `go.mod`)
+- **Go:** 1.24+ (must match version in `go.mod`)
 - **make:** For build automation
 - **golangci-lint:** For code linting (`go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest`)
 
 ### Setup
 
 ```bash
-git clone https://github.com/MillerMedia/awtest.git
+git clone https://github.com/mattmillerai/awtest.git
 cd awtest
 go mod download
 ```
+
+### Commit Messages & Releases
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/); [release-please](https://github.com/googleapis/release-please) uses them to compute the next version and changelog automatically:
+
+- `feat:` -> minor version bump
+- `fix:` / `perf:` -> patch version bump
+- `feat!:` or a `BREAKING CHANGE:` footer -> major version bump
+- `deps:` (used by Dependabot) -> shown under "Dependencies" in the changelog
+- `chore:` / `ci:` / `docs:` / `test:` / `refactor:` -> no release triggered
+
+When a PR is squash-merged, **the PR title becomes the commit message**, so PR titles must follow this format too.
+
+**Release flow:** release-please keeps a `chore(main): release X.Y.Z` PR open with the next changelog. Merging it tags `vX.Y.Z`, which `sync-public.yml` mirrors to the public repo, where GoReleaser builds, signs, and publishes the release and Homebrew cask.
 
 ### Common Commands
 
@@ -229,27 +243,16 @@ Brief description of the AWS service being added and what resources it enumerate
 
 > **Note:** This section is for maintainers only.
 
-Releases are fully automated via GitHub Actions and GoReleaser:
+Releases are fully automated via GitHub Actions, release-please, and GoReleaser. Do not create tags by hand.
 
-1. **Create a version tag:**
-   ```bash
-   git tag v0.x.y
-   ```
+1. **Merge the release-please PR:** release-please keeps a `chore(main): release X.Y.Z` PR open against `main` with the next version and changelog. Merging it tags `vX.Y.Z` on this (private) repo.
+2. **Sync to the public repo:** the `v*` tag triggers `sync-public.yml`, which pushes a cleaned commit (private-only artifacts stripped) and only that tag to `mattmillerai/awtest`.
+3. **Build and publish:** the pushed tag triggers `release.yml` in the public repo, which runs GoReleaser to build cross-platform binaries, sign and notarize the macOS binaries, publish the GitHub Release, and update the cask in `mattmillerai/homebrew-tap`.
 
-2. **Push the tag:**
-   ```bash
-   git push origin v0.x.y
-   ```
-
-3. **GitHub Actions handles the rest:**
-   - GoReleaser builds cross-platform binaries (Linux, macOS, Windows)
-   - Release artifacts are uploaded to GitHub Releases
-   - Homebrew cask auto-updates via push to `MillerMedia/homebrew-tap`
-
-> **Note:** The release workflow requires a `GH_PAT` secret (not the default `GITHUB_TOKEN`) for cross-repo push to the Homebrew tap repository.
+> **Note:** A `GH_PAT` secret (not the default `GITHUB_TOKEN`) is required at each cross-repo step: release-please uses it because tags created with `GITHUB_TOKEN` do not trigger other workflows, and the sync must fire on its tag; the sync step uses it to push to the public repo; and GoReleaser uses it to push the cask update to the Homebrew tap.
 
 ## Development Requirements
 
-- **Go:** 1.19+
+- **Go:** 1.24+ (must match version in `go.mod`)
 - **AWS SDK:** v1 (`github.com/aws/aws-sdk-go`) -- do not use SDK v2
 - **Test framework:** standard `testing` package (no external test dependencies)

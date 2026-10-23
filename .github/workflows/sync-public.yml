@@ -36,6 +36,12 @@ jobs:
           rm -f summary.txt coverage.out awtest
           # Remove this sync workflow (only lives in private repo)
           rm -f .github/workflows/sync-public.yml
+          # These workflows/configs only make sense in the private repo: release-please
+          # tags releases there, and a dependabot.yml on the public default branch would
+          # make Dependabot open PRs against the mirror.
+          rm -f .github/workflows/release-please.yml .github/dependabot.yml
+          # release-please writes compare links against the private repo; point them at public.
+          if [ -f CHANGELOG.md ]; then sed -i 's#Miller-Media/awtest-private#mattmillerai/awtest#g' CHANGELOG.md; fi
 
       - name: Push to public repo
         env:
@@ -51,7 +57,7 @@ jobs:
           git add -A
           git commit -m "Sync from private repo" --allow-empty
 
-          git remote add public https://x-access-token:${GH_PAT}@github.com/mattmillerai/awtest.git
+          git remote add public "https://x-access-token:${GH_PAT}@github.com/mattmillerai/awtest.git"
 
           # Push master first so a tag-triggered public release always sees the cleaned code.
           # Force is required because the sync commit above is synthetic, not a fast-forward of public history.

@@ -1,13 +1,17 @@
 # .github/workflows/test.yml
 name: Tests
 on:
-  push:
   pull_request:
+  push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -20,7 +24,40 @@ jobs:
           go-version-file: go.mod
 
       - name: Build
-        run: go build ./cmd/awtest
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
 
       - name: Test
         run: go test -race ./...
+
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # actionlint v1.7.12 needs Go >= 1.25, and setup-go pins GOTOOLCHAIN=local so go.mod's 1.24 can't run it.
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: actionlint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+
+  govulncheck:
+    runs-on: ubuntu-latest
+    # Scans with the project's Go version so stdlib findings match shipped binaries.
+    # v1.1.4 is the last govulncheck that builds on Go 1.24. Go 1.24 is end-of-life and has
+    # unfixed stdlib vulns, so this is non-blocking until go.mod is bumped to a supported Go,
+    # after which switch to @latest and drop continue-on-error.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...

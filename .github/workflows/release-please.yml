@@ -1,0 +1,23 @@
+# .github/workflows/release-please.yml
+name: release-please
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.repository == 'Miller-Media/awtest-private'
+    steps:
+      - uses: googleapis/release-please-action@v5
+        with:
+          # GITHUB_TOKEN-tagged releases don't fire other workflows, and sync-public.yml
+          # must trigger on the v* tag release-please creates, so a PAT is required here.
+          token: ${{ secrets.GH_PAT }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
