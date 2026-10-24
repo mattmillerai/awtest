@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/Miller-Media/awtest-private/compare/v1.2.0...v1.3.0) (2026-10-24)
+
+
+### Features
+
+* **cli:** add offline diff command for comparing two JSON scan outputs ([#9](https://github.com/Miller-Media/awtest-private/issues/9)) ([d272d53](https://github.com/Miller-Media/awtest-private/commit/d272d530a065f4a54efdb68f95df5b3008917d8d))
+
+
+### Bug Fixes
+
+* **transcribe:** remove write-type StartTranscriptionJob call from read-only enumeration ([#7](https://github.com/Miller-Media/awtest-private/issues/7)) ([951ca04](https://github.com/Miller-Media/awtest-private/commit/951ca0429a4137a999ab6a954c3640a89cecc6ad))
+
 ## [1.2.0](https://github.com/Miller-Media/awtest-private/compare/v1.1.1...v1.2.0) (2026-10-24)
 
 
