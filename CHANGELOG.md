@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.0](https://github.com/Miller-Media/awtest-private/compare/v1.4.0...v1.5.0) (2026-10-24)
+
+
+### Features
+
+* **cli:** add --all-regions to scan every enabled AWS region ([#12](https://github.com/Miller-Media/awtest-private/issues/12)) ([58e77e3](https://github.com/Miller-Media/awtest-private/commit/58e77e385fd3d268749b7491a496dcd65db7de2e))
+
+### Notes
+
+* **--all-regions is opt-in:** default behavior is unchanged. When enabled, awtest scans every enabled AWS region, which makes many more API calls and generates many more CloudTrail events. Consider `-speed fast` and a longer `-timeout`.
+
 ## [1.4.0](https://github.com/Miller-Media/awtest-private/compare/v1.3.0...v1.4.0) (2026-10-24)
 
 
