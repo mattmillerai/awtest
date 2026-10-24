@@ -29,6 +29,10 @@ const (
 )
 
 func main() {
+	if isDiffInvocation(os.Args) {
+		os.Exit(runDiff(os.Args[2:], os.Stdout, os.Stderr))
+	}
+
 	awsAccessKeyID := flag.String("access-key-id", "", "AWS Access Key ID")
 	awsSecretAccessKey := flag.String("secret-access-key", "", "AWS Secret Access Key")
 	awsSessionToken := flag.String("session-token", "", "AWS Session Token (optional)")
@@ -58,6 +62,11 @@ func main() {
 	checkUpdate := flag.Bool("check-update", false, "Check if a newer version is available")
 
 	registerShortFlags(flag.CommandLine, outputFile, version)
+
+	flag.Usage = func() {
+		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nFlags:\n")
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
 

@@ -147,6 +147,8 @@ Resources Found:    11
 | `--check-update` | Check if a newer version is available | `false` |
 | `-v`, `--version` | Print version and build info | |
 
+Subcommand: `awtest diff [-format text|json] <before.json> <after.json>` compares two JSON scan outputs offline (see [Comparing scans](#comparing-scans-awtest-diff)).
+
 ## Speed Presets & OPSEC
 
 AWTest provides named speed presets that control scan parallelism. Choose the right preset based on your OPSEC requirements:
@@ -194,6 +196,52 @@ awtest --format=csv --output-file=findings.csv
 # View results as a formatted table
 awtest --format=table
 ```
+
+### Comparing scans (`awtest diff`)
+
+`awtest diff` compares two JSON scan outputs offline -- no AWS credentials or network access needed. Generate the two files with `-format json`, then diff them:
+
+```bash
+awtest -format json -o before.json
+# ...time passes, permissions change...
+awtest -format json -o after.json
+
+awtest diff before.json after.json
+```
+
+```text
+Comparing before.json -> after.json
+
+Added resources (1):
+  + sqs:ListQueues  orders-queue (queue)
+
+Removed resources (1):
+  - s3:ListBuckets  old-bucket (bucket)
+
+Changed calls (2):
+  ~ ec2:DescribeInstances  ok -> error (newly denied)
+  ~ iam:ListUsers  error -> ok (newly allowed)
+
+Summary: 1 added, 1 removed, 2 changed
+```
+
+Use `-format json` (`awtest diff -format json before.json after.json`) for machine-readable output with `identical`, `summary`, `added`, `removed` and `changedCalls` fields. Both the default envelope output and the bare-array output produced with `-quiet` are accepted.
+
+What it compares:
+
+- Resources are identified by service, method and resource name; resources only in the second scan are *added*, only in the first are *removed*.
+- Calls that returned errors (access denied, etc.) are tracked per method: a call that went from error to success is reported as *newly allowed*, and the reverse as *newly denied*.
+
+What it ignores:
+
+- Timestamps and `details` contents, and the resource type (for identity).
+- Calls that succeed with zero resources leave no trace in the output, so a call that was allowed but found nothing looks the same as a call that was never run.
+
+| Exit code | Meaning |
+|---|---|
+| `0` | No differences |
+| `1` | Differences found |
+| `2` | Usage or input error (wrong arguments, unreadable or non-awtest JSON file) |
 
 ## Real-World Use Cases
 
