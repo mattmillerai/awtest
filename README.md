@@ -27,7 +27,7 @@
 
 ## What It Does
 
-AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **63 AWS services** with **117 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
+AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **63 AWS services** with **116 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ awtest --speed=fast --format=json -o results.json
 
 ## Features
 
-- **Broad AWS Coverage** -- 63 services, 117 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
+- **Broad AWS Coverage** -- 63 services, 116 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
 - **Speed Presets** -- `--speed` presets (`safe`, `fast`, `insane`) for OPSEC-aware concurrent scanning, or fine-grained `--concurrency` control
 - **Multiple Output Formats** -- Text, JSON, YAML, CSV, and table output with `--output-file` export
 - **Service Filtering** -- Include or exclude specific services with `--services` and `--exclude-services`
@@ -227,10 +227,10 @@ awtest --aki=AKIAEXAMPLE --sak=YourSecretKey --speed=safe --timeout=2m
 
 AWTest shows the credentials only have access to CloudWatch logs and one S3 log bucket -- no customer data exposed, no emergency escalation needed.
 
-## Supported AWS Services (63 services, 117 API calls)
+## Supported AWS Services (63 services, 116 API calls)
 
 <details>
-<summary>Click to expand full service list (63 services, 117 API calls)</summary>
+<summary>Click to expand full service list (63 services, 116 API calls)</summary>
 
 ### Compute & Containers
 
@@ -343,7 +343,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | MediaConvert | ListQueues, ListJobs, ListPresets |
 | Rekognition | ListCollections, DescribeProjects, ListStreamProcessors |
 | SageMaker | ListNotebookInstances, ListEndpoints, ListModels, ListTrainingJobs |
-| Transcribe | ListTranscriptionJobs, ListLanguageModels, ListVocabularies, StartTranscriptionJob |
+| Transcribe | ListTranscriptionJobs, ListLanguageModels, ListVocabularies |
 
 ### IoT
 

@@ -133,43 +133,4 @@ var TranscribeCalls = []types.AWSService{
 		},
 		ModuleName: types.DefaultModuleName,
 	},
-	{
-		Name: "transcribe:StartTranscriptionJob",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := transcribeservice.New(sess)
-			input := &transcribeservice.StartTranscriptionJobInput{}
-			return svc.StartTranscriptionJobWithContext(ctx, input)
-		},
-		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
-			var results []types.ScanResult
-
-			if err != nil {
-				utils.HandleAWSError(debug, "transcribe:StartTranscriptionJob", err)
-				return []types.ScanResult{
-					{
-						ServiceName: "Transcribe",
-						MethodName:  "transcribe:StartTranscriptionJob",
-						Error:       err,
-						Timestamp:   time.Now(),
-					},
-				}
-			}
-
-			if jobOutput, ok := output.(*transcribeservice.StartTranscriptionJobOutput); ok {
-				utils.PrintResult(debug, "", "transcribe:StartTranscriptionJob", *jobOutput.TranscriptionJob.TranscriptionJobName, nil)
-
-				results = append(results, types.ScanResult{
-					ServiceName:  "Transcribe",
-					MethodName:   "transcribe:StartTranscriptionJob",
-					ResourceType: "transcription-job",
-					ResourceName: *jobOutput.TranscriptionJob.TranscriptionJobName,
-					Details:      map[string]interface{}{},
-					Timestamp:    time.Now(),
-				})
-			}
-
-			return results
-		},
-		ModuleName: types.DefaultModuleName,
-	},
 }
