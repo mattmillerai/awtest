@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Miller-Media/awtest-private/compare/v1.1.1...v1.2.0) (2026-10-24)
+
+
+### Features
+
+* **cli:** add -o and -v short flags ([48f8114](https://github.com/Miller-Media/awtest-private/commit/48f811456c6d9be88daaa5279fd3379081cadd58))
+
 ## [1.1.1](https://github.com/Miller-Media/awtest-private/compare/v1.1.0...v1.1.1) (2026-10-24)
 
 
