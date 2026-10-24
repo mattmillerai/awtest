@@ -29,7 +29,7 @@ var ECRCalls = []types.AWSService{
 		Name: "ecr:DescribeRepositories",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allRepos []*ecr.Repository
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := ecr.New(sess)
 				input := &ecr.DescribeRepositoriesInput{}
@@ -107,7 +107,7 @@ var ECRCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allImages []ecrImage
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := ecr.New(sess)
 
@@ -213,7 +213,7 @@ var ECRCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allPolicies []ecrPolicy
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := ecr.New(sess)
 

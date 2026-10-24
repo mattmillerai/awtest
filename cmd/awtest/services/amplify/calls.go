@@ -23,7 +23,7 @@ var AmplifyCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allAppsWithBranches []AppWithBranches
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := amplify.New(regionSess)
 				appsOutput, err := svc.ListAppsWithContext(ctx, &amplify.ListAppsInput{})

@@ -16,7 +16,7 @@ var EfsCalls = []types.AWSService{
 		Name: "efs:DescribeFileSystems",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allFileSystems []*efs.FileSystemDescription
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := efs.New(regionSess)
 				output, err := svc.DescribeFileSystemsWithContext(ctx, &efs.DescribeFileSystemsInput{})

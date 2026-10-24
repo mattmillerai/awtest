@@ -45,8 +45,8 @@ var SERVICECalls = []types.AWSService{
 
 			// TODO: For GLOBAL services (e.g., IAM, Route53, CloudFront, S3 bucket listing),
 			// remove this region loop and call the API once with a single region (e.g., "us-east-1").
-			// Only REGIONAL services need to iterate over types.Regions.
-			for _, region := range types.Regions {
+			// Only REGIONAL services need to iterate over types.RegionsFor(ctx).
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 
 				// TODO: Replace AWSSDKPACKAGE.New with the correct SDK client constructor

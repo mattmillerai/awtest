@@ -194,7 +194,7 @@ var CodeDeployCalls = []types.AWSService{
 			var allApps []cdApplication
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
 				var allAppNames []*string
 				var nextToken *string
@@ -276,7 +276,7 @@ var CodeDeployCalls = []types.AWSService{
 			var allGroups []cdDeploymentGroup
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all application names
@@ -394,7 +394,7 @@ var CodeDeployCalls = []types.AWSService{
 			var allConfigs []cdDeploymentConfig
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
 				var configNames []*string
 				var nextToken *string

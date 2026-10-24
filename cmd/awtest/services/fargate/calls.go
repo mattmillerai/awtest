@@ -18,7 +18,7 @@ var FargateCalls = []types.AWSService{
 			var allTasks []*ecs.Task
 			var lastErr error
 			anyRegionSucceeded := false
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := ecs.New(regionSess)
 

@@ -23,7 +23,7 @@ var CloudFrontCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDistributionsWithOrigins []DistributionWithOrigins
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := cloudfront.New(regionSess)
 				distributionsOutput, err := svc.ListDistributionsWithContext(ctx, &cloudfront.ListDistributionsInput{})

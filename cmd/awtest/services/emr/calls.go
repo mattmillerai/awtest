@@ -137,7 +137,7 @@ var EMRCalls = []types.AWSService{
 			var allClusters []emrCluster
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
 				var marker *string
 				for {
@@ -228,7 +228,7 @@ var EMRCalls = []types.AWSService{
 			var allInstanceGroups []emrInstanceGroup
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all cluster IDs and names
@@ -349,7 +349,7 @@ var EMRCalls = []types.AWSService{
 			var allConfigs []emrSecurityConfig
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
 				var marker *string
 				for {

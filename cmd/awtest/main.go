@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -55,6 +56,8 @@ func main() {
 
 	endpointURL := flag.String("endpoint-url", "", "Custom AWS-compatible endpoint URL (e.g. http://localhost:4566) used for ALL services; env AWS_ENDPOINT_URL is used if unset")
 
+	allRegions := flag.Bool("all-regions", false, "Scan every enabled AWS region instead of the default four US regions (many more API calls and CloudTrail events; see README)")
+
 	timeout := flag.Duration("timeout", 5*time.Minute, "Maximum scan timeout duration (e.g., 5m, 300s)")
 
 	concurrency := flag.Int("concurrency", MinConcurrency, "Number of concurrent service scans (1-20)")
@@ -66,7 +69,7 @@ func main() {
 	registerShortFlags(flag.CommandLine, outputFile, version)
 
 	flag.Usage = func() {
-		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nUse -endpoint-url to target LocalStack or a mock instead of AWS.\n\nFlags:\n")
+		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nUse -endpoint-url to target LocalStack or a mock instead of AWS.\nUse -all-regions to scan every enabled region (opt-in).\n\nFlags:\n")
 		flag.PrintDefaults()
 	}
 
@@ -254,7 +257,26 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
 
+	var regionStats *regionFailures
+	if *allRegions {
+		regions, source := discoverRegions(ctx, sess)
+		regions = orderRegions(regions, *awsRegion)
+		regionStats = &regionFailures{}
+		ctx = withAllRegions(ctx, &allRegionsConfig{regions: regions, failures: regionStats})
+		if !*quiet {
+			fmt.Fprintf(os.Stderr, "All-regions mode: scanning %d regions (source: %s). This multiplies API calls roughly %d-fold and creates much more CloudTrail activity; consider -speed fast and a longer -timeout.\n", len(regions), source, len(regions))
+		}
+	}
+
+	if *allRegions && !*debug {
+		utils.SetErrorDedupe(true)
+	}
+
 	results, skippedServices := scanServices(ctx, filteredSvcs, sess, speedResult.Concurrency, *quiet, *debug)
+
+	if regionStats != nil && !*quiet {
+		printRegionFailures(os.Stderr, regionStats, *debug, utils.SuppressedErrorLines())
+	}
 
 	if len(skippedServices) > 0 {
 		fmt.Fprintf(os.Stderr, "\nScan timeout reached after %s. %d services not scanned:\n", *timeout, len(skippedServices))
@@ -298,6 +320,34 @@ func main() {
 
 	if !*quiet {
 		printUpdateNotice(updateCh)
+	}
+}
+
+// printRegionFailures prints the one-line -all-regions failure summary and,
+// with debug, one line per failure.
+func printRegionFailures(w io.Writer, f *regionFailures, debug bool, suppressed int) {
+	total, regions := f.summary()
+	note := ""
+	if suppressed > 0 {
+		note = fmt.Sprintf(" %d repeated per-region error line(s) were suppressed.", suppressed)
+	}
+	if total == 0 {
+		if suppressed > 0 {
+			fmt.Fprintf(w, "All-regions:%s Use -debug to see every line.\n", note)
+		}
+		return
+	}
+	shown := regions
+	suffix := ""
+	if len(shown) > 10 {
+		shown = shown[:10]
+		suffix = ", ..."
+	}
+	fmt.Fprintf(w, "All-regions: %d region-level call(s) failed in %d region(s) (opt-in region not enabled or service unavailable): %s%s; re-run with -debug for details.%s\n", total, len(regions), strings.Join(shown, ", "), suffix, note)
+	if debug {
+		for _, fl := range f.all() {
+			fmt.Fprintf(w, "  %s %s: %s\n", fl.region, fl.call, fl.detail)
+		}
 	}
 }
 
@@ -393,7 +443,7 @@ func scanServices(ctx context.Context, svcs []types.AWSService, sess *session.Se
 				if !quiet {
 					fmt.Fprintf(os.Stderr, "Scanning %s...\n", service.Name)
 				}
-				serviceResults, _ := scanWithBackoff(ctx, service, sess, debug)
+				serviceResults, _ := scanService(ctx, service, sess, debug)
 				results = append(results, serviceResults...)
 			}
 		}

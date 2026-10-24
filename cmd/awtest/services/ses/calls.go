@@ -16,7 +16,7 @@ var SESCalls = []types.AWSService{
 		Name: "ses:ListIdentities",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allIdentities []string
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := ses.New(regionSess)
 				output, err := svc.ListIdentitiesWithContext(ctx, &ses.ListIdentitiesInput{})

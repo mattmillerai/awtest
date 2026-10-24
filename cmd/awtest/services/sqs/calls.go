@@ -30,7 +30,7 @@ var SQSCalls = []types.AWSService{
 		Name: "sqs:ListQueues",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allQueues []*string
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := sqs.New(sess)
 				output, err := svc.ListQueuesWithContext(ctx, &sqs.ListQueuesInput{})

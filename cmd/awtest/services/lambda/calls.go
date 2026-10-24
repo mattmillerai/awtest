@@ -24,7 +24,7 @@ var LambdaCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDetails []LambdaDetails
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := lambda.New(regionSess)
 				output, err := svc.ListFunctionsWithContext(ctx, &lambda.ListFunctionsInput{})

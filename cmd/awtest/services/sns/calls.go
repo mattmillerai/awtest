@@ -22,7 +22,7 @@ var SNSCalls = []types.AWSService{
 		Name: "sns:ListTopics",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allTopicsWithAttributes []TopicWithAttributes
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := sns.New(regionSess)
 				output, err := svc.ListTopicsWithContext(ctx, &sns.ListTopicsInput{})

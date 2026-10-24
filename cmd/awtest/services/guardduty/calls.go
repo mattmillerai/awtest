@@ -47,7 +47,7 @@ var GuardDutyCalls = []types.AWSService{
 			var allDetectors []guarddutyDetector
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
 
 				input := &guardduty.ListDetectorsInput{}
@@ -171,7 +171,7 @@ var GuardDutyCalls = []types.AWSService{
 			var allFindings []guarddutyFinding
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Discover detectors in this region
@@ -331,7 +331,7 @@ var GuardDutyCalls = []types.AWSService{
 			var allFilters []guarddutyFilter
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Discover detectors in this region

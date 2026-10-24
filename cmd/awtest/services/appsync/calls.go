@@ -16,7 +16,7 @@ var AppSyncCalls = []types.AWSService{
 		Name: "appsync:ListGraphqlApis",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApis []*appsync.GraphqlApi
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := appsync.New(regionSess)
 				output, err := svc.ListGraphqlApisWithContext(ctx, &appsync.ListGraphqlApisInput{})

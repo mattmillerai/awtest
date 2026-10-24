@@ -55,7 +55,7 @@ var SageMakerCalls = []types.AWSService{
 			var allNotebooks []smNotebook
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -185,7 +185,7 @@ var SageMakerCalls = []types.AWSService{
 			var allEndpoints []smEndpoint
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -301,7 +301,7 @@ var SageMakerCalls = []types.AWSService{
 			var allModels []smModel
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -403,7 +403,7 @@ var SageMakerCalls = []types.AWSService{
 			var allJobs []smTrainingJob
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {

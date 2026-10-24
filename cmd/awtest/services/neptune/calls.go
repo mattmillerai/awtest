@@ -243,7 +243,7 @@ var NeptuneCalls = []types.AWSService{
 			var allClusters []npCluster
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
 				var marker *string
 				for {
@@ -335,7 +335,7 @@ var NeptuneCalls = []types.AWSService{
 			var allInstances []npInstance
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
 				var marker *string
 				for {
@@ -425,7 +425,7 @@ var NeptuneCalls = []types.AWSService{
 			var allGroups []npParameterGroup
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
 				var marker *string
 				for {

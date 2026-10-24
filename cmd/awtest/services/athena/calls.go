@@ -241,7 +241,7 @@ var AthenaCalls = []types.AWSService{
 			var allWorkGroups []atWorkGroup
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -357,7 +357,7 @@ var AthenaCalls = []types.AWSService{
 			var allNamedQueries []atNamedQuery
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all workgroups in this region
@@ -475,7 +475,7 @@ var AthenaCalls = []types.AWSService{
 			var allQueryExecutions []atQueryExecution
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all workgroups in this region

@@ -16,7 +16,7 @@ var DynamoDBCalls = []types.AWSService{
 		Name: "dynamodb:ListTables",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allTableNames []*string
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := dynamodb.New(sess)
 				output, err := svc.ListTablesWithContext(ctx, &dynamodb.ListTablesInput{})
@@ -69,7 +69,7 @@ var DynamoDBCalls = []types.AWSService{
 		Name: "dynamodb:ListExports",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allExports []*dynamodb.ExportSummary
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := dynamodb.New(sess)
 				output, err := svc.ListExportsWithContext(ctx, &dynamodb.ListExportsInput{})
@@ -126,7 +126,7 @@ var DynamoDBCalls = []types.AWSService{
 		Name: "dynamodb:ListBackups",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allBackups []*dynamodb.BackupSummary
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := dynamodb.New(sess)
 				output, err := svc.ListBackupsWithContext(ctx, &dynamodb.ListBackupsInput{})

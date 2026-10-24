@@ -16,7 +16,7 @@ var SecretsManagerCalls = []types.AWSService{
 		Name: "secretsmanager:ListSecrets",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allSecrets []*secretsmanager.SecretListEntry
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := secretsmanager.New(sess)
 				output, err := svc.ListSecretsWithContext(ctx, &secretsmanager.ListSecretsInput{})

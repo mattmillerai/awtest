@@ -24,7 +24,7 @@ var ConfigCalls = []types.AWSService{
 			var allRecorders []*configservice.ConfigurationRecorder
 			var allRecorderStatuses []*configservice.ConfigurationRecorderStatus
 			var allRules []*configservice.ConfigRule
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := configservice.New(regionSess)
 

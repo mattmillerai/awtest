@@ -121,7 +121,7 @@ var Macie2Calls = []types.AWSService{
 			var allJobs []mcClassificationJob
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -238,7 +238,7 @@ var Macie2Calls = []types.AWSService{
 			var allFindings []mcFinding
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -330,7 +330,7 @@ var Macie2Calls = []types.AWSService{
 			var allBuckets []mcMonitoredBucket
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {

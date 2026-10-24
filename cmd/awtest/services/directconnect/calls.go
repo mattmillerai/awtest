@@ -173,7 +173,7 @@ var DirectConnectCalls = []types.AWSService{
 			var allConnections []dcConnection
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := directconnect.New(sess, &aws.Config{Region: aws.String(region)})
 				output, err := svc.DescribeConnectionsWithContext(ctx, &directconnect.DescribeConnectionsInput{})
 				if err != nil {
@@ -246,7 +246,7 @@ var DirectConnectCalls = []types.AWSService{
 			var allVIs []dcVirtualInterface
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := directconnect.New(sess, &aws.Config{Region: aws.String(region)})
 				output, err := svc.DescribeVirtualInterfacesWithContext(ctx, &directconnect.DescribeVirtualInterfacesInput{})
 				if err != nil {
@@ -321,6 +321,8 @@ var DirectConnectCalls = []types.AWSService{
 			var allGateways []dcGateway
 			var lastErr error
 
+			// Intentionally not scoped by types.RegionsFor: Direct Connect gateways are
+			// a single global-ish resource listed through one regional endpoint.
 			svc := directconnect.New(sess, &aws.Config{Region: aws.String(types.Regions[0])})
 			var nextToken *string
 			for {

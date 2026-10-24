@@ -35,7 +35,7 @@ var CodeCommitCalls = []types.AWSService{
 			var allRepos []ccRepository
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codecommit.New(sess, &aws.Config{Region: aws.String(region)})
 
 				var repoNames []*string
@@ -179,7 +179,7 @@ var CodeCommitCalls = []types.AWSService{
 			var allBranches []ccBranch
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codecommit.New(sess, &aws.Config{Region: aws.String(region)})
 
 				var repoNames []*string

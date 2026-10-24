@@ -16,7 +16,7 @@ var CognitoUserPoolsCalls = []types.AWSService{
 		Name: "cognito-idp:ListUserPools",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allUserPools []*cognitoidentityprovider.UserPoolDescriptionType
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := cognitoidentityprovider.New(sess)
 				output, err := svc.ListUserPoolsWithContext(ctx, &cognitoidentityprovider.ListUserPoolsInput{

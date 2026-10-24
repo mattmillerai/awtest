@@ -16,7 +16,7 @@ var CertificateManagerCalls = []types.AWSService{
 		Name: "acm:ListCertificates",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allCertificates []*acm.CertificateSummary
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := acm.New(sess)
 				output, err := svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})

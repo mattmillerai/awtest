@@ -47,7 +47,7 @@ func describeDomainsByRegion(ctx context.Context, sess *session.Session, methodN
 	var allRegionDomains []regionDomains
 	var lastErr error
 
-	for _, region := range types.Regions {
+	for _, region := range types.RegionsFor(ctx) {
 		svc := opensearchservice.New(sess, &aws.Config{Region: aws.String(region)})
 
 		listOutput, err := svc.ListDomainNamesWithContext(ctx, &opensearchservice.ListDomainNamesInput{})

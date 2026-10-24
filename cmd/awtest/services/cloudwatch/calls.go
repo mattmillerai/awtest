@@ -22,7 +22,7 @@ var CloudwatchCalls = []types.AWSService{
 		Name: "cloudwatch:DescribeAlarms",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allAlarms []*cloudwatch.MetricAlarm
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := cloudwatch.New(sess)
 				output, err := svc.DescribeAlarmsWithContext(ctx, &cloudwatch.DescribeAlarmsInput{})
@@ -70,7 +70,7 @@ var CloudwatchCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allLogGroupsWithStreams []*LogGroupWithStreams
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := cloudwatchlogs.New(regionSess)
 
@@ -165,7 +165,7 @@ var CloudwatchCalls = []types.AWSService{
 		Name: "cloudwatchlogs:ListMetrics",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allMetrics []*cloudwatch.Metric
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := cloudwatch.New(sess)
 				input := &cloudwatch.ListMetricsInput{}

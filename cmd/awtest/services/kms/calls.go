@@ -16,7 +16,7 @@ var KMSCalls = []types.AWSService{
 		Name: "kms:ListKeys",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allKeys []*kms.KeyListEntry
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := kms.New(sess)
 				output, err := svc.ListKeysWithContext(ctx, &kms.ListKeysInput{})

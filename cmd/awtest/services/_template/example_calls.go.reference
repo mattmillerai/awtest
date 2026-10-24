@@ -44,7 +44,7 @@ var CertificateManagerCalls = []types.AWSService{
 			// Here: []*acm.CertificateSummary
 			var allCertificates []*acm.CertificateSummary
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 
 				// TEMPLATE: svc := AWSSDKPACKAGE.New(sess)

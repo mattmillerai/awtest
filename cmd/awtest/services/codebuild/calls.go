@@ -43,7 +43,7 @@ var CodeBuildCalls = []types.AWSService{
 			var allProjects []cbProject
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
 
 				var projectNames []*string
@@ -176,7 +176,7 @@ var CodeBuildCalls = []types.AWSService{
 			var allEnvVars []cbEnvVar
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
 
 				var projectNames []*string
@@ -299,7 +299,7 @@ var CodeBuildCalls = []types.AWSService{
 			var allBuilds []cbBuild
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// First page only — no pagination, cap at 100 build IDs per region

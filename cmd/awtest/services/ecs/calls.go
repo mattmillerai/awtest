@@ -17,7 +17,7 @@ var ECSCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allClusters []*ecs.Cluster
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := ecs.New(regionSess)
 				output, err := svc.ListClustersWithContext(ctx, &ecs.ListClustersInput{})

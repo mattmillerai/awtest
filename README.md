@@ -140,6 +140,7 @@ Resources Found:    11
 | `--services` | Include only specific services (comma-separated) | all |
 | `--exclude-services` | Exclude specific services (comma-separated) | none |
 | `--endpoint-url` | Custom AWS-compatible endpoint URL used for every service (e.g. `http://localhost:4566`); also read from `AWS_ENDPOINT_URL` | none |
+| `--all-regions` | Scan every enabled AWS region instead of the default four US regions (opt-in; many more API calls) | `false` |
 | `--timeout` | Maximum scan duration (e.g., `5m`, `300s`) | `5m` |
 | `--speed` | Speed preset: `safe`, `fast`, `insane` (controls scan parallelism) | `safe` |
 | `--concurrency` | Number of concurrent service scans (overrides speed preset when specified) | `1` |
@@ -164,6 +165,23 @@ awtest -endpoint-url http://localhost:4566 -aki test -sak test
 - A notice is printed to stderr unless `-quiet` is set; results do not come from real AWS.
 - The scheme must be `http` or `https`; anything else exits with code 2.
 - The flag takes precedence over the `AWS_ENDPOINT_URL` environment variable.
+
+### Scanning all regions
+
+By default regional services are scanned in four US regions (`us-east-1`, `us-east-2`, `us-west-1`, `us-west-2`). Use `-all-regions` to scan every enabled region:
+
+```bash
+awtest -all-regions -speed fast -timeout 20m
+```
+
+- Regions are discovered with one read-only `ec2:DescribeRegions` call, which returns only the regions enabled for the account. If that call is denied or unavailable, awtest falls back to a built-in list of the commercial regions enabled by default; opt-in regions (e.g. `af-south-1`, `ap-east-1`) are not included in the fallback.
+- The `--region` value is scanned first.
+- Global services (IAM, S3 bucket listing, STS, ...) run once, not once per region.
+- A failure in one region does not discard results from the others. Failures are summarized in a single stderr line (opt-in region not enabled or service unavailable); use `-debug` for per-region details.
+- Repeated identical per-region error lines (same call and error code, e.g. access denied) are collapsed to the first occurrence and counted in that summary line; use `-debug` to see all of them.
+- Warning: this multiplies API calls roughly by the number of regions, generates far more CloudTrail activity (OPSEC) and takes much longer. Consider `-speed fast` and a larger `-timeout`.
+- Composes with `-endpoint-url`: every region hits the same endpoint.
+- GovCloud and China regions are not included.
 
 ## Speed Presets & OPSEC
 

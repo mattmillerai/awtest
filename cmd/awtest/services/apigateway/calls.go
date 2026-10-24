@@ -28,7 +28,7 @@ var APIGatewayCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApisWithStages []ApiWithStages
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				apisOutput, err := svc.GetRestApisWithContext(ctx, &apigateway.GetRestApisInput{})
@@ -217,7 +217,7 @@ var APIGatewayCalls = []types.AWSService{
 		Name: "apigateway:GetApiKeys",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApiKeys []*apigateway.ApiKey
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				output, err := svc.GetApiKeysWithContext(ctx, &apigateway.GetApiKeysInput{})
@@ -268,7 +268,7 @@ var APIGatewayCalls = []types.AWSService{
 		Name: "apigateway:GetDomainNames",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDomainNames []*apigateway.DomainName
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				output, err := svc.GetDomainNamesWithContext(ctx, &apigateway.GetDomainNamesInput{})

@@ -193,7 +193,7 @@ var MediaConvertCalls = []types.AWSService{
 			var allQueues []mcQueue
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -281,7 +281,7 @@ var MediaConvertCalls = []types.AWSService{
 			var allJobs []mcJob
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -369,7 +369,7 @@ var MediaConvertCalls = []types.AWSService{
 			var allPresets []mcPreset
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {

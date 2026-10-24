@@ -147,7 +147,7 @@ var KinesisCalls = []types.AWSService{
 			var allStreams []kinesisStream
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -229,7 +229,7 @@ var KinesisCalls = []types.AWSService{
 			var allShards []kinesisShard
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all stream names
@@ -346,7 +346,7 @@ var KinesisCalls = []types.AWSService{
 			var allConsumers []kinesisConsumer
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all stream names and ARNs

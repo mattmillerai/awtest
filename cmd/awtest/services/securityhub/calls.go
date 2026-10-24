@@ -55,7 +55,7 @@ var SecurityHubCalls = []types.AWSService{
 			var allStandards []shStandard
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
 
 				input := &securityhub.GetEnabledStandardsInput{}
@@ -154,7 +154,7 @@ var SecurityHubCalls = []types.AWSService{
 			var allFindings []shFinding
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
 
 				input := &securityhub.GetFindingsInput{
@@ -294,7 +294,7 @@ var SecurityHubCalls = []types.AWSService{
 			var allProducts []shProduct
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
 
 				input := &securityhub.ListEnabledProductsForImportInput{}

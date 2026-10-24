@@ -118,6 +118,12 @@ func HandleAWSError(debug bool, callName string, err error) error {
 		}
 		return nil
 	}
+	suppress := suppressRepeatedError(debug, callName, err)
+	emit := func(result string) {
+		if !suppress {
+			PrintResult(debug, "", callName, result, err)
+		}
+	}
 	if awsErr, ok := err.(awserr.Error); ok {
 		prettyMsg, exists := types.AwsErrorMessages[awsErr.Code()]
 		if !exists {
@@ -132,13 +138,13 @@ func HandleAWSError(debug bool, callName string, err error) error {
 				prettyMsg = "Access denied to this service."
 			}
 		} else if awsErr.Code() == types.InvalidAccessKeyId || awsErr.Code() == types.InvalidClientTokenId {
-			PrintResult(debug, "", callName, fmt.Sprintf("Error: %s", prettyMsg), err)
+			emit(fmt.Sprintf("Error: %s", prettyMsg))
 			return &types.InvalidKeyError{Message: prettyMsg}
 		}
 
-		PrintResult(debug, "", callName, fmt.Sprintf("Error: %s", prettyMsg), err)
+		emit(fmt.Sprintf("Error: %s", prettyMsg))
 	} else {
-		PrintResult(debug, "", callName, fmt.Sprintf("Error: %s", err.Error()), err)
+		emit(fmt.Sprintf("Error: %s", err.Error()))
 	}
 	return nil
 }

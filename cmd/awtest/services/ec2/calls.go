@@ -24,7 +24,7 @@ var EC2Calls = []types.AWSService{
 		Name: "ec2:DescribeInstances",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDetails []EC2InstanceDetails
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := ec2.New(sess)
 				input := &ec2.DescribeInstancesInput{}

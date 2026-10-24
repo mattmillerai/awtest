@@ -65,7 +65,7 @@ var BackupCalls = []types.AWSService{
 			var allVaults []bkVault
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -188,7 +188,7 @@ var BackupCalls = []types.AWSService{
 			var allPlans []bkPlan
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
 				var nextToken *string
 				for {
@@ -311,7 +311,7 @@ var BackupCalls = []types.AWSService{
 			var allRecoveryPoints []bkRecoveryPoint
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all vaults in this region
@@ -472,7 +472,7 @@ var BackupCalls = []types.AWSService{
 			var allPolicies []bkVaultPolicy
 			var lastErr error
 
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
 
 				// Step 1: List all vaults in this region

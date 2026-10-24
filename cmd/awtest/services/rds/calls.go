@@ -16,7 +16,7 @@ var RDSCalls = []types.AWSService{
 		Name: "rds:DescribeDBInstances",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDBInstances []*rds.DBInstance
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				sess.Config.Region = aws.String(region)
 				svc := rds.New(sess)
 				output, err := svc.DescribeDBInstancesWithContext(ctx, &rds.DescribeDBInstancesInput{})

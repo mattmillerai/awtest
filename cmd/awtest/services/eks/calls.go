@@ -16,7 +16,7 @@ var EKSCalls = []types.AWSService{
 		Name: "eks:ListClusters",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allClusters []*eks.Cluster
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := eks.New(regionSess)
 				listOutput, err := svc.ListClustersWithContext(ctx, &eks.ListClustersInput{})

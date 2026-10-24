@@ -18,7 +18,7 @@ var ElastiCacheCalls = []types.AWSService{
 			var allClusters []*elasticache.CacheCluster
 			var lastErr error
 			anyRegionSucceeded := false
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := elasticache.New(regionSess)
 				input := &elasticache.DescribeCacheClustersInput{

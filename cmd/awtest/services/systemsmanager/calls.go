@@ -18,7 +18,7 @@ var SystemsManagerCalls = []types.AWSService{
 			var allParameters []*ssm.ParameterMetadata
 			var lastErr error
 			anyRegionSucceeded := false
-			for _, region := range types.Regions {
+			for _, region := range types.RegionsFor(ctx) {
 				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := ssm.New(regionSess)
 				input := &ssm.DescribeParametersInput{}
