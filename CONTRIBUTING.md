@@ -6,7 +6,7 @@ Thank you for your interest in contributing to awtest! The most common contribut
 
 ### Prerequisites
 
-- **Go:** 1.24+ (must match version in `go.mod`)
+- **Go:** 1.26+ (must match version in `go.mod`)
 - **make:** For build automation
 - **golangci-lint:** For code linting (`go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest`)
 
@@ -253,6 +253,6 @@ Releases are fully automated via GitHub Actions, release-please, and GoReleaser.
 
 ## Development Requirements
 
-- **Go:** 1.24+ (must match version in `go.mod`)
+- **Go:** 1.26+ (must match version in `go.mod`)
 - **AWS SDK:** v1 (`github.com/aws/aws-sdk-go`) -- do not use SDK v2
 - **Test framework:** standard `testing` package (no external test dependencies)

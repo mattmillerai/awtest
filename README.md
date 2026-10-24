@@ -20,7 +20,7 @@
   <a href="https://github.com/MillerMedia/awtest/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/MillerMedia/awtest/test.yml?label=tests&style=flat-square" alt="Tests"></a>
   <a href="https://github.com/MillerMedia/awtest/blob/main/LICENSE"><img src="https://img.shields.io/github/license/MillerMedia/awtest?style=flat-square" alt="License"></a>
   <a href="https://goreportcard.com/report/github.com/MillerMedia/awtest"><img src="https://goreportcard.com/badge/github.com/MillerMedia/awtest" alt="Go Report Card"></a>
-  <img src="https://img.shields.io/badge/go-1.24+-00ADD8?style=flat-square&logo=go" alt="Go Version">
+  <img src="https://img.shields.io/badge/go-1.26+-00ADD8?style=flat-square&logo=go" alt="Go Version">
 </p>
 
 ---
@@ -68,7 +68,7 @@ brew install --cask MillerMedia/tap/awtest
 
 ### Go Install
 
-Requires Go 1.24+:
+Requires Go 1.26+:
 
 ```sh
 go install github.com/MillerMedia/awtest/cmd/awtest@latest

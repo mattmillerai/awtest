@@ -37,21 +37,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # actionlint v1.7.12 needs Go >= 1.25, and setup-go pins GOTOOLCHAIN=local so go.mod's 1.24 can't run it.
       - uses: actions/setup-go@v7
         with:
-          go-version: stable
+          go-version-file: go.mod
 
       - name: actionlint
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
   govulncheck:
     runs-on: ubuntu-latest
-    # Scans with the project's Go version so stdlib findings match shipped binaries.
-    # v1.1.4 is the last govulncheck that builds on Go 1.24. Go 1.24 is end-of-life and has
-    # unfixed stdlib vulns, so this is non-blocking until go.mod is bumped to a supported Go,
-    # after which switch to @latest and drop continue-on-error.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
@@ -59,5 +53,6 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # Scans with the project's Go toolchain so stdlib findings match shipped binaries.
       - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
