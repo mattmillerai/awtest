@@ -42,7 +42,7 @@ awtest
 awtest --aki=AKIAEXAMPLE --sak=YourSecretAccessKey
 
 # Fast scan with JSON output
-awtest --speed=fast --format=json --output-file=results.json
+awtest --speed=fast --format=json -o results.json
 ```
 
 ## Features
@@ -136,7 +136,7 @@ Resources Found:    11
 | `--st`, `--session-token` | AWS Session Token | |
 | `--region` | AWS Region | `us-west-2` |
 | `--format` | Output format: `text`, `json`, `yaml`, `csv`, `table` | `text` |
-| `--output-file` | Write output to file | |
+| `-o`, `--output-file` | Write output to file | |
 | `--services` | Include only specific services (comma-separated) | all |
 | `--exclude-services` | Exclude specific services (comma-separated) | none |
 | `--timeout` | Maximum scan duration (e.g., `5m`, `300s`) | `5m` |
@@ -145,7 +145,7 @@ Resources Found:    11
 | `--quiet` | Suppress info messages, show only findings | `false` |
 | `--debug` | Enable debug output | `false` |
 | `--check-update` | Check if a newer version is available | `false` |
-| `--version` | Print version and build info | |
+| `-v`, `--version` | Print version and build info | |
 
 ## Speed Presets & OPSEC
 

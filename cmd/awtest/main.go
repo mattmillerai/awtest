@@ -39,7 +39,7 @@ func main() {
 	awsSessionTokenAbbr := flag.String("st", "", "Abbreviated AWS Session Token")
 
 	outputFormat := flag.String("format", "text", "Output format: text, json, yaml, csv, table")
-	outputFile := flag.String("output-file", "", "Write output to file instead of stdout")
+	outputFile := flag.String("output-file", "", "Write output to file instead of stdout (short: -o)")
 	quiet := flag.Bool("quiet", false, "Suppress informational messages, show only findings")
 
 	debug := flag.Bool("debug", false, "Enable debug mode")
@@ -54,8 +54,10 @@ func main() {
 	concurrency := flag.Int("concurrency", MinConcurrency, "Number of concurrent service scans (1-20)")
 	speed := flag.String("speed", SpeedSafe, "Speed preset: safe, fast, insane")
 
-	version := flag.Bool("version", false, "Print version and build date")
+	version := flag.Bool("version", false, "Print version and build date (short: -v)")
 	checkUpdate := flag.Bool("check-update", false, "Check if a newer version is available")
+
+	registerShortFlags(flag.CommandLine, outputFile, version)
 
 	flag.Parse()
 
@@ -268,6 +270,13 @@ func main() {
 	if !*quiet {
 		printUpdateNotice(updateCh)
 	}
+}
+
+// registerShortFlags binds short aliases to existing flag variables: -o for
+// -output-file and -v for -version.
+func registerShortFlags(fs *flag.FlagSet, outputFile *string, version *bool) {
+	fs.StringVar(outputFile, "o", "", "Shorthand for -output-file")
+	fs.BoolVar(version, "v", false, "Shorthand for -version")
 }
 
 type updateNotice struct {
