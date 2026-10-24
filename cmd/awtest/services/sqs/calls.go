@@ -42,6 +42,7 @@ var SQSCalls = []types.AWSService{
 			return map[string]interface{}{
 				"queues": allQueues,
 				"ctx":    ctx,
+				"sess":   sess,
 			}, nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -60,6 +61,7 @@ var SQSCalls = []types.AWSService{
 			}
 			if outputMap, ok := output.(map[string]interface{}); ok {
 				queues, _ := outputMap["queues"].([]*string)
+				sess, _ := outputMap["sess"].(*session.Session)
 				ctx, _ := outputMap["ctx"].(context.Context)
 				if ctx == nil {
 					ctx = context.Background()
@@ -83,9 +85,8 @@ var SQSCalls = []types.AWSService{
 					utils.PrintResult(debug, "", "sqs:ListQueues", fmt.Sprintf("================================================================================"), nil)
 					utils.PrintResult(debug, "", "sqs:ListQueues", fmt.Sprintf("Found SQS queue: %s", queueUrl), nil)
 
-					sess := session.Must(session.NewSession())
-					sess.Config.Region = aws.String("us-east-1")
-					svc := sqs.New(sess)
+					sqsSess := sess.Copy(&aws.Config{Region: aws.String("us-east-1")})
+					svc := sqs.New(sqsSess)
 
 					// Receive messages from the queue
 					receiveOutput, receiveErr := svc.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{
@@ -143,8 +144,7 @@ var SQSCalls = []types.AWSService{
 														ruleName := strings.Split(arn.(string), "/")[1]
 
 														// Attempt describe rule
-														eventBridgeSess := session.Must(session.NewSession())
-														eventBridgeSess.Config.Region = aws.String("us-west-2")
+														eventBridgeSess := sess.Copy(&aws.Config{Region: aws.String("us-west-2")})
 														eventBridgeSvc := eventbridge.New(eventBridgeSess)
 														eventBridgeOutput, eventBridgeErr := eventBridgeSvc.DescribeRuleWithContext(ctx, &eventbridge.DescribeRuleInput{
 															Name: aws.String(ruleName),
@@ -179,8 +179,7 @@ var SQSCalls = []types.AWSService{
 										deadLetterQueueUrl := arnToQueueUrl(deadLetterQueueArn)
 
 										// Receive messages from the dead letter queue
-										deadLetterSess := session.Must(session.NewSession())
-										deadLetterSess.Config.Region = aws.String("us-east-1")
+										deadLetterSess := sess.Copy(&aws.Config{Region: aws.String("us-east-1")})
 										deadLetterSvc := sqs.New(deadLetterSess)
 										deadLetterAttrOutput, deadLetterAttrErr := deadLetterSvc.ListDeadLetterSourceQueuesWithContext(ctx, &sqs.ListDeadLetterSourceQueuesInput{
 											QueueUrl: aws.String(deadLetterQueueUrl),

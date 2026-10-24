@@ -28,16 +28,8 @@ var APIGatewayCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApisWithStages []ApiWithStages
 
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				apisOutput, err := svc.GetRestApisWithContext(ctx, &apigateway.GetRestApisInput{})
 				if err != nil {
@@ -225,16 +217,8 @@ var APIGatewayCalls = []types.AWSService{
 		Name: "apigateway:GetApiKeys",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApiKeys []*apigateway.ApiKey
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				output, err := svc.GetApiKeysWithContext(ctx, &apigateway.GetApiKeysInput{})
 				if err != nil {
@@ -284,16 +268,8 @@ var APIGatewayCalls = []types.AWSService{
 		Name: "apigateway:GetDomainNames",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDomainNames []*apigateway.DomainName
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := apigateway.New(regionSess)
 				output, err := svc.GetDomainNamesWithContext(ctx, &apigateway.GetDomainNamesInput{})
 				if err != nil {

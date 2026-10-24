@@ -71,19 +71,12 @@ var CloudwatchCalls = []types.AWSService{
 			var allLogGroupsWithStreams []*LogGroupWithStreams
 
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: sess.Config.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := cloudwatchlogs.New(regionSess)
 
 				// Describe Log Groups
 				input := &cloudwatchlogs.DescribeLogGroupsInput{}
-				err = svc.DescribeLogGroupsPagesWithContext(ctx, input, func(output *cloudwatchlogs.DescribeLogGroupsOutput, lastPage bool) bool {
+				err := svc.DescribeLogGroupsPagesWithContext(ctx, input, func(output *cloudwatchlogs.DescribeLogGroupsOutput, lastPage bool) bool {
 					for _, logGroup := range output.LogGroups {
 						// Describe Log Streams for each Log Group
 						streamInput := &cloudwatchlogs.DescribeLogStreamsInput{

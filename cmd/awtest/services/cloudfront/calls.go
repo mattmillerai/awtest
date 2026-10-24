@@ -23,16 +23,8 @@ var CloudFrontCalls = []types.AWSService{
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allDistributionsWithOrigins []DistributionWithOrigins
 
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := cloudfront.New(regionSess)
 				distributionsOutput, err := svc.ListDistributionsWithContext(ctx, &cloudfront.ListDistributionsInput{})
 				if err != nil {

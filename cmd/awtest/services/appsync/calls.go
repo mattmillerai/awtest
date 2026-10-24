@@ -16,16 +16,8 @@ var AppSyncCalls = []types.AWSService{
 		Name: "appsync:ListGraphqlApis",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allApis []*appsync.GraphqlApi
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := appsync.New(regionSess)
 				output, err := svc.ListGraphqlApisWithContext(ctx, &appsync.ListGraphqlApisInput{})
 				if err != nil {

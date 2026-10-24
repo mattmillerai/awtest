@@ -139,6 +139,7 @@ Resources Found:    11
 | `-o`, `--output-file` | Write output to file | |
 | `--services` | Include only specific services (comma-separated) | all |
 | `--exclude-services` | Exclude specific services (comma-separated) | none |
+| `--endpoint-url` | Custom AWS-compatible endpoint URL used for every service (e.g. `http://localhost:4566`); also read from `AWS_ENDPOINT_URL` | none |
 | `--timeout` | Maximum scan duration (e.g., `5m`, `300s`) | `5m` |
 | `--speed` | Speed preset: `safe`, `fast`, `insane` (controls scan parallelism) | `safe` |
 | `--concurrency` | Number of concurrent service scans (overrides speed preset when specified) | `1` |
@@ -148,6 +149,21 @@ Resources Found:    11
 | `-v`, `--version` | Print version and build info | |
 
 Subcommand: `awtest diff [-format text|json] <before.json> <after.json>` compares two JSON scan outputs offline (see [Comparing scans](#comparing-scans-awtest-diff)).
+
+### Using with LocalStack or mocks
+
+Point awtest at any AWS-compatible endpoint instead of real AWS:
+
+```bash
+awtest -endpoint-url http://localhost:4566 -aki test -sak test
+```
+
+- The endpoint applies to all services, including regional loops. Every region in the loop hits the same endpoint, so you may see duplicate results.
+- S3 switches to path-style addressing automatically.
+- For `https` endpoints with self-signed certificates, set `AWS_CA_BUNDLE` to your CA file.
+- A notice is printed to stderr unless `-quiet` is set; results do not come from real AWS.
+- The scheme must be `http` or `https`; anything else exits with code 2.
+- The flag takes precedence over the `AWS_ENDPOINT_URL` environment variable.
 
 ## Speed Presets & OPSEC
 

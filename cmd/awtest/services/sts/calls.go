@@ -20,6 +20,7 @@ var STSCalls = []types.AWSService{
 			return map[string]interface{}{
 				"output": output,
 				"ctx":    ctx,
+				"sess":   sess,
 			}, err
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -43,6 +44,7 @@ var STSCalls = []types.AWSService{
 				if ctx == nil {
 					ctx = context.Background()
 				}
+				sess, _ := outputMap["sess"].(*session.Session)
 				userId := ""
 				account := ""
 				arn := ""
@@ -79,8 +81,8 @@ var STSCalls = []types.AWSService{
 				utils.PrintResult(debug, "", "iam-user", userName, nil)
 
 				// List attached user policies by calling the IAM service using the Policy Simulator
-				sess := session.Must(session.NewSession())
-				svc := iam.New(sess)
+				iamSess := sess.Copy()
+				svc := iam.New(iamSess)
 				attachedPolicyOutput, err := svc.ListAttachedUserPoliciesWithContext(ctx, &iam.ListAttachedUserPoliciesInput{
 					UserName: &userName,
 				})

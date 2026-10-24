@@ -53,6 +53,8 @@ func main() {
 	flag.StringVar(&includeServices, "services", "", "Include only specific services (comma-separated, e.g., s3,ec2,iam)")
 	flag.StringVar(&excludeServices, "exclude-services", "", "Exclude specific services (comma-separated, e.g., cloudwatch,cloudtrail)")
 
+	endpointURL := flag.String("endpoint-url", "", "Custom AWS-compatible endpoint URL (e.g. http://localhost:4566) used for ALL services; env AWS_ENDPOINT_URL is used if unset")
+
 	timeout := flag.Duration("timeout", 5*time.Minute, "Maximum scan timeout duration (e.g., 5m, 300s)")
 
 	concurrency := flag.Int("concurrency", MinConcurrency, "Number of concurrent service scans (1-20)")
@@ -64,7 +66,7 @@ func main() {
 	registerShortFlags(flag.CommandLine, outputFile, version)
 
 	flag.Usage = func() {
-		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nFlags:\n")
+		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nUse -endpoint-url to target LocalStack or a mock instead of AWS.\n\nFlags:\n")
 		flag.PrintDefaults()
 	}
 
@@ -92,6 +94,12 @@ func main() {
 			fmt.Print(msg)
 		}
 		os.Exit(0)
+	}
+
+	endpoint, err := utils.ResolveEndpointURL(*endpointURL, os.Getenv)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		os.Exit(2)
 	}
 
 	utils.Quiet = *quiet
@@ -188,6 +196,15 @@ func main() {
 		}
 	}
 
+	utils.ApplyEndpoint(sess, endpoint)
+	endpointNotice := ""
+	if endpoint != "" {
+		endpointNotice = fmt.Sprintf("Using custom endpoint: %s (results do not come from real AWS)", endpoint)
+		if !*quiet {
+			fmt.Fprintln(os.Stderr, endpointNotice)
+		}
+	}
+
 	if *debug {
 		fmt.Println("Debug mode enabled")
 		fmt.Println("-----------------------------")
@@ -209,6 +226,9 @@ func main() {
 			fmt.Println("Profile:", awsProfile)
 		}
 		fmt.Println("Region:", *awsRegion)
+		if endpointNotice != "" {
+			fmt.Println(endpointNotice)
+		}
 		fmt.Println("-----------------------------")
 	}
 

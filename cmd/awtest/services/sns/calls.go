@@ -22,16 +22,8 @@ var SNSCalls = []types.AWSService{
 		Name: "sns:ListTopics",
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			var allTopicsWithAttributes []TopicWithAttributes
-			originalConfig := sess.Config
 			for _, region := range types.Regions {
-				regionConfig := &aws.Config{
-					Region:      aws.String(region),
-					Credentials: originalConfig.Credentials,
-				}
-				regionSess, err := session.NewSession(regionConfig)
-				if err != nil {
-					return nil, err
-				}
+				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 				svc := sns.New(regionSess)
 				output, err := svc.ListTopicsWithContext(ctx, &sns.ListTopicsInput{})
 				if err != nil {
@@ -44,14 +36,7 @@ var SNSCalls = []types.AWSService{
 						return nil, fmt.Errorf("invalid ARN: %s", *topic.TopicArn)
 					}
 					region := arnParts[3]
-					regionConfigForAttr := &aws.Config{
-						Region:      aws.String(region),
-						Credentials: originalConfig.Credentials,
-					}
-					attrSess, err := session.NewSession(regionConfigForAttr)
-					if err != nil {
-						return nil, err
-					}
+					attrSess := sess.Copy(&aws.Config{Region: aws.String(region)})
 					svc = sns.New(attrSess)
 
 					attrOutput, attrErr := svc.GetTopicAttributesWithContext(ctx, &sns.GetTopicAttributesInput{

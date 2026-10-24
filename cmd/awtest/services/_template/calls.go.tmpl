@@ -36,6 +36,8 @@ var SERVICECalls = []types.AWSService{
 
 		// Call is invoked via the safeScan wrapper which handles panic recovery and error classification.
 		// No concurrency-related code is needed here — just implement the AWS API call.
+		// Never construct sessions in a service (session.New*/Must): derive per-region sessions
+		// with sess.Copy(&aws.Config{Region: aws.String(region)}) so -endpoint-url and credentials are inherited.
 		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
 			// TODO: Replace RESULTTYPE with the SDK type for individual items in the response
 			// Examples: *acm.CertificateSummary, *sfn.StateMachineListItem

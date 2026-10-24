@@ -187,6 +187,7 @@ Before submitting a new service, verify:
 - [ ] Exported variable follows `DISPLAYNAMECalls` naming convention
 - [ ] `AWSService` struct fields are correctly populated (Name, Call, Process, ModuleName)
 - [ ] `Call()` accepts `context.Context` and `*session.Session`
+- [ ] Services never construct sessions (`session.New*`/`session.Must`); per-region sessions use `sess.Copy(&aws.Config{Region: aws.String(region)})` so `-endpoint-url` and credentials are inherited (enforced by `TestNoServiceBuildsItsOwnSession`)
 - [ ] `Call()` uses `WithContext` variant of the API method for timeout support
 - [ ] `Process()` accepts `(interface{}, error, bool)` and returns `[]types.ScanResult`
 - [ ] `Process()` handles errors via `utils.HandleAWSError`
