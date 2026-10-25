@@ -3,20 +3,22 @@ package codepipeline
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/codepipeline"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/codepipeline"
-	"time"
 )
 
 var CodePipelineCalls = []types.AWSService{
 	{
 		Name: "codepipeline:ListPipelines",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := codepipeline.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", codepipeline.NewFromConfig)
 			input := &codepipeline.ListPipelinesInput{}
-			return svc.ListPipelinesWithContext(ctx, input)
+			return svc.ListPipelines(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -33,19 +35,24 @@ var CodePipelineCalls = []types.AWSService{
 				}
 			}
 
-			if pipelines, ok := output.(*codepipeline.ListPipelinesOutput); ok {
-				for _, pipeline := range pipelines.Pipelines {
-					results = append(results, types.ScanResult{
-						ServiceName:  "CodePipeline",
-						MethodName:   "codepipeline:ListPipelines",
-						ResourceType: "pipeline",
-						ResourceName: *pipeline.Name,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			pipelines, ok := output.(*codepipeline.ListPipelinesOutput)
+			if !ok {
+				utils.HandleAWSError(debug, "codepipeline:ListPipelines", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "codepipeline:ListPipelines", fmt.Sprintf("Pipeline: %s", *pipeline.Name), nil)
-				}
+			for _, pipeline := range pipelines.Pipelines {
+				pipelineName := aws.ToString(pipeline.Name)
+				results = append(results, types.ScanResult{
+					ServiceName:  "CodePipeline",
+					MethodName:   "codepipeline:ListPipelines",
+					ResourceType: "pipeline",
+					ResourceName: pipelineName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "codepipeline:ListPipelines", fmt.Sprintf("Pipeline: %s", pipelineName), nil)
 			}
 			return results
 		},

@@ -1,0 +1,1 @@
+{"jobSummaryList":[{"jobId":"11111111-2222-3333-4444-555555555555","jobName":"nightly-etl","createdAt":1700000000000,"status":"SUCCEEDED","container":{"exitCode":0}},{"jobId":"66666666-7777-8888-9999-000000000000","jobName":"thumbnail-render"}]}

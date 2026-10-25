@@ -2,7 +2,7 @@
 // migration.
 //
 // main wires this package in (see "Migration status" below) and the pilot
-// services, sts, kms, ecr and s3, have been migrated. It holds the configuration, retry, endpoint and
+// services, sts, kms, ecr and s3, and bulk 1 have been migrated. It holds the configuration, retry, endpoint and
 // error-normalisation behaviour that migrated services rely on.
 //
 // Rules for future callers:
@@ -68,7 +68,11 @@
 //     GetBucketLocation and region-pinned ListObjectsV2 follow-ups, and
 //     s3:GetBucketPolicy, whose Process runs four read-only checks per bucket
 //     in the bucket's own region; both carry the v2 config in their output
-//     and build the per-bucket-region clients with NewRegionalClient). Every
+//     and build the per-bucket-region clients with NewRegionalClient). Bulk 1
+//     is migrated too: batch (batch:ListJobs), cloudformation
+//     (cloudformation:ListStacks), codepipeline (codepipeline:ListPipelines),
+//     glacier (glacier:ListVaults) and eventbridge
+//     (eventbridge:ListEventBuses), all single non-paginated calls. Every
 //     other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

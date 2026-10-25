@@ -1,0 +1,72 @@
+[
+  {
+    "details": {},
+    "methodName": "batch:ListJobs",
+    "resourceName": "nightly-etl",
+    "resourceType": "job",
+    "serviceName": "Batch"
+  },
+  {
+    "details": {},
+    "methodName": "batch:ListJobs",
+    "resourceName": "thumbnail-render",
+    "resourceType": "job",
+    "serviceName": "Batch"
+  },
+  {
+    "details": {},
+    "methodName": "cloudformation:ListStacks",
+    "resourceName": "demo-network",
+    "resourceType": "stack",
+    "serviceName": "CloudFormation"
+  },
+  {
+    "details": {},
+    "methodName": "cloudformation:ListStacks",
+    "resourceName": "demo-app",
+    "resourceType": "stack",
+    "serviceName": "CloudFormation"
+  },
+  {
+    "details": {},
+    "methodName": "codepipeline:ListPipelines",
+    "resourceName": "demo-release-pipeline",
+    "resourceType": "pipeline",
+    "serviceName": "CodePipeline"
+  },
+  {
+    "details": {},
+    "methodName": "codepipeline:ListPipelines",
+    "resourceName": "demo-docs-pipeline",
+    "resourceType": "pipeline",
+    "serviceName": "CodePipeline"
+  },
+  {
+    "details": {},
+    "methodName": "eventbridge:ListEventBuses",
+    "resourceName": "default",
+    "resourceType": "event-bus",
+    "serviceName": "EventBridge"
+  },
+  {
+    "details": {},
+    "methodName": "eventbridge:ListEventBuses",
+    "resourceName": "demo-orders-bus",
+    "resourceType": "event-bus",
+    "serviceName": "EventBridge"
+  },
+  {
+    "details": {},
+    "methodName": "glacier:ListVaults",
+    "resourceName": "demo-archive-vault",
+    "resourceType": "vault",
+    "serviceName": "Glacier"
+  },
+  {
+    "details": {},
+    "methodName": "glacier:ListVaults",
+    "resourceName": "demo-cold-vault",
+    "resourceType": "vault",
+    "serviceName": "Glacier"
+  }
+]

@@ -3,19 +3,22 @@ package eventbridge
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
+	ebtypes "github.com/aws/aws-sdk-go-v2/service/eventbridge/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/eventbridge"
-	"time"
 )
 
 var EventbridgeCalls = []types.AWSService{
 	{
 		Name: "eventbridge:ListEventBuses",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := eventbridge.New(sess)
-			output, err := svc.ListEventBusesWithContext(ctx, &eventbridge.ListEventBusesInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", eventbridge.NewFromConfig)
+			output, err := svc.ListEventBuses(ctx, &eventbridge.ListEventBusesInput{})
 			if err != nil {
 				return nil, err
 			}
@@ -36,19 +39,24 @@ var EventbridgeCalls = []types.AWSService{
 				}
 			}
 
-			if buses, ok := output.([]*eventbridge.EventBus); ok {
-				for _, bus := range buses {
-					results = append(results, types.ScanResult{
-						ServiceName:  "EventBridge",
-						MethodName:   "eventbridge:ListEventBuses",
-						ResourceType: "event-bus",
-						ResourceName: *bus.Name,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			buses, ok := output.([]ebtypes.EventBus)
+			if !ok {
+				utils.HandleAWSError(debug, "eventbridge:ListEventBuses", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "eventbridge:ListEventBuses", fmt.Sprintf("EventBridge bus: %s", *bus.Name), nil)
-				}
+			for _, bus := range buses {
+				busName := aws.ToString(bus.Name)
+				results = append(results, types.ScanResult{
+					ServiceName:  "EventBridge",
+					MethodName:   "eventbridge:ListEventBuses",
+					ResourceType: "event-bus",
+					ResourceName: busName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "eventbridge:ListEventBuses", fmt.Sprintf("EventBridge bus: %s", busName), nil)
 			}
 			return results
 		},

@@ -3,19 +3,22 @@ package glacier
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/glacier"
+	glaciertypes "github.com/aws/aws-sdk-go-v2/service/glacier/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/glacier"
-	"time"
 )
 
 var GlacierCalls = []types.AWSService{
 	{
 		Name: "glacier:ListVaults",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := glacier.New(sess)
-			output, err := svc.ListVaultsWithContext(ctx, &glacier.ListVaultsInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", glacier.NewFromConfig)
+			output, err := svc.ListVaults(ctx, &glacier.ListVaultsInput{})
 			if err != nil {
 				return nil, err
 			}
@@ -36,19 +39,24 @@ var GlacierCalls = []types.AWSService{
 				}
 			}
 
-			if vaults, ok := output.([]*glacier.DescribeVaultOutput); ok {
-				for _, vault := range vaults {
-					results = append(results, types.ScanResult{
-						ServiceName:  "Glacier",
-						MethodName:   "glacier:ListVaults",
-						ResourceType: "vault",
-						ResourceName: *vault.VaultName,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			vaults, ok := output.([]glaciertypes.DescribeVaultOutput)
+			if !ok {
+				utils.HandleAWSError(debug, "glacier:ListVaults", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "glacier:ListVaults", fmt.Sprintf("Glacier vault: %s", utils.ColorizeItem(*vault.VaultName)), nil)
-				}
+			for _, vault := range vaults {
+				vaultName := aws.ToString(vault.VaultName)
+				results = append(results, types.ScanResult{
+					ServiceName:  "Glacier",
+					MethodName:   "glacier:ListVaults",
+					ResourceType: "vault",
+					ResourceName: vaultName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "glacier:ListVaults", fmt.Sprintf("Glacier vault: %s", utils.ColorizeItem(vaultName)), nil)
 			}
 			return results
 		},

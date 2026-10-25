@@ -32,6 +32,20 @@ adding ecr/kms data there would change `replay-sample.json`.
 Migration PRs for ecr and kms must keep this golden green
 (`TestGoldenReplaySample/pilot`) without regenerating it.
 
+## Bulk 1 golden (batch, cloudformation, codepipeline, glacier, eventbridge)
+
+`replay-bulk1.json` is the v1 baseline for the first bulk migration batch:
+`batch:ListJobs`, `cloudformation:ListStacks`, `codepipeline:ListPipelines`,
+`glacier:ListVaults` and `eventbridge:ListEventBuses`. It is produced from the
+fictional fixtures in `bulk1/` (fixture dir `testdata/golden/bulk1`) with
+`awtest -replay <abs>/testdata/golden/bulk1 -services batch,cloudformation,codepipeline,glacier,eventbridge -quiet -format json`.
+Each service has one operation and the golden pins names-only results (empty
+`details`, resource type and order). The functional tests in each service
+package additionally cover sparse resources and error text.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk1`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

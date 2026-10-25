@@ -4,7 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/service/batch"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/codepipeline"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
+	"github.com/aws/aws-sdk-go-v2/service/glacier"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -38,6 +43,12 @@ var v2EnvSuffix = map[string][]string{
 	"kms": {"KMS"},
 	"ecr": {"ECR"},
 	"s3":  {"S3"},
+
+	"batch":          {"BATCH"},
+	"cloudformation": {"CLOUDFORMATION"},
+	"codepipeline":   {"CODEPIPELINE"},
+	"glacier":        {"GLACIER"},
+	"eventbridge":    {"EVENTBRIDGE"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -47,6 +58,12 @@ var v2ServiceIDs = map[string][]string{
 	"kms": {kms.ServiceID},
 	"ecr": {ecr.ServiceID},
 	"s3":  {s3.ServiceID},
+
+	"batch":          {batch.ServiceID},
+	"cloudformation": {cloudformation.ServiceID},
+	"codepipeline":   {codepipeline.ServiceID},
+	"glacier":        {glacier.ServiceID},
+	"eventbridge":    {eventbridge.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

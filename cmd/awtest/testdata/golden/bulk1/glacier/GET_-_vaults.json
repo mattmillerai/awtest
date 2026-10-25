@@ -1,0 +1,1 @@
+{"VaultList":[{"VaultName":"demo-archive-vault","VaultARN":"arn:aws:glacier:us-west-2:123456789012:vaults/demo-archive-vault","NumberOfArchives":42,"SizeInBytes":1048576},{"VaultName":"demo-cold-vault"}]}

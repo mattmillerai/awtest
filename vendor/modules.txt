@@ -53,8 +53,6 @@ github.com/aws/aws-sdk-go/service/apigateway
 github.com/aws/aws-sdk-go/service/appsync
 github.com/aws/aws-sdk-go/service/athena
 github.com/aws/aws-sdk-go/service/backup
-github.com/aws/aws-sdk-go/service/batch
-github.com/aws/aws-sdk-go/service/cloudformation
 github.com/aws/aws-sdk-go/service/cloudfront
 github.com/aws/aws-sdk-go/service/cloudtrail
 github.com/aws/aws-sdk-go/service/cloudwatch
@@ -62,7 +60,6 @@ github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/codebuild
 github.com/aws/aws-sdk-go/service/codecommit
 github.com/aws/aws-sdk-go/service/codedeploy
-github.com/aws/aws-sdk-go/service/codepipeline
 github.com/aws/aws-sdk-go/service/cognitoidentity
 github.com/aws/aws-sdk-go/service/cognitoidentityprovider
 github.com/aws/aws-sdk-go/service/configservice
@@ -76,7 +73,6 @@ github.com/aws/aws-sdk-go/service/elasticache
 github.com/aws/aws-sdk-go/service/elasticbeanstalk
 github.com/aws/aws-sdk-go/service/emr
 github.com/aws/aws-sdk-go/service/eventbridge
-github.com/aws/aws-sdk-go/service/glacier
 github.com/aws/aws-sdk-go/service/glue
 github.com/aws/aws-sdk-go/service/guardduty
 github.com/aws/aws-sdk-go/service/iam
@@ -171,11 +167,42 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
 github.com/aws/aws-sdk-go-v2/internal/v4a
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/crypto
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/v4
+# github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/batch
+github.com/aws/aws-sdk-go-v2/service/batch/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/batch/schemas
+github.com/aws/aws-sdk-go-v2/service/batch/types
+# github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.2
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cloudformation
+github.com/aws/aws-sdk-go-v2/service/cloudformation/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cloudformation/types
+# github.com/aws/aws-sdk-go-v2/service/codepipeline v1.56.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/codepipeline
+github.com/aws/aws-sdk-go-v2/service/codepipeline/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas
+github.com/aws/aws-sdk-go-v2/service/codepipeline/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr
 github.com/aws/aws-sdk-go-v2/service/ecr/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/ecr/types
+# github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/eventbridge
+github.com/aws/aws-sdk-go-v2/service/eventbridge/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/eventbridge/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas
+github.com/aws/aws-sdk-go-v2/service/eventbridge/types
+# github.com/aws/aws-sdk-go-v2/service/glacier v1.41.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/glacier
+github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/glacier/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/glacier/schemas
+github.com/aws/aws-sdk-go-v2/service/glacier/types
 # github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/iam
@@ -236,6 +263,8 @@ github.com/aws/smithy-go/container/private/cache
 github.com/aws/smithy-go/container/private/cache/lru
 github.com/aws/smithy-go/context
 github.com/aws/smithy-go/document
+github.com/aws/smithy-go/document/internal/serde
+github.com/aws/smithy-go/document/json
 github.com/aws/smithy-go/encoding
 github.com/aws/smithy-go/encoding/httpbinding
 github.com/aws/smithy-go/encoding/json
@@ -244,11 +273,16 @@ github.com/aws/smithy-go/endpoints
 github.com/aws/smithy-go/endpoints/private/bdd
 github.com/aws/smithy-go/endpoints/private/rulesfn
 github.com/aws/smithy-go/eventstream
+github.com/aws/smithy-go/internal/errors
+github.com/aws/smithy-go/internal/eventstream
+github.com/aws/smithy-go/internal/serde
+github.com/aws/smithy-go/internal/sync
 github.com/aws/smithy-go/internal/sync/singleflight
 github.com/aws/smithy-go/io
 github.com/aws/smithy-go/logging
 github.com/aws/smithy-go/metrics
 github.com/aws/smithy-go/middleware
+github.com/aws/smithy-go/prelude
 github.com/aws/smithy-go/private/requestcompression
 github.com/aws/smithy-go/ptr
 github.com/aws/smithy-go/rand
@@ -258,6 +292,11 @@ github.com/aws/smithy-go/tracing
 github.com/aws/smithy-go/traits
 github.com/aws/smithy-go/transport/http
 github.com/aws/smithy-go/transport/http/internal/io
+github.com/aws/smithy-go/transport/http/protocol/awsjson
+github.com/aws/smithy-go/transport/http/protocol/internal/httpbinding
+github.com/aws/smithy-go/transport/http/protocol/internal/json
+github.com/aws/smithy-go/transport/http/protocol/internal/json/internal/stdlib
+github.com/aws/smithy-go/transport/http/protocol/restjson1
 github.com/aws/smithy-go/waiter
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14

@@ -2,19 +2,22 @@ package batch
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/batch"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/batch"
-	"time"
 )
 
 var BatchCalls = []types.AWSService{
 	{
 		Name: "batch:ListJobs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := batch.New(sess)
-			output, err := svc.ListJobsWithContext(ctx, &batch.ListJobsInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", batch.NewFromConfig)
+			output, err := svc.ListJobs(ctx, &batch.ListJobsInput{})
 			if err != nil {
 				return nil, err
 			} else {
@@ -36,19 +39,24 @@ var BatchCalls = []types.AWSService{
 				}
 			}
 
-			if jobs, ok := output.(*batch.ListJobsOutput); ok {
-				for _, job := range jobs.JobSummaryList {
-					results = append(results, types.ScanResult{
-						ServiceName:  "Batch",
-						MethodName:   "batch:ListJobs",
-						ResourceType: "job",
-						ResourceName: *job.JobName,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			jobs, ok := output.(*batch.ListJobsOutput)
+			if !ok {
+				utils.HandleAWSError(debug, "batch:ListJobs", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "batch:ListJobs", *job.JobName, nil)
-				}
+			for _, job := range jobs.JobSummaryList {
+				jobName := aws.ToString(job.JobName)
+				results = append(results, types.ScanResult{
+					ServiceName:  "Batch",
+					MethodName:   "batch:ListJobs",
+					ResourceType: "job",
+					ResourceName: jobName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "batch:ListJobs", jobName, nil)
 			}
 			return results
 		},
