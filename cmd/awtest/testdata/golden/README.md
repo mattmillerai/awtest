@@ -58,3 +58,16 @@ Add `/sample` or `/pilot` to the `-run` pattern to regenerate just one golden.
 
 Regenerating requires a reviewed reason (e.g. new fixtures or a new service
 in the sample). Never regenerate to make a migration PR pass.
+
+## Intentional baseline change: leaked session region (ecr migration)
+
+v1 regional-loop services set `sess.Config.Region` on the **shared** session.
+When the v1 `ecr` service aborted in its first region (us-east-1) under
+`builtin:sample`, later v1 services that build their client from the session
+without setting a region inherited us-east-1. The migrated v2 `ecr` (like
+`kms` before it) never touches shared state, so those services now use the
+session's own region (us-west-2). Only the region text inside 13 replay
+"no fixture for ... (region X)" errors changed (us-east-1 -> us-west-2);
+resource names, details and order are identical. `replay-sample.json` was
+regenerated for exactly these lines. Further regional v1 services migrated
+later may shift the same text for services that run after them.

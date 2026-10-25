@@ -435,7 +435,7 @@
   },
   {
     "details": {},
-    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeApplications (region us-east-1); expected elasticbeanstalk/DescribeApplications.xml or .json",
+    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeApplications (region us-west-2); expected elasticbeanstalk/DescribeApplications.xml or .json",
     "methodName": "elasticbeanstalk:DescribeApplications",
     "resourceName": "",
     "resourceType": "",
@@ -443,7 +443,7 @@
   },
   {
     "details": {},
-    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeEvents (region us-east-1); expected elasticbeanstalk/DescribeEvents.xml or .json",
+    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeEvents (region us-west-2); expected elasticbeanstalk/DescribeEvents.xml or .json",
     "methodName": "elasticbeanstalk:DescribeEvents",
     "resourceName": "",
     "resourceType": "",
@@ -451,7 +451,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for events:ListEventBuses (region us-east-1); expected events/ListEventBuses.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for events:ListEventBuses (region us-west-2); expected events/ListEventBuses.xml or .json",
     "methodName": "eventbridge:ListEventBuses",
     "resourceName": "",
     "resourceType": "",
@@ -467,7 +467,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for glacier:GET_-_vaults (region us-east-1); expected glacier/GET_-_vaults.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for glacier:GET_-_vaults (region us-west-2); expected glacier/GET_-_vaults.xml or .json",
     "methodName": "glacier:ListVaults",
     "resourceName": "",
     "resourceType": "",
@@ -475,7 +475,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListWorkflows (region us-east-1); expected glue/ListWorkflows.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListWorkflows (region us-west-2); expected glue/ListWorkflows.xml or .json",
     "methodName": "glue:ListWorkflows",
     "resourceName": "",
     "resourceType": "",
@@ -483,7 +483,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListJobs (region us-east-1); expected glue/ListJobs.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListJobs (region us-west-2); expected glue/ListJobs.xml or .json",
     "methodName": "glue:ListJobs",
     "resourceName": "",
     "resourceType": "",
@@ -645,7 +645,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_things (region us-east-1); expected iot/GET_things.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_things (region us-west-2); expected iot/GET_things.xml or .json",
     "methodName": "iot:ListThings",
     "resourceName": "",
     "resourceType": "",
@@ -653,7 +653,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_policies (region us-east-1); expected iot/GET_policies.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_policies (region us-west-2); expected iot/GET_policies.xml or .json",
     "methodName": "iot:ListPolicies",
     "resourceName": "",
     "resourceType": "",
@@ -661,7 +661,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_certificates (region us-east-1); expected iot/GET_certificates.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_certificates (region us-west-2); expected iot/GET_certificates.xml or .json",
     "methodName": "iot:ListCertificates",
     "resourceName": "",
     "resourceType": "",
@@ -669,7 +669,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListChannels (region us-east-1); expected ivs/POST_ListChannels.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListChannels (region us-west-2); expected ivs/POST_ListChannels.xml or .json",
     "methodName": "ivs:ListChannels",
     "resourceName": "",
     "resourceType": "",
@@ -677,7 +677,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStreams (region us-east-1); expected ivs/POST_ListStreams.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStreams (region us-west-2); expected ivs/POST_ListStreams.xml or .json",
     "methodName": "ivs:ListStreams",
     "resourceName": "",
     "resourceType": "",
@@ -693,7 +693,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for ivschat:POST_ListRooms (region us-east-1); expected ivschat/POST_ListRooms.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for ivschat:POST_ListRooms (region us-west-2); expected ivschat/POST_ListRooms.xml or .json",
     "methodName": "ivsChat:ListRooms",
     "resourceName": "",
     "resourceType": "",
@@ -701,7 +701,7 @@
   },
   {
     "details": {},
-    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStages (region us-east-1); expected ivs/POST_ListStages.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStages (region us-west-2); expected ivs/POST_ListStages.xml or .json",
     "methodName": "ivsRealtime:ListStages",
     "resourceName": "",
     "resourceType": "",

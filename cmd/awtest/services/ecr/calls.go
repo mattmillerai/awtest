@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	ecrtypes "github.com/aws/aws-sdk-go-v2/service/ecr/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecr"
 )
 
 type ecrImage struct {
@@ -27,14 +27,13 @@ type ecrPolicy struct {
 var ECRCalls = []types.AWSService{
 	{
 		Name: "ecr:DescribeRepositories",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allRepos []*ecr.Repository
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allRepos []ecrtypes.Repository
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := ecr.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, region, ecr.NewFromConfig)
 				input := &ecr.DescribeRepositoriesInput{}
 				for {
-					output, err := svc.DescribeRepositoriesWithContext(ctx, input)
+					output, err := svc.DescribeRepositories(ctx, input)
 					if err != nil {
 						return nil, err
 					}
@@ -62,7 +61,7 @@ var ECRCalls = []types.AWSService{
 				}
 			}
 
-			repos, ok := output.([]*ecr.Repository)
+			repos, ok := output.([]ecrtypes.Repository)
 			if !ok {
 				utils.HandleAWSError(debug, "ecr:DescribeRepositories", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -104,16 +103,15 @@ var ECRCalls = []types.AWSService{
 	},
 	{
 		Name: "ecr:ListImages",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allImages []ecrImage
 
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := ecr.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, region, ecr.NewFromConfig)
 
 				repoInput := &ecr.DescribeRepositoriesInput{}
 				for {
-					repoOutput, err := svc.DescribeRepositoriesWithContext(ctx, repoInput)
+					repoOutput, err := svc.DescribeRepositories(ctx, repoInput)
 					if err != nil {
 						return nil, err
 					}
@@ -127,7 +125,7 @@ var ECRCalls = []types.AWSService{
 							RepositoryName: repo.RepositoryName,
 						}
 						for {
-							imagesOutput, err := svc.ListImagesWithContext(ctx, imgInput)
+							imagesOutput, err := svc.ListImages(ctx, imgInput)
 							if err != nil {
 								break
 							}
@@ -210,16 +208,15 @@ var ECRCalls = []types.AWSService{
 	},
 	{
 		Name: "ecr:GetRepositoryPolicy",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allPolicies []ecrPolicy
 
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := ecr.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, region, ecr.NewFromConfig)
 
 				repoInput := &ecr.DescribeRepositoriesInput{}
 				for {
-					repoOutput, err := svc.DescribeRepositoriesWithContext(ctx, repoInput)
+					repoOutput, err := svc.DescribeRepositories(ctx, repoInput)
 					if err != nil {
 						return nil, err
 					}
@@ -229,15 +226,10 @@ var ECRCalls = []types.AWSService{
 							continue
 						}
 
-						policyOutput, err := svc.GetRepositoryPolicyWithContext(ctx, &ecr.GetRepositoryPolicyInput{
+						policyOutput, err := svc.GetRepositoryPolicy(ctx, &ecr.GetRepositoryPolicyInput{
 							RepositoryName: repo.RepositoryName,
 						})
 						if err != nil {
-							if awsErr, ok := err.(awserr.Error); ok {
-								if awsErr.Code() == "RepositoryPolicyNotFoundException" {
-									continue
-								}
-							}
 							continue
 						}
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ecrtypes "github.com/aws/aws-sdk-go-v2/service/ecr/types"
 )
 
 func TestDescribeRepositoriesProcess(t *testing.T) {
@@ -22,7 +22,7 @@ func TestDescribeRepositoriesProcess(t *testing.T) {
 	}{
 		{
 			name: "valid repositories",
-			output: []*ecr.Repository{
+			output: []ecrtypes.Repository{
 				{
 					RepositoryName: aws.String("my-app"),
 					RepositoryUri:  aws.String("123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app"),
@@ -40,7 +40,7 @@ func TestDescribeRepositoriesProcess(t *testing.T) {
 		},
 		{
 			name:    "empty results",
-			output:  []*ecr.Repository{},
+			output:  []ecrtypes.Repository{},
 			wantLen: 0,
 		},
 		{
@@ -52,7 +52,7 @@ func TestDescribeRepositoriesProcess(t *testing.T) {
 		},
 		{
 			name: "nil fields",
-			output: []*ecr.Repository{
+			output: []ecrtypes.Repository{
 				{
 					RepositoryName: nil,
 					RepositoryUri:  nil,

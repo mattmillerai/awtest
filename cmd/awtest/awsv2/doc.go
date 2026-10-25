@@ -2,7 +2,7 @@
 // migration.
 //
 // main wires this package in (see "Migration status" below) and the pilot
-// services, sts and kms, have been migrated. It holds the configuration, retry, endpoint and
+// services, sts, kms and ecr, have been migrated. It holds the configuration, retry, endpoint and
 // error-normalisation behaviour that migrated services rely on.
 //
 // Rules for future callers:
@@ -61,8 +61,10 @@
 //     one is set. Migrated to v2 (CallV2): sts
 //     (sts:GetCallerIdentity, whose Process also makes the IAM
 //     ListAttachedUserPolicies / ListUserPolicies follow-ups with the v2 config
-//     carried in its output) and kms (kms:ListKeys, a regional loop over
-//     types.RegionsFor). Every other service is still v1.
+//     carried in its output), kms (kms:ListKeys, a regional loop over
+//     types.RegionsFor) and ecr (ecr:DescribeRepositories, ecr:ListImages and
+//     ecr:GetRepositoryPolicy, regional loops with manual NextToken
+//     pagination). Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
 //     from the context and returns the error normalised with Wrap
