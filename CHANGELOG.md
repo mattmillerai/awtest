@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.6.0](https://github.com/Miller-Media/awtest-private/compare/v1.5.1...v1.6.0) (2026-10-25)
+
+
+### Features
+
+* **cli:** add offline replay mode for demos and labs ([#18](https://github.com/Miller-Media/awtest-private/issues/18)) ([27fade6](https://github.com/Miller-Media/awtest-private/commit/27fade6ffe576c0756e2f45b9292379a90d081a1))
+* **services:** add IAM role/policy and S3 bucket policy coverage ([#16](https://github.com/Miller-Media/awtest-private/issues/16)) ([e250931](https://github.com/Miller-Media/awtest-private/commit/e250931a9773312890939caf91e02f1a376e1cf0))
+
+### Notes
+
+* **More API calls:** the new IAM and S3 policy calls add API calls to a scan. Caps (documented in the README): IAM follow-up calls cover only the first 100 roles and first 100 groups (up to about 400 calls, 2 per role or group); S3 makes 5 extra calls per bucket, for up to 500 buckets.
+* **`-replay` is fully offline:** it runs against canned, fictional responses with fake credentials and never touches real AWS.
+
 ## [1.5.1](https://github.com/Miller-Media/awtest-private/compare/v1.5.0...v1.5.1) (2026-10-25)
 
 
