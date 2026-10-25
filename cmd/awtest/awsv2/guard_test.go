@@ -22,11 +22,16 @@ const (
 	awsv2PkgPath   = "github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	v2ServicePath  = "github.com/aws/aws-sdk-go-v2/service/"
 	v2FeaturePath  = "github.com/aws/aws-sdk-go-v2/feature/"
-	newClientFunc  = "NewClient"
-	bypassGuidance = "build v2 clients only with awsv2.NewClient (cmd/awtest/awsv2)"
+	bypassGuidance = "build v2 clients only with awsv2.NewClient or awsv2.NewRegionalClient (cmd/awtest/awsv2)"
 )
 
 var (
+	// sanctionedCallees are the awsv2 functions that may be handed a service
+	// constructor. Adding to this set widens the guard; do so deliberately.
+	sanctionedCallees = map[string]bool{
+		"NewClient":         true,
+		"NewRegionalClient": true,
+	}
 	forbiddenV2Ctors = map[string]bool{
 		"New":              true,
 		"NewFromConfig":    true,
@@ -119,7 +124,7 @@ func scanV2Bypass(filename string, src []byte) ([]string, error) {
 			fun = x.X
 		}
 		sel, ok := fun.(*ast.SelectorExpr)
-		return ok && sel.Sel.Name == newClientFunc && pathOf(sel) == awsv2PkgPath
+		return ok && sanctionedCallees[sel.Sel.Name] && pathOf(sel) == awsv2PkgPath
 	}
 
 	ast.Inspect(f, func(n ast.Node) bool {
@@ -281,6 +286,24 @@ func f(cfg int) {
 	_ = awsv2.NewClient[sts.Client, sts.Options](cfg, awsv2.ClientParams{}, sts.NewFromConfig)
 	_ = awsv2.NewClient[sts.Client](cfg, awsv2.ClientParams{}, sts.NewFromConfig)
 }`, 0},
+		{"sanctioned NewRegionalClient", hdr + `import (
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+)
+func f(cfg int) {
+	_ = awsv2.NewRegionalClient(cfg, "us-east-1", sts.NewFromConfig)
+	_ = awsv2.NewRegionalClient[sts.Client, sts.Options](cfg, "us-east-1", sts.NewFromConfig)
+}`, 0},
+		{"unsanctioned awsv2 function", hdr + `import (
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+)
+func f(cfg int) { _ = awsv2.NewOtherClient(cfg, sts.NewFromConfig) }`, 1},
+		{"NewRegionalClient from another package", hdr + `import (
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"example.com/other"
+)
+func f() { other.NewRegionalClient(nil, "r", sts.NewFromConfig) }`, 1},
 		{"sanctioned aliased awsv2", hdr + `import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	av2 "github.com/mattmillerai/awtest/cmd/awtest/awsv2"

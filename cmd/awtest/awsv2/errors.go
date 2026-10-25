@@ -1,8 +1,6 @@
 package awsv2
 
 import (
-	"errors"
-
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/smithy-go"
@@ -11,8 +9,7 @@ import (
 // ErrorCode returns the API error code carried by err (for example
 // "AccessDenied"), or "" if err is nil or is not a smithy.APIError.
 func ErrorCode(err error) string {
-	var ae smithy.APIError
-	if errors.As(err, &ae) {
+	if ae := apiError(err); ae != nil {
 		return ae.ErrorCode()
 	}
 	return ""
@@ -25,8 +22,7 @@ func ErrorMessage(err error) string {
 	if err == nil {
 		return ""
 	}
-	var ae smithy.APIError
-	if errors.As(err, &ae) {
+	if ae := apiError(err); ae != nil {
 		return ae.ErrorMessage()
 	}
 	return innermost(err).Error()
@@ -41,8 +37,7 @@ func NormalizeError(err error) string {
 	if err == nil {
 		return ""
 	}
-	var ae smithy.APIError
-	if errors.As(err, &ae) {
+	if ae := apiError(err); ae != nil {
 		return ae.ErrorCode() + ": " + ae.ErrorMessage()
 	}
 	return innermost(err).Error()
@@ -76,10 +71,90 @@ func innermost(err error) error {
 			next = e.Err
 		case *awshttp.ResponseError:
 			next = e.Err
+		case *Error:
+			next = e.Err
 		}
 		if next == nil {
 			return err
 		}
 		err = next
 	}
+}
+
+// Error is a normalised error: Code and Message are the API error code and
+// message (or "" and the plain innermost message for non-API errors) and Err
+// is the original cause, kept for errors.Is / errors.As.
+//
+// Error() equals NormalizeError(Err). When Code is non-empty *Error satisfies
+// smithy.APIError.
+type Error struct {
+	Code    string
+	Message string
+	Err     error
+}
+
+// Wrap returns err as an *Error. nil stays nil and an *Error is returned
+// unchanged, so Wrap is idempotent.
+func Wrap(err error) error {
+	if err == nil {
+		return nil
+	}
+	if e, ok := err.(*Error); ok {
+		return e
+	}
+	return &Error{Code: ErrorCode(err), Message: ErrorMessage(err), Err: err}
+}
+
+// apiError returns the first smithy.APIError in err's chain, treating an
+// *Error with an empty Code as transparent (it implements the interface by
+// method set but represents a non-API error). It handles both Unwrap() error
+// and Unwrap() []error.
+func apiError(err error) smithy.APIError {
+	for err != nil {
+		if e, ok := err.(*Error); ok {
+			if e.Code != "" {
+				return e
+			}
+			err = e.Err
+			continue
+		}
+		if ae, ok := err.(smithy.APIError); ok {
+			return ae
+		}
+		switch u := err.(type) {
+		case interface{ Unwrap() error }:
+			err = u.Unwrap()
+		case interface{ Unwrap() []error }:
+			for _, c := range u.Unwrap() {
+				if ae := apiError(c); ae != nil {
+					return ae
+				}
+			}
+			return nil
+		default:
+			return nil
+		}
+	}
+	return nil
+}
+
+// Error implements error; it is NormalizeError(e.Err).
+func (e *Error) Error() string { return NormalizeError(e.Err) }
+
+// Unwrap returns the original cause.
+func (e *Error) Unwrap() error { return e.Err }
+
+// ErrorCode implements smithy.APIError.
+func (e *Error) ErrorCode() string { return e.Code }
+
+// ErrorMessage implements smithy.APIError.
+func (e *Error) ErrorMessage() string { return e.Message }
+
+// ErrorFault implements smithy.APIError, delegating to the cause when it is an
+// API error.
+func (e *Error) ErrorFault() smithy.ErrorFault {
+	if ae := apiError(e.Err); ae != nil {
+		return ae.ErrorFault()
+	}
+	return smithy.FaultUnknown
 }

@@ -2,12 +2,8 @@ package awsv2
 
 import (
 	"context"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -130,9 +126,41 @@ func TestAmbientEndpointIgnored(t *testing.T) {
 	}
 }
 
-// Control: building the client without the helper is redirected by the
-// ambient service-specific variable, which proves the matrix above would catch
-// a bypass.
+// NewClient must not depend on the isolation LoadConfig leaves in
+// cfg.ConfigSources: given a config from the SDK's plain loader it still sends
+// to the real endpoint, or to the explicit one.
+func TestNewClientDefeatsAmbientOnUnisolatedConfig(t *testing.T) {
+	for _, explicit := range []string{"", "https://" + explicitHost} {
+		t.Run("explicit="+explicit, func(t *testing.T) {
+			isolateEnv(t)
+			t.Setenv("AWS_ENDPOINT_URL_STS", "https://"+ambientHost)
+			t.Setenv("AWS_ACCESS_KEY_ID", "AKIAENVKEY")
+			t.Setenv("AWS_SECRET_ACCESS_KEY", "envsecret")
+			ft := &fakeTransport{}
+			cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(testRegion), config.WithHTTPClient(ft.client()))
+			if err != nil {
+				t.Fatal(err)
+			}
+			client := NewClient(cfg, ClientParams{Endpoint: explicit}, sts.NewFromConfig)
+			if _, err := client.GetCallerIdentity(context.Background(), &sts.GetCallerIdentityInput{}); err != nil {
+				t.Fatal(err)
+			}
+			want := "sts." + testRegion + ".amazonaws.com"
+			if explicit != "" {
+				want = explicitHost
+			}
+			if len(ft.reqs) != 1 || ft.reqs[0].URL.Host != want {
+				t.Fatalf("requests = %v, want one to %s", ft.reqs, want)
+			}
+		})
+	}
+}
+
+// Control: a client built without the helper from a config loaded by the SDK's
+// own loader is redirected by the ambient service-specific variable, which
+// proves the matrix above would catch a bypass. (A config from LoadConfig
+// additionally records "ignore configured endpoints" in its config sources, so
+// plain clients built from it are not redirected either.)
 func TestAmbientControlPlainClientIsRedirected(t *testing.T) {
 	isolateEnv(t)
 	t.Setenv("AWS_ENDPOINT_URL_STS", "https://"+ambientHost)
@@ -140,14 +168,11 @@ func TestAmbientControlPlainClientIsRedirected(t *testing.T) {
 	t.Setenv("AWS_SECRET_ACCESS_KEY", "envsecret")
 
 	ft := &fakeTransport{}
-	cfg, err := LoadConfig(context.Background(), Options{Region: testRegion, HTTPClient: ft.client()})
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(testRegion), config.WithHTTPClient(ft.client()))
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.RetryMaxAttempts = 1
-	if cfg.BaseEndpoint != nil {
-		t.Fatalf("cfg.BaseEndpoint = %q, want nil", *cfg.BaseEndpoint)
-	}
 
 	client := sts.NewFromConfig(cfg)
 	if _, err := client.GetCallerIdentity(context.Background(), &sts.GetCallerIdentityInput{}); err != nil {
@@ -170,65 +195,5 @@ func TestAmbientControlDefaultLoaderSetsBaseEndpoint(t *testing.T) {
 	}
 	if cfg.BaseEndpoint == nil || *cfg.BaseEndpoint != "https://"+ambientHost {
 		t.Fatalf("cfg.BaseEndpoint = %v, want https://%s", cfg.BaseEndpoint, ambientHost)
-	}
-}
-
-const assumeRoleXML = `<AssumeRoleResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
-<AssumeRoleResult>
-<AssumedRoleUser><AssumedRoleId>AROATEST:sess</AssumedRoleId><Arn>arn:aws:sts::123456789012:assumed-role/r/sess</Arn></AssumedRoleUser>
-<Credentials><AccessKeyId>ASIAFAKEKEY</AccessKeyId><SecretAccessKey>fakesecret</SecretAccessKey><SessionToken>faketoken</SessionToken><Expiration>2099-01-01T00:00:00Z</Expiration></Credentials>
-</AssumeRoleResult>
-<ResponseMetadata><RequestId>r-2</RequestId></ResponseMetadata>
-</AssumeRoleResponse>`
-
-type hostRecorder struct {
-	mu    sync.Mutex
-	hosts []string
-}
-
-func (h *hostRecorder) RoundTrip(req *http.Request) (*http.Response, error) {
-	h.mu.Lock()
-	h.hosts = append(h.hosts, req.URL.Host)
-	h.mu.Unlock()
-	return &http.Response{
-		StatusCode: 200,
-		Status:     "200 OK",
-		Header:     http.Header{"Content-Type": []string{"text/xml"}},
-		Body:       io.NopCloser(strings.NewReader(assumeRoleXML)),
-		Request:    req,
-	}, nil
-}
-
-// Observational only: documents whether the credential-vending AssumeRole
-// call made by the SDK's config loading honours ambient endpoint settings.
-// It never asserts on the outcome.
-func TestAmbientObserveAssumeRoleEndpoint(t *testing.T) {
-	isolateEnv(t)
-	writeAWSFiles(t,
-		"[profile src]\nregion = "+testRegion+"\n\n[profile role]\nrole_arn = arn:aws:iam::123456789012:role/r\nsource_profile = src\nregion = "+testRegion+"\n",
-		"[src]\naws_access_key_id = AKIASOURCEKEY\naws_secret_access_key = sourcesecret\n")
-	t.Setenv("AWS_ENDPOINT_URL_STS", "https://"+ambientHost)
-
-	rec := &hostRecorder{}
-	cfg, err := LoadConfig(context.Background(), Options{
-		Region:     testRegion,
-		Profile:    "role",
-		HTTPClient: &http.Client{Transport: rec},
-	})
-	if err != nil {
-		t.Logf("LoadConfig error (observational): %v", err)
-		return
-	}
-	if _, err := cfg.Credentials.Retrieve(context.Background()); err != nil {
-		t.Logf("Retrieve error (observational): %v", err)
-	}
-	rec.mu.Lock()
-	defer rec.mu.Unlock()
-	if len(rec.hosts) == 0 {
-		t.Log("observation: no AssumeRole request recorded")
-		return
-	}
-	for _, h := range rec.hosts {
-		t.Logf("observation: AssumeRole request host = %q (ambient host %q honoured: %v)", h, ambientHost, h == ambientHost)
 	}
 }

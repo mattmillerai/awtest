@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/smithy-go/logging"
@@ -36,6 +37,13 @@ type Options struct {
 	// Debug logs SDK retry attempts to Stderr (never requests, responses or
 	// signing details, which could leak secrets).
 	Debug bool
+	// MaxAttempts is the total number of attempts (first try plus retries)
+	// the SDK makes per request. 0 selects DefaultMaxAttempts.
+	MaxAttempts int
+	// RetryBackoff replaces the SDK's default jittered exponential backoff
+	// between attempts. It exists for tests (a zero-delay delayer); nil keeps
+	// the SDK default.
+	RetryBackoff retry.BackoffDelayer
 	// HTTPClient overrides the SDK's HTTP client (used by tests).
 	HTTPClient aws.HTTPClient
 	// Stderr receives debug logging; os.Stderr when nil.
@@ -53,8 +61,21 @@ type Options struct {
 //  2. A named Profile, via config.WithSharedConfigProfile.
 //  3. The SDK default chain.
 //
-// No retry options are set: the retry policy is an open phase-1 decision, so
-// the SDK defaults apply for now.
+// Retries: the SDK retries up to Options.MaxAttempts (DefaultMaxAttempts, 4
+// total attempts, for v1 parity) with its standard backoff, except for the
+// throttle codes in AwtestThrottleCodes, which the SDK never retries because
+// awtest's own scan backoff handles them. The retryer is installed on the
+// loader, so it also applies to the STS client the SDK builds internally for
+// assume-role and web-identity credentials.
+//
+// Credential-chain isolation: while the SDK loader runs,
+// AWS_IGNORE_CONFIGURED_ENDPOINT_URLS=true is set in the process environment
+// so the internal STS client of the credential chain cannot be redirected by
+// AWS_ENDPOINT_URL, AWS_ENDPOINT_URL_STS or shared-config endpoint settings.
+// The variable is process-global while held (a package mutex serialises
+// LoadConfig calls, but other goroutines reading the environment would see
+// it), so call LoadConfig at startup, before worker goroutines. The previous
+// value is restored (or the variable unset) on every return path.
 //
 // The returned cfg.BaseEndpoint is exactly the validated Endpoint, or nil;
 // AWS_ENDPOINT_URL and shared-config endpoint_url never survive. Note that
@@ -100,10 +121,21 @@ func LoadConfig(ctx context.Context, opts Options) (aws.Config, error) {
 		loadOpts = append(loadOpts, config.WithSharedConfigProfile(opts.Profile))
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx, loadOpts...)
+	if opts.Endpoint != "" {
+		if err := validateEndpoint(opts.Endpoint); err != nil {
+			return aws.Config{}, err
+		}
+	}
+	loadOpts = append(loadOpts, config.WithRetryer(newRetryer(opts)))
+	loadOpts = append(loadOpts, endpointLoadOpts(opts.Endpoint)...)
+
+	cfg, err := loadDefaultConfigIsolated(ctx, loadOpts)
 	if err != nil {
 		return aws.Config{}, err
 	}
+	clearLegacyResolvers(&cfg)
+	// Surface the policy on the config; clients cap their retryer to it.
+	cfg.RetryMaxAttempts = maxAttempts(opts)
 
 	if err := ApplyEndpoint(&cfg, opts.Endpoint); err != nil {
 		return aws.Config{}, err

@@ -72,6 +72,15 @@ func NewClient[C any, O any](cfg aws.Config, p ClientParams, ctor func(aws.Confi
 	return ctor(cfg, func(o *O) { applyParams(o, p) })
 }
 
+// NewRegionalClient builds a v2 service client in region from a config that
+// LoadConfig already validated. It is NewClient with the config's own explicit
+// endpoint (cfg.BaseEndpoint, or none) carried over, so a service that
+// receives the shared aws.Config keeps the user's --endpoint while ambient
+// service endpoints stay ignored.
+func NewRegionalClient[C any, O any](cfg aws.Config, region string, ctor func(aws.Config, ...func(*O)) *C) *C {
+	return NewClient(cfg, ClientParams{Region: region, Endpoint: aws.ToString(cfg.BaseEndpoint)}, ctor)
+}
+
 // applyParams applies p to the Options struct pointed to by opts using
 // reflection. It panics if opts has no settable BaseEndpoint *string field.
 func applyParams(opts any, p ClientParams) {
