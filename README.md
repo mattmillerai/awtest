@@ -27,7 +27,7 @@
 
 ## What It Does
 
-AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **63 AWS services** with **116 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
+AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **63 AWS services** with **120 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ awtest --speed=fast --format=json -o results.json
 
 ## Features
 
-- **Broad AWS Coverage** -- 63 services, 116 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
+- **Broad AWS Coverage** -- 63 services, 120 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
 - **Speed Presets** -- `--speed` presets (`safe`, `fast`, `insane`) for OPSEC-aware concurrent scanning, or fine-grained `--concurrency` control
 - **Multiple Output Formats** -- Text, JSON, YAML, CSV, and table output with `--output-file` export
 - **Service Filtering** -- Include or exclude specific services with `--services` and `--exclude-services`
@@ -309,10 +309,10 @@ awtest --aki=AKIAEXAMPLE --sak=YourSecretKey --speed=safe --timeout=2m
 
 AWTest shows the credentials only have access to CloudWatch logs and one S3 log bucket -- no customer data exposed, no emergency escalation needed.
 
-## Supported AWS Services (63 services, 116 API calls)
+## Supported AWS Services (63 services, 120 API calls)
 
 <details>
-<summary>Click to expand full service list (63 services, 116 API calls)</summary>
+<summary>Click to expand full service list (63 services, 120 API calls)</summary>
 
 ### Compute & Containers
 
@@ -347,7 +347,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | Cognito User Pools | ListUserPools |
 | ECR | DescribeRepositories, ListImages, GetRepositoryPolicy |
 | GuardDuty | ListDetectors, GetFindings, ListFilters |
-| IAM | ListUsers |
+| IAM | ListUsers, ListRoles, ListGroups, ListPolicies |
 | KMS | ListKeys |
 | Macie | ListClassificationJobs, ListFindings, DescribeBuckets |
 | Organizations | ListAccounts, ListOrganizationalUnits, ListPolicies |
@@ -363,7 +363,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | Backup | ListBackupVaults, ListBackupPlans, ListRecoveryPointsByBackupVault, GetBackupVaultAccessPolicy |
 | EFS | DescribeFileSystems |
 | Glacier | ListVaults |
-| S3 | ListBuckets |
+| S3 | ListBuckets, GetBucketPolicy (policy, policy status, ACL, public access block) |
 
 ### Networking
 
@@ -434,6 +434,16 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | IoT | ListThings, ListCertificates, ListPolicies |
 
 </details>
+
+### IAM role / policy and S3 bucket policy coverage
+
+- **IAM** (`iam:ListRoles`, `iam:ListGroups`, `iam:ListPolicies`): roles with ARN, path, creation date, session duration, description and a trust-policy summary (`trusted_principals`, `trust_findings`); groups; and customer managed policies that are attached to something. For the first 100 roles and the first 100 groups, the attached managed policies and inline policy names are also listed (`iam:ListAttached{Role,Group}Policies`, `iam:List{Role,Group}Policies`).
+- **S3** (`s3:GetBucketPolicy`): for each bucket, the bucket region is resolved (`GetBucketLocation`) and then `GetBucketPolicy`, `GetBucketPolicyStatus`, `GetBucketAcl` and `GetPublicAccessBlock` are called in that region. That is 5 extra API calls per bucket.
+- **Findings are factual statements**, not ratings, e.g. `wildcard principal (*) in Allow statement`, `cross-account principal: 222222222222 (role account is 111111111111)` or `grant to AllUsers (...): READ`. Only `Allow` statements are considered.
+- **Bounds:** at most 1000 roles, 1000 groups, 1000 policies and 500 buckets are examined; per-role and per-group follow-ups cover the first 100 only. When a bound is hit a result with resource type `note` and `truncated: true` is recorded. If a follow-up call is denied for one role or group it is skipped for the rest.
+- **Not collected:** AWS-managed policies (hundreds of entries, not account-specific), policy documents (`GetPolicyVersion`), and `RoleLastUsed` (not returned by `ListRoles`; `GetRole` is not called per role).
+- **Statuses, not errors:** `denied` (access denied) and `none` / `no_policy` (no bucket policy or public access block) are reported as a `status` in the result details, not as errors. As a consequence, `awtest diff` shows these buckets as resources, and a permission change on these calls only appears as a status change in the details. Any other error (for example `NoSuchBucket` or `PermanentRedirect`) is reported as an error.
+- Both are global services and run once per scan, regardless of `-all-regions`.
 
 ## Contributing
 
