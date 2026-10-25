@@ -1,0 +1,1 @@
+{"BackupSummaries":[{"BackupArn":"arn:aws:dynamodb:us-west-2:123456789012:table/orders/backup/01700000000000-efgh5678","BackupName":"orders-nightly","TableName":"orders"},{"BackupName":"no-arn-backup"}]}

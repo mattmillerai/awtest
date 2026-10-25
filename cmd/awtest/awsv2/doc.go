@@ -96,6 +96,12 @@
 //     follow-ups), regional loops that abort on the first error, plus
 //     cloudtrail (DescribeTrails, ListTrails) and elasticbeanstalk
 //     (DescribeApplications, DescribeEvents), single non-paginated calls.
+//     Bulk 6 is migrated too: glue (ListWorkflows, ListJobs), iot (ListThings,
+//     ListPolicies, ListCertificates), rekognition (ListCollections,
+//     ListStreamProcessors, DescribeProjects) and transcribe
+//     (ListTranscriptionJobs, ListVocabularies, ListLanguageModels), single
+//     non-paginated calls, plus dynamodb (ListTables, ListExports,
+//     ListBackups), non-paginated regional loops that abort on the first error.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

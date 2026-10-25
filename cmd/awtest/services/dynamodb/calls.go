@@ -3,23 +3,24 @@ package dynamodb
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	dynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"time"
 )
 
 var DynamoDBCalls = []types.AWSService{
 	{
 		Name: "dynamodb:ListTables",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allTableNames []*string
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allTableNames []string
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := dynamodb.New(sess)
-				output, err := svc.ListTablesWithContext(ctx, &dynamodb.ListTablesInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, dynamodb.NewFromConfig)
+				output, err := svc.ListTables(ctx, &dynamodb.ListTablesInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,13 +43,8 @@ var DynamoDBCalls = []types.AWSService{
 				}
 			}
 
-			if tableNames, ok := output.([]*string); ok {
-				for _, tableName := range tableNames {
-					tblName := ""
-					if tableName != nil {
-						tblName = *tableName
-					}
-
+			if tableNames, ok := output.([]string); ok {
+				for _, tblName := range tableNames {
 					results = append(results, types.ScanResult{
 						ServiceName:  "DynamoDB",
 						MethodName:   "dynamodb:ListTables",
@@ -67,12 +63,11 @@ var DynamoDBCalls = []types.AWSService{
 	},
 	{
 		Name: "dynamodb:ListExports",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allExports []*dynamodb.ExportSummary
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allExports []dynamodbtypes.ExportSummary
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := dynamodb.New(sess)
-				output, err := svc.ListExportsWithContext(ctx, &dynamodb.ListExportsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, dynamodb.NewFromConfig)
+				output, err := svc.ListExports(ctx, &dynamodb.ListExportsInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -95,15 +90,12 @@ var DynamoDBCalls = []types.AWSService{
 				}
 			}
 
-			if exports, ok := output.([]*dynamodb.ExportSummary); ok {
+			if exports, ok := output.([]dynamodbtypes.ExportSummary); ok {
 				if len(exports) == 0 {
 					utils.PrintAccessGranted(debug, "dynamodb:ListExports", "DynamoDB exports")
 				} else {
 					for _, export := range exports {
-						exportArn := ""
-						if export.ExportArn != nil {
-							exportArn = *export.ExportArn
-						}
+						exportArn := aws.ToString(export.ExportArn)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "DynamoDB",
@@ -124,12 +116,11 @@ var DynamoDBCalls = []types.AWSService{
 	},
 	{
 		Name: "dynamodb:ListBackups",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allBackups []*dynamodb.BackupSummary
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allBackups []dynamodbtypes.BackupSummary
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := dynamodb.New(sess)
-				output, err := svc.ListBackupsWithContext(ctx, &dynamodb.ListBackupsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, dynamodb.NewFromConfig)
+				output, err := svc.ListBackups(ctx, &dynamodb.ListBackupsInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -152,15 +143,12 @@ var DynamoDBCalls = []types.AWSService{
 				}
 			}
 
-			if backups, ok := output.([]*dynamodb.BackupSummary); ok {
+			if backups, ok := output.([]dynamodbtypes.BackupSummary); ok {
 				if len(backups) == 0 {
 					utils.PrintAccessGranted(debug, "dynamodb:ListBackups", "DynamoDB backups")
 				} else {
 					for _, backup := range backups {
-						backupArn := ""
-						if backup.BackupArn != nil {
-							backupArn = *backup.BackupArn
-						}
+						backupArn := aws.ToString(backup.BackupArn)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "DynamoDB",

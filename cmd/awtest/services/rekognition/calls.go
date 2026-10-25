@@ -6,20 +6,21 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/rekognition"
+	rekognitiontypes "github.com/aws/aws-sdk-go-v2/service/rekognition/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/rekognition"
 )
 
 var RekognitionCalls = []types.AWSService{
 	{
 		Name: "rekognition:ListCollections",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := rekognition.New(sess)
-			output, err := svc.ListCollectionsWithContext(ctx, &rekognition.ListCollectionsInput{
-				MaxResults: aws.Int64(4096),
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", rekognition.NewFromConfig)
+			output, err := svc.ListCollections(ctx, &rekognition.ListCollectionsInput{
+				MaxResults: aws.Int32(4096),
 			})
 			if err != nil {
 				return nil, err
@@ -41,17 +42,12 @@ var RekognitionCalls = []types.AWSService{
 				}
 			}
 
-			if collections, ok := output.([]*string); ok {
+			if collections, ok := output.([]string); ok {
 				if len(collections) == 0 {
 					utils.PrintAccessGranted(debug, "rekognition:ListCollections", "Rekognition collections")
 					return results
 				}
-				for _, id := range collections {
-					collectionID := ""
-					if id != nil {
-						collectionID = *id
-					}
-
+				for _, collectionID := range collections {
 					results = append(results, types.ScanResult{
 						ServiceName:  "Rekognition",
 						MethodName:   "rekognition:ListCollections",
@@ -71,9 +67,9 @@ var RekognitionCalls = []types.AWSService{
 	{
 		// Note: ListStreamProcessors is a legacy API; AWS recommends newer Rekognition Streaming APIs.
 		Name: "rekognition:ListStreamProcessors",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := rekognition.New(sess)
-			output, err := svc.ListStreamProcessorsWithContext(ctx, &rekognition.ListStreamProcessorsInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", rekognition.NewFromConfig)
+			output, err := svc.ListStreamProcessors(ctx, &rekognition.ListStreamProcessorsInput{})
 			if err != nil {
 				return nil, err
 			}
@@ -94,20 +90,14 @@ var RekognitionCalls = []types.AWSService{
 				}
 			}
 
-			if processors, ok := output.([]*rekognition.StreamProcessor); ok {
+			if processors, ok := output.([]rekognitiontypes.StreamProcessor); ok {
 				if len(processors) == 0 {
 					utils.PrintAccessGranted(debug, "rekognition:ListStreamProcessors", "Rekognition stream processors")
 					return results
 				}
 				for _, sp := range processors {
-					name := ""
-					if sp.Name != nil {
-						name = *sp.Name
-					}
-					status := ""
-					if sp.Status != nil {
-						status = *sp.Status
-					}
+					name := aws.ToString(sp.Name)
+					status := string(sp.Status)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Rekognition",
@@ -127,9 +117,9 @@ var RekognitionCalls = []types.AWSService{
 	},
 	{
 		Name: "rekognition:DescribeProjects",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := rekognition.New(sess)
-			output, err := svc.DescribeProjectsWithContext(ctx, &rekognition.DescribeProjectsInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", rekognition.NewFromConfig)
+			output, err := svc.DescribeProjects(ctx, &rekognition.DescribeProjectsInput{})
 			if err != nil {
 				return nil, err
 			}
@@ -150,7 +140,7 @@ var RekognitionCalls = []types.AWSService{
 				}
 			}
 
-			if projects, ok := output.([]*rekognition.ProjectDescription); ok {
+			if projects, ok := output.([]rekognitiontypes.ProjectDescription); ok {
 				if len(projects) == 0 {
 					utils.PrintAccessGranted(debug, "rekognition:DescribeProjects", "Rekognition projects")
 					return results
@@ -166,10 +156,7 @@ var RekognitionCalls = []types.AWSService{
 							name = *proj.ProjectArn
 						}
 					}
-					status := ""
-					if proj.Status != nil {
-						status = *proj.Status
-					}
+					status := string(proj.Status)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Rekognition",

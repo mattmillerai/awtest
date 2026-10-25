@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/efs"
@@ -22,17 +23,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
+	"github.com/aws/aws-sdk-go-v2/service/glue"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iot"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/redshift"
+	"github.com/aws/aws-sdk-go-v2/service/rekognition"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/transcribe"
 )
 
 // How to add a migrated (CallV2) service to the endpoint guards:
@@ -94,6 +99,12 @@ var v2EnvSuffix = map[string][]string{
 	// elasticbeanstalk covers DescribeApplications and DescribeEvents.
 	"cloudtrail":       {"CLOUDTRAIL"},
 	"elasticbeanstalk": {"ELASTIC_BEANSTALK"},
+
+	"glue":        {"GLUE"},
+	"dynamodb":    {"DYNAMODB"},
+	"iot":         {"IOT"},
+	"rekognition": {"REKOGNITION"},
+	"transcribe":  {"TRANSCRIBE"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -132,6 +143,12 @@ var v2ServiceIDs = map[string][]string{
 	"lambda":           {lambda.ServiceID},
 	"cloudtrail":       {cloudtrail.ServiceID},
 	"elasticbeanstalk": {elasticbeanstalk.ServiceID},
+
+	"glue":        {glue.ServiceID},
+	"dynamodb":    {dynamodb.ServiceID},
+	"iot":         {iot.ServiceID},
+	"rekognition": {rekognition.ServiceID},
+	"transcribe":  {transcribe.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

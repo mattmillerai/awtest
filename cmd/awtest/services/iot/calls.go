@@ -3,20 +3,22 @@ package iot
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iot"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iot"
-	"time"
 )
 
 var IoTCalls = []types.AWSService{
 	{
 		Name: "iot:ListThings",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := iot.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", iot.NewFromConfig)
 			input := &iot.ListThingsInput{}
-			return svc.ListThingsWithContext(ctx, input)
+			return svc.ListThings(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -34,13 +36,14 @@ var IoTCalls = []types.AWSService{
 			}
 			if things, ok := output.(*iot.ListThingsOutput); ok {
 				for _, thing := range things.Things {
-					utils.PrintResult(debug, "", "iot:ListThings", fmt.Sprintf("Found Thing: %s", *thing.ThingName), nil)
+					thingName := aws.ToString(thing.ThingName)
+					utils.PrintResult(debug, "", "iot:ListThings", fmt.Sprintf("Found Thing: %s", thingName), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IoT",
 						MethodName:   "iot:ListThings",
 						ResourceType: "thing",
-						ResourceName: *thing.ThingName,
+						ResourceName: thingName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -52,10 +55,10 @@ var IoTCalls = []types.AWSService{
 	},
 	{
 		Name: "iot:ListPolicies",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := iot.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", iot.NewFromConfig)
 			input := &iot.ListPoliciesInput{}
-			return svc.ListPoliciesWithContext(ctx, input)
+			return svc.ListPolicies(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -73,13 +76,14 @@ var IoTCalls = []types.AWSService{
 			}
 			if policies, ok := output.(*iot.ListPoliciesOutput); ok {
 				for _, policy := range policies.Policies {
-					utils.PrintResult(debug, "", "iot:ListPolicies", fmt.Sprintf("Found Policy: %s", *policy.PolicyName), nil)
+					policyName := aws.ToString(policy.PolicyName)
+					utils.PrintResult(debug, "", "iot:ListPolicies", fmt.Sprintf("Found Policy: %s", policyName), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IoT",
 						MethodName:   "iot:ListPolicies",
 						ResourceType: "policy",
-						ResourceName: *policy.PolicyName,
+						ResourceName: policyName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -91,10 +95,10 @@ var IoTCalls = []types.AWSService{
 	},
 	{
 		Name: "iot:ListCertificates",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := iot.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", iot.NewFromConfig)
 			input := &iot.ListCertificatesInput{}
-			return svc.ListCertificatesWithContext(ctx, input)
+			return svc.ListCertificates(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -112,13 +116,14 @@ var IoTCalls = []types.AWSService{
 			}
 			if certificates, ok := output.(*iot.ListCertificatesOutput); ok {
 				for _, cert := range certificates.Certificates {
-					utils.PrintResult(debug, "", "iot:ListCertificates", fmt.Sprintf("Found Certificate: %s", *cert.CertificateArn), nil)
+					certArn := aws.ToString(cert.CertificateArn)
+					utils.PrintResult(debug, "", "iot:ListCertificates", fmt.Sprintf("Found Certificate: %s", certArn), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IoT",
 						MethodName:   "iot:ListCertificates",
 						ResourceType: "certificate",
-						ResourceName: *cert.CertificateArn,
+						ResourceName: certArn,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

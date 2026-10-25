@@ -1,0 +1,180 @@
+[
+  {
+    "details": {},
+    "methodName": "dynamodb:ListTables",
+    "resourceName": "orders",
+    "resourceType": "table",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "dynamodb:ListTables",
+    "resourceName": "sessions",
+    "resourceType": "table",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "dynamodb:ListExports",
+    "resourceName": "arn:aws:dynamodb:us-west-2:123456789012:table/orders/export/01700000000000-abcd1234",
+    "resourceType": "export",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "dynamodb:ListExports",
+    "resourceName": "",
+    "resourceType": "export",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "dynamodb:ListBackups",
+    "resourceName": "arn:aws:dynamodb:us-west-2:123456789012:table/orders/backup/01700000000000-efgh5678",
+    "resourceType": "backup",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "dynamodb:ListBackups",
+    "resourceName": "",
+    "resourceType": "backup",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "methodName": "glue:ListWorkflows",
+    "resourceName": "orders-etl",
+    "resourceType": "workflow",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "methodName": "glue:ListWorkflows",
+    "resourceName": "nightly-compaction",
+    "resourceType": "workflow",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "methodName": "glue:ListJobs",
+    "resourceName": "orders-transform-job",
+    "resourceType": "job",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "methodName": "glue:ListJobs",
+    "resourceName": "compact-parquet-job",
+    "resourceType": "job",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "methodName": "iot:ListThings",
+    "resourceName": "sensor-01",
+    "resourceType": "thing",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "methodName": "iot:ListThings",
+    "resourceName": "gateway-02",
+    "resourceType": "thing",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "methodName": "iot:ListPolicies",
+    "resourceName": "sensor-publish-policy",
+    "resourceType": "policy",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "methodName": "iot:ListCertificates",
+    "resourceName": "arn:aws:iot:us-west-2:123456789012:cert/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "resourceType": "certificate",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "methodName": "rekognition:ListCollections",
+    "resourceName": "faces-demo",
+    "resourceType": "collection",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {},
+    "methodName": "rekognition:ListCollections",
+    "resourceName": "badges-demo",
+    "resourceType": "collection",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {
+      "status": "RUNNING"
+    },
+    "methodName": "rekognition:ListStreamProcessors",
+    "resourceName": "lobby-processor",
+    "resourceType": "stream-processor",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {
+      "status": ""
+    },
+    "methodName": "rekognition:ListStreamProcessors",
+    "resourceName": "nostatus-processor",
+    "resourceType": "stream-processor",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {
+      "status": "CREATED"
+    },
+    "methodName": "rekognition:DescribeProjects",
+    "resourceName": "demo-project",
+    "resourceType": "project",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {
+      "status": ""
+    },
+    "methodName": "rekognition:DescribeProjects",
+    "resourceName": "bare-project-arn",
+    "resourceType": "project",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {
+      "status": "DELETING"
+    },
+    "methodName": "rekognition:DescribeProjects",
+    "resourceName": "",
+    "resourceType": "project",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {},
+    "methodName": "transcribe:ListTranscriptionJobs",
+    "resourceName": "call-recording-001",
+    "resourceType": "transcription-job",
+    "serviceName": "Transcribe"
+  },
+  {
+    "details": {},
+    "methodName": "transcribe:ListVocabularies",
+    "resourceName": "product-terms",
+    "resourceType": "vocabulary",
+    "serviceName": "Transcribe"
+  },
+  {
+    "details": {},
+    "methodName": "transcribe:ListLanguageModels",
+    "resourceName": "support-calls-model",
+    "resourceType": "language-model",
+    "serviceName": "Transcribe"
+  }
+]

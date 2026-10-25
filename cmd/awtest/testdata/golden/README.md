@@ -109,6 +109,23 @@ visited regions.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk5`
 green without regenerating it.
 
+## Bulk 6 golden (glue, dynamodb, iot, rekognition, transcribe)
+
+`replay-bulk6.json` is the v1 baseline for the sixth bulk migration batch:
+`glue:ListWorkflows` / `glue:ListJobs`, `dynamodb:ListTables` /
+`dynamodb:ListExports` / `dynamodb:ListBackups`, `iot:ListThings` /
+`iot:ListPolicies` / `iot:ListCertificates`, the three rekognition calls and
+`transcribe:ListTranscriptionJobs` / `ListVocabularies` / `ListLanguageModels`.
+It is produced from the fictional fixtures in `bulk6/` (fixture dir
+`testdata/golden/bulk6`) with
+`awtest -replay <abs>/testdata/golden/bulk6 -services glue,dynamodb,iot,rekognition,transcribe -quiet -format json`.
+The functional tests in each service package additionally cover populated and
+sparse `details`, error text, the dynamodb region loop (all regions visited,
+abort on the first error) and rekognition's `MaxResults=4096` request.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk6`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

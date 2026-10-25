@@ -1,0 +1,1 @@
+{"policies":[{"policyName":"sensor-publish-policy","policyArn":"arn:aws:iot:us-west-2:123456789012:policy/sensor-publish-policy"}]}

@@ -1,0 +1,1 @@
+{"things":[{"thingName":"sensor-01","thingArn":"arn:aws:iot:us-west-2:123456789012:thing/sensor-01","version":1},{"thingName":"gateway-02","version":3}]}

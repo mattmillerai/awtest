@@ -1,0 +1,1 @@
+{"certificates":[{"certificateArn":"arn:aws:iot:us-west-2:123456789012:cert/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","certificateId":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","status":"ACTIVE"}]}

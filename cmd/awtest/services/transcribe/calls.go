@@ -2,20 +2,22 @@ package transcribe
 
 import (
 	"context"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/transcribe"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/transcribeservice"
-	"time"
 )
 
 var TranscribeCalls = []types.AWSService{
 	{
 		Name: "transcribe:ListTranscriptionJobs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := transcribeservice.New(sess)
-			input := &transcribeservice.ListTranscriptionJobsInput{}
-			return svc.ListTranscriptionJobsWithContext(ctx, input)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", transcribe.NewFromConfig)
+			input := &transcribe.ListTranscriptionJobsInput{}
+			return svc.ListTranscriptionJobs(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -32,15 +34,16 @@ var TranscribeCalls = []types.AWSService{
 				}
 			}
 
-			if jobsOutput, ok := output.(*transcribeservice.ListTranscriptionJobsOutput); ok {
+			if jobsOutput, ok := output.(*transcribe.ListTranscriptionJobsOutput); ok {
 				for _, job := range jobsOutput.TranscriptionJobSummaries {
-					utils.PrintResult(debug, "", "transcribe:ListTranscriptionJobs", *job.TranscriptionJobName, nil)
+					jobName := aws.ToString(job.TranscriptionJobName)
+					utils.PrintResult(debug, "", "transcribe:ListTranscriptionJobs", jobName, nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Transcribe",
 						MethodName:   "transcribe:ListTranscriptionJobs",
 						ResourceType: "transcription-job",
-						ResourceName: *job.TranscriptionJobName,
+						ResourceName: jobName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -53,10 +56,10 @@ var TranscribeCalls = []types.AWSService{
 	},
 	{
 		Name: "transcribe:ListVocabularies",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := transcribeservice.New(sess)
-			input := &transcribeservice.ListVocabulariesInput{}
-			return svc.ListVocabulariesWithContext(ctx, input)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", transcribe.NewFromConfig)
+			input := &transcribe.ListVocabulariesInput{}
+			return svc.ListVocabularies(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -73,15 +76,16 @@ var TranscribeCalls = []types.AWSService{
 				}
 			}
 
-			if vocabOutput, ok := output.(*transcribeservice.ListVocabulariesOutput); ok {
+			if vocabOutput, ok := output.(*transcribe.ListVocabulariesOutput); ok {
 				for _, vocab := range vocabOutput.Vocabularies {
-					utils.PrintResult(debug, "", "transcribe:ListVocabularies", *vocab.VocabularyName, nil)
+					vocabName := aws.ToString(vocab.VocabularyName)
+					utils.PrintResult(debug, "", "transcribe:ListVocabularies", vocabName, nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Transcribe",
 						MethodName:   "transcribe:ListVocabularies",
 						ResourceType: "vocabulary",
-						ResourceName: *vocab.VocabularyName,
+						ResourceName: vocabName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -94,10 +98,10 @@ var TranscribeCalls = []types.AWSService{
 	},
 	{
 		Name: "transcribe:ListLanguageModels",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := transcribeservice.New(sess)
-			input := &transcribeservice.ListLanguageModelsInput{}
-			return svc.ListLanguageModelsWithContext(ctx, input)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", transcribe.NewFromConfig)
+			input := &transcribe.ListLanguageModelsInput{}
+			return svc.ListLanguageModels(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -114,15 +118,16 @@ var TranscribeCalls = []types.AWSService{
 				}
 			}
 
-			if langModelOutput, ok := output.(*transcribeservice.ListLanguageModelsOutput); ok {
+			if langModelOutput, ok := output.(*transcribe.ListLanguageModelsOutput); ok {
 				for _, langModel := range langModelOutput.Models {
-					utils.PrintResult(debug, "", "transcribe:ListLanguageModels", *langModel.ModelName, nil)
+					modelName := aws.ToString(langModel.ModelName)
+					utils.PrintResult(debug, "", "transcribe:ListLanguageModels", modelName, nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Transcribe",
 						MethodName:   "transcribe:ListLanguageModels",
 						ResourceType: "language-model",
-						ResourceName: *langModel.ModelName,
+						ResourceName: modelName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

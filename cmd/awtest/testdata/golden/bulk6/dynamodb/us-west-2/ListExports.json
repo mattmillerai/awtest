@@ -1,0 +1,1 @@
+{"ExportSummaries":[{"ExportArn":"arn:aws:dynamodb:us-west-2:123456789012:table/orders/export/01700000000000-abcd1234","ExportStatus":"COMPLETED"},{"ExportStatus":"IN_PROGRESS"}]}

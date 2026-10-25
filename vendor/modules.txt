@@ -61,10 +61,8 @@ github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/ec2
 github.com/aws/aws-sdk-go/service/emr
 github.com/aws/aws-sdk-go/service/eventbridge
-github.com/aws/aws-sdk-go/service/glue
 github.com/aws/aws-sdk-go/service/guardduty
 github.com/aws/aws-sdk-go/service/iam
-github.com/aws/aws-sdk-go/service/iot
 github.com/aws/aws-sdk-go/service/ivs
 github.com/aws/aws-sdk-go/service/ivschat
 github.com/aws/aws-sdk-go/service/ivsrealtime
@@ -75,7 +73,6 @@ github.com/aws/aws-sdk-go/service/mediaconvert
 github.com/aws/aws-sdk-go/service/neptune
 github.com/aws/aws-sdk-go/service/opensearchservice
 github.com/aws/aws-sdk-go/service/organizations
-github.com/aws/aws-sdk-go/service/rekognition
 github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sagemaker
@@ -86,7 +83,6 @@ github.com/aws/aws-sdk-go/service/sso
 github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
-github.com/aws/aws-sdk-go/service/transcribeservice
 github.com/aws/aws-sdk-go/service/waf
 # github.com/aws/aws-sdk-go-v2 v1.47.4
 ## explicit; go 1.24
@@ -104,6 +100,7 @@ github.com/aws/aws-sdk-go-v2/aws/signer/v4
 github.com/aws/aws-sdk-go-v2/aws/transport/http
 github.com/aws/aws-sdk-go-v2/internal/auth
 github.com/aws/aws-sdk-go-v2/internal/auth/smithy
+github.com/aws/aws-sdk-go-v2/internal/awsutil
 github.com/aws/aws-sdk-go-v2/internal/context
 github.com/aws/aws-sdk-go-v2/internal/endpoints
 github.com/aws/aws-sdk-go-v2/internal/endpoints/awsrulesfn
@@ -210,6 +207,13 @@ github.com/aws/aws-sdk-go-v2/service/configservice
 github.com/aws/aws-sdk-go-v2/service/configservice/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/configservice/schemas
 github.com/aws/aws-sdk-go-v2/service/configservice/types
+# github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/dynamodb
+github.com/aws/aws-sdk-go-v2/service/dynamodb/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/dynamodb/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/dynamodb/schemas
+github.com/aws/aws-sdk-go-v2/service/dynamodb/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr
@@ -259,6 +263,14 @@ github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations
 github.com/aws/aws-sdk-go-v2/service/glacier/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/glacier/schemas
 github.com/aws/aws-sdk-go-v2/service/glacier/types
+# github.com/aws/aws-sdk-go-v2/service/glue v1.172.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/glue
+github.com/aws/aws-sdk-go-v2/service/glue/document
+github.com/aws/aws-sdk-go-v2/service/glue/internal/document
+github.com/aws/aws-sdk-go-v2/service/glue/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/glue/schemas
+github.com/aws/aws-sdk-go-v2/service/glue/types
 # github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/iam
@@ -270,6 +282,9 @@ github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding
 # github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.7
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/internal/checksum
+# github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.7
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery
 # github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.7
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url
@@ -278,6 +293,12 @@ github.com/aws/aws-sdk-go-v2/service/internal/presigned-url
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared/arn
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared/config
+# github.com/aws/aws-sdk-go-v2/service/iot v1.84.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/iot
+github.com/aws/aws-sdk-go-v2/service/iot/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/iot/schemas
+github.com/aws/aws-sdk-go-v2/service/iot/types
 # github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/kms
@@ -299,6 +320,12 @@ github.com/aws/aws-sdk-go-v2/service/rds/types
 github.com/aws/aws-sdk-go-v2/service/redshift
 github.com/aws/aws-sdk-go-v2/service/redshift/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/redshift/types
+# github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/rekognition
+github.com/aws/aws-sdk-go-v2/service/rekognition/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/rekognition/schemas
+github.com/aws/aws-sdk-go-v2/service/rekognition/types
 # github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/s3
@@ -349,6 +376,12 @@ github.com/aws/aws-sdk-go-v2/service/ssooidc/types
 github.com/aws/aws-sdk-go-v2/service/sts
 github.com/aws/aws-sdk-go-v2/service/sts/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/sts/types
+# github.com/aws/aws-sdk-go-v2/service/transcribe v1.66.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/transcribe
+github.com/aws/aws-sdk-go-v2/service/transcribe/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/transcribe/schemas
+github.com/aws/aws-sdk-go-v2/service/transcribe/types
 # github.com/aws/smithy-go v1.28.6
 ## explicit; go 1.24
 github.com/aws/smithy-go
