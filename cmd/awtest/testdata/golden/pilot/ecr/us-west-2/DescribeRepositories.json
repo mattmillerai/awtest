@@ -1,0 +1,24 @@
+{
+  "repositories": [
+    {
+      "registryId": "123456789012",
+      "repositoryArn": "arn:aws:ecr:us-west-2:123456789012:repository/example-api",
+      "repositoryName": "example-api",
+      "repositoryUri": "123456789012.dkr.ecr.us-west-2.amazonaws.com/example-api",
+      "createdAt": 1767225600.0,
+      "imageTagMutability": "MUTABLE",
+      "imageScanningConfiguration": {"scanOnPush": true},
+      "encryptionConfiguration": {"encryptionType": "AES256"}
+    },
+    {
+      "registryId": "123456789012",
+      "repositoryArn": "arn:aws:ecr:us-west-2:123456789012:repository/example-worker",
+      "repositoryName": "example-worker",
+      "repositoryUri": "123456789012.dkr.ecr.us-west-2.amazonaws.com/example-worker",
+      "createdAt": 1767312000.0,
+      "imageTagMutability": "IMMUTABLE",
+      "imageScanningConfiguration": {"scanOnPush": false},
+      "encryptionConfiguration": {"encryptionType": "AES256"}
+    }
+  ]
+}

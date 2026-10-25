@@ -13,7 +13,10 @@ import (
 	"github.com/mattmillerai/awtest/cmd/awtest/diff"
 )
 
-const goldenSamplePath = "testdata/golden/replay-sample.json"
+const (
+	goldenSamplePath = "testdata/golden/replay-sample.json"
+	goldenPilotPath  = "testdata/golden/replay-pilot.json"
+)
 
 // v1TransportSuffix is the aws-sdk-go v1 error noise the v2 migration drops.
 var v1TransportSuffix = regexp.MustCompile(`\n\tstatus code: \d+, request id: \S+$`)
@@ -126,10 +129,10 @@ func describeResult(raw json.RawMessage) string {
 	return r.ServiceName + " " + r.MethodName
 }
 
-func runGoldenScan(t *testing.T, bin string) []byte {
+func runGoldenScan(t *testing.T, bin string, args []string) []byte {
 	t.Helper()
 	out := filepath.Join(t.TempDir(), "out.json")
-	stderr, code := runBinaryEnv(t, bin, nil, "-replay", "builtin:sample", "-quiet", "-format", "json", "-output-file", out)
+	stderr, code := runBinaryEnv(t, bin, nil, append(append([]string{}, args...), "-output-file", out)...)
 	if code != 0 {
 		t.Fatalf("awtest exited %d: %s", code, stderr)
 	}
@@ -144,36 +147,60 @@ func runGoldenScan(t *testing.T, bin string) []byte {
 	return norm
 }
 
-func TestGoldenReplaySample(t *testing.T) {
+// runGoldenCase runs the binary twice (determinism), then either regenerates
+// the golden file (AWTEST_UPDATE_GOLDEN=1) or compares against it.
+func runGoldenCase(t *testing.T, args []string, goldenPath string) {
+	t.Helper()
 	if testing.Short() {
 		t.Skip("skipping golden integration test in short mode")
 	}
 	bin := buildAwtestBinary(t)
 
-	first := runGoldenScan(t, bin)
-	second := runGoldenScan(t, bin)
+	first := runGoldenScan(t, bin, args)
+	second := runGoldenScan(t, bin, args)
 	if !bytes.Equal(first, second) {
 		report, _ := compareGolden(first, second)
 		t.Fatalf("replay output is not deterministic across runs:\n%s", report)
 	}
 
 	if os.Getenv("AWTEST_UPDATE_GOLDEN") == "1" {
-		if err := os.MkdirAll(filepath.Dir(goldenSamplePath), 0o755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(goldenSamplePath, first, 0o644); err != nil {
+		if err := os.WriteFile(goldenPath, first, 0o644); err != nil {
 			t.Fatal(err)
 		}
-		t.Logf("updated golden file %s", goldenSamplePath)
+		t.Logf("updated golden file %s", goldenPath)
 		return
 	}
 
-	want, err := os.ReadFile(goldenSamplePath)
+	want, err := os.ReadFile(goldenPath)
 	if err != nil {
 		t.Fatalf("read golden (regenerate with AWTEST_UPDATE_GOLDEN=1): %v", err)
 	}
 	if report, ok := compareGolden(want, first); !ok {
-		t.Fatalf("output differs from %s:\n%s", goldenSamplePath, report)
+		t.Fatalf("output differs from %s:\n%s", goldenPath, report)
+	}
+}
+
+func TestGoldenReplaySample(t *testing.T) {
+	pilotDir, err := filepath.Abs("testdata/golden/pilot")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		name       string
+		args       []string
+		goldenPath string
+	}{
+		{"sample", []string{"-replay", "builtin:sample", "-quiet", "-format", "json"}, goldenSamplePath},
+		// -services matches by substring, and "ecr" is inside "secretsmanager".
+		{"pilot", []string{"-replay", pilotDir, "-services", "ecr,kms", "-exclude-services", "secretsmanager", "-quiet", "-format", "json"}, goldenPilotPath},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			runGoldenCase(t, tc.args, tc.goldenPath)
+		})
 	}
 }
 

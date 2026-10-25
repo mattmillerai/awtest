@@ -1,0 +1,8 @@
+{
+  "Keys": [
+    {"KeyId": "1234abcd-12ab-34cd-56ef-1234567890ab", "KeyArn": "arn:aws:kms:us-west-2:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab"},
+    {"KeyId": "2345bcde-23bc-45de-67fa-2345678901bc", "KeyArn": "arn:aws:kms:us-west-2:123456789012:key/2345bcde-23bc-45de-67fa-2345678901bc"},
+    {"KeyId": "3456cdef-34cd-56ef-78ab-3456789012cd", "KeyArn": "arn:aws:kms:us-west-2:123456789012:key/3456cdef-34cd-56ef-78ab-3456789012cd"}
+  ],
+  "Truncated": false
+}

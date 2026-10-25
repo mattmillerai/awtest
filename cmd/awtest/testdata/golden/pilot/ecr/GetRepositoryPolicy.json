@@ -1,0 +1,5 @@
+{
+  "registryId": "123456789012",
+  "repositoryName": "example-api",
+  "policyText": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowPull\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":[\"ecr:GetDownloadUrlForLayer\",\"ecr:BatchGetImage\"]}]}"
+}

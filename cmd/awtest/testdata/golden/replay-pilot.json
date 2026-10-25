@@ -1,0 +1,83 @@
+[
+  {
+    "details": {
+      "RepositoryArn": "arn:aws:ecr:us-west-2:123456789012:repository/example-api"
+    },
+    "methodName": "ecr:DescribeRepositories",
+    "resourceName": "example-api",
+    "resourceType": "repository",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {
+      "RepositoryArn": "arn:aws:ecr:us-west-2:123456789012:repository/example-worker"
+    },
+    "methodName": "ecr:DescribeRepositories",
+    "resourceName": "example-worker",
+    "resourceType": "repository",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:ListImages",
+    "resourceName": "v1.0.0",
+    "resourceType": "image",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:ListImages",
+    "resourceName": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+    "resourceType": "image",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:ListImages",
+    "resourceName": "v1.0.0",
+    "resourceType": "image",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:ListImages",
+    "resourceName": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+    "resourceType": "image",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:GetRepositoryPolicy",
+    "resourceName": "example-api",
+    "resourceType": "repository-policy",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "ecr:GetRepositoryPolicy",
+    "resourceName": "example-worker",
+    "resourceType": "repository-policy",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "methodName": "kms:ListKeys",
+    "resourceName": "1234abcd-12ab-34cd-56ef-1234567890ab",
+    "resourceType": "key",
+    "serviceName": "KMS"
+  },
+  {
+    "details": {},
+    "methodName": "kms:ListKeys",
+    "resourceName": "2345bcde-23bc-45de-67fa-2345678901bc",
+    "resourceType": "key",
+    "serviceName": "KMS"
+  },
+  {
+    "details": {},
+    "methodName": "kms:ListKeys",
+    "resourceName": "3456cdef-34cd-56ef-78ab-3456789012cd",
+    "resourceType": "key",
+    "serviceName": "KMS"
+  }
+]

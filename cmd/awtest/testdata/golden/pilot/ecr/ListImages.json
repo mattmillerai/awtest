@@ -1,0 +1,6 @@
+{
+  "imageIds": [
+    {"imageDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "imageTag": "v1.0.0"},
+    {"imageDigest": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"}
+  ]
+}
