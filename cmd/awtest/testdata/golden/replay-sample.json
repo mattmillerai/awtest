@@ -1,0 +1,1220 @@
+[
+  {
+    "details": {
+      "account": "123456789012",
+      "arn": "arn:aws:iam::123456789012:user/demo-user"
+    },
+    "methodName": "sts:GetCallerIdentity",
+    "resourceName": "AIDAEXAMPLEDEMO0001",
+    "resourceType": "identity",
+    "serviceName": "STS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for amplify:GET_apps (region us-east-1); expected amplify/GET_apps.xml or .json",
+    "methodName": "amplify:ListApps",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Amplify"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for apigateway:GET_restapis (region us-east-1); expected apigateway/GET_restapis.xml or .json",
+    "methodName": "apigateway:RestApis",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for apigateway:GET_apikeys (region us-east-1); expected apigateway/GET_apikeys.xml or .json",
+    "methodName": "apigateway:GetApiKeys",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for apigateway:GET_domainnames (region us-east-1); expected apigateway/GET_domainnames.xml or .json",
+    "methodName": "apigateway:GetDomainNames",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for appsync:GET_v1_apis (region us-east-1); expected appsync/GET_v1_apis.xml or .json",
+    "methodName": "appsync:ListGraphqlApis",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "AppSync"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for athena:ListWorkGroups (region us-west-2); expected athena/ListWorkGroups.xml or .json",
+    "methodName": "athena:ListWorkGroups",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for athena:ListWorkGroups (region us-west-2); expected athena/ListWorkGroups.xml or .json",
+    "methodName": "athena:ListNamedQueries",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for athena:ListWorkGroups (region us-west-2); expected athena/ListWorkGroups.xml or .json",
+    "methodName": "athena:ListQueryExecutions",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for backup:GET_backup-vaults (region us-west-2); expected backup/GET_backup-vaults.xml or .json",
+    "methodName": "backup:ListBackupVaults",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for backup:GET_backup_plans (region us-west-2); expected backup/GET_backup_plans.xml or .json",
+    "methodName": "backup:ListBackupPlans",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for backup:GET_backup-vaults (region us-west-2); expected backup/GET_backup-vaults.xml or .json",
+    "methodName": "backup:ListRecoveryPointsByBackupVault",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for backup:GET_backup-vaults (region us-west-2); expected backup/GET_backup-vaults.xml or .json",
+    "methodName": "backup:GetBackupVaultAccessPolicy",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for batch:POST_v1_listjobs (region us-west-2); expected batch/POST_v1_listjobs.xml or .json",
+    "methodName": "batch:ListJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Batch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for acm:ListCertificates (region us-east-1); expected acm/ListCertificates.xml or .json",
+    "methodName": "acm:ListCertificates",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CertificateManager"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for cloudformation:ListStacks (region us-east-1); expected cloudformation/ListStacks.xml or .json",
+    "methodName": "cloudformation:ListStacks",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudFormation"
+  },
+  {
+    "details": {},
+    "error": ": ",
+    "methodName": "cloudfront:ListDistributions",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudFront"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for cloudtrail:DescribeTrails (region us-east-1); expected cloudtrail/DescribeTrails.xml or .json",
+    "methodName": "cloudtrail:DescribeTrails",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudTrail"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for cloudtrail:ListTrails (region us-east-1); expected cloudtrail/ListTrails.xml or .json",
+    "methodName": "cloudtrail:ListTrails",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudTrail"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for monitoring:DescribeAlarms (region us-east-1); expected monitoring/DescribeAlarms.xml or .json",
+    "methodName": "cloudwatch:DescribeAlarms",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for logs:DescribeLogGroups (region us-east-1); expected logs/DescribeLogGroups.xml or .json",
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for monitoring:ListMetrics (region us-east-1); expected monitoring/ListMetrics.xml or .json",
+    "methodName": "cloudwatchlogs:ListMetrics",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codebuild:ListProjects (region us-west-2); expected codebuild/ListProjects.xml or .json",
+    "methodName": "codebuild:ListProjects",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codebuild:ListProjects (region us-west-2); expected codebuild/ListProjects.xml or .json",
+    "methodName": "codebuild:ListProjectEnvironmentVariables",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codebuild:ListBuilds (region us-west-2); expected codebuild/ListBuilds.xml or .json",
+    "methodName": "codebuild:ListBuilds",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codecommit:ListRepositories (region us-west-2); expected codecommit/ListRepositories.xml or .json",
+    "methodName": "codecommit:ListRepositories",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codecommit:ListRepositories (region us-west-2); expected codecommit/ListRepositories.xml or .json",
+    "methodName": "codecommit:ListBranches",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codedeploy:ListApplications (region us-west-2); expected codedeploy/ListApplications.xml or .json",
+    "methodName": "codedeploy:ListApplications",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codedeploy:ListApplications (region us-west-2); expected codedeploy/ListApplications.xml or .json",
+    "methodName": "codedeploy:ListDeploymentGroups",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codedeploy:ListDeploymentConfigs (region us-west-2); expected codedeploy/ListDeploymentConfigs.xml or .json",
+    "methodName": "codedeploy:ListDeploymentConfigs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for codepipeline:ListPipelines (region us-east-1); expected codepipeline/ListPipelines.xml or .json",
+    "methodName": "codepipeline:ListPipelines",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CodePipeline"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for cognito-identity:ListIdentityPools (region us-east-1); expected cognito-identity/ListIdentityPools.xml or .json",
+    "methodName": "cognitoidentity:ListIdentityPools",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CognitoIdentity"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for cognito-idp:ListUserPools (region us-east-1); expected cognito-idp/ListUserPools.xml or .json",
+    "methodName": "cognito-idp:ListUserPools",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "CognitoUserPools"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for config:DescribeConfigurationRecorders (region us-east-1); expected config/DescribeConfigurationRecorders.xml or .json",
+    "methodName": "config:DescribeConfigurationRecorders",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Config"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for directconnect:DescribeConnections (region us-west-2); expected directconnect/DescribeConnections.xml or .json",
+    "methodName": "directconnect:DescribeConnections",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for directconnect:DescribeVirtualInterfaces (region us-west-2); expected directconnect/DescribeVirtualInterfaces.xml or .json",
+    "methodName": "directconnect:DescribeVirtualInterfaces",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for directconnect:DescribeDirectConnectGateways (region us-east-1); expected directconnect/DescribeDirectConnectGateways.xml or .json",
+    "methodName": "directconnect:DescribeDirectConnectGateways",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for dynamodb:ListTables (region us-east-1); expected dynamodb/ListTables.xml or .json",
+    "methodName": "dynamodb:ListTables",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for dynamodb:ListExports (region us-east-1); expected dynamodb/ListExports.xml or .json",
+    "methodName": "dynamodb:ListExports",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for dynamodb:ListBackups (region us-east-1); expected dynamodb/ListBackups.xml or .json",
+    "methodName": "dynamodb:ListBackups",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "DynamoDB"
+  },
+  {
+    "details": {
+      "elastic_ip": "",
+      "ip": "203.0.113.10",
+      "state": "running",
+      "tags": {
+        "Name": "example-web-1"
+      },
+      "type": "t3.micro",
+      "user_data": "#!/bin/bash\necho \"hello from example-web\"\n"
+    },
+    "methodName": "ec2:DescribeInstances",
+    "resourceName": "i-0example00000001",
+    "resourceType": "instance",
+    "serviceName": "EC2"
+  },
+  {
+    "details": {
+      "elastic_ip": "",
+      "ip": "198.51.100.20",
+      "state": "running",
+      "tags": {
+        "Name": "example-web-2"
+      },
+      "type": "t3.micro",
+      "user_data": "#!/bin/bash\necho \"hello from example-web\"\n"
+    },
+    "methodName": "ec2:DescribeInstances",
+    "resourceName": "i-0example00000002",
+    "resourceType": "instance",
+    "serviceName": "EC2"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecr:DescribeRepositories (region us-east-1); expected ecr/DescribeRepositories.xml or .json",
+    "methodName": "ecr:DescribeRepositories",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecr:DescribeRepositories (region us-east-1); expected ecr/DescribeRepositories.xml or .json",
+    "methodName": "ecr:ListImages",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecr:DescribeRepositories (region us-east-1); expected ecr/DescribeRepositories.xml or .json",
+    "methodName": "ecr:GetRepositoryPolicy",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECR"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecs:ListClusters (region us-east-1); expected ecs/ListClusters.xml or .json",
+    "methodName": "ecs:ListClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for elasticfilesystem:GET_2015-02-01_file-systems (region us-east-1); expected elasticfilesystem/GET_2015-02-01_file-systems.xml or .json",
+    "methodName": "efs:DescribeFileSystems",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EFS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for eks:GET_clusters (region us-east-1); expected eks/GET_clusters.xml or .json",
+    "methodName": "eks:ListClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for elasticmapreduce:ListClusters (region us-west-2); expected elasticmapreduce/ListClusters.xml or .json",
+    "methodName": "emr:ListClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for elasticmapreduce:ListClusters (region us-west-2); expected elasticmapreduce/ListClusters.xml or .json",
+    "methodName": "emr:ListInstanceGroups",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for elasticmapreduce:ListSecurityConfigurations (region us-west-2); expected elasticmapreduce/ListSecurityConfigurations.xml or .json",
+    "methodName": "emr:ListSecurityConfigurations",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for elasticache:DescribeCacheClusters (region us-west-2); expected elasticache/DescribeCacheClusters.xml or .json",
+    "methodName": "elasticache:DescribeCacheClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ElastiCache"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeApplications (region us-east-1); expected elasticbeanstalk/DescribeApplications.xml or .json",
+    "methodName": "elasticbeanstalk:DescribeApplications",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ElasticBeanstalk"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for elasticbeanstalk:DescribeEvents (region us-east-1); expected elasticbeanstalk/DescribeEvents.xml or .json",
+    "methodName": "elasticbeanstalk:DescribeEvents",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ElasticBeanstalk"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for events:ListEventBuses (region us-east-1); expected events/ListEventBuses.xml or .json",
+    "methodName": "eventbridge:ListEventBuses",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EventBridge"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecs:ListClusters (region us-west-2); expected ecs/ListClusters.xml or .json",
+    "methodName": "ecs:ListFargateTasks",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Fargate"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for glacier:GET_-_vaults (region us-east-1); expected glacier/GET_-_vaults.xml or .json",
+    "methodName": "glacier:ListVaults",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Glacier"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListWorkflows (region us-east-1); expected glue/ListWorkflows.xml or .json",
+    "methodName": "glue:ListWorkflows",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for glue:ListJobs (region us-east-1); expected glue/ListJobs.xml or .json",
+    "methodName": "glue:ListJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Glue"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for guardduty:GET_detector (region us-west-2); expected guardduty/GET_detector.xml or .json",
+    "methodName": "guardduty:ListDetectors",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for guardduty:GET_detector (region us-west-2); expected guardduty/GET_detector.xml or .json",
+    "methodName": "guardduty:GetFindings",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for guardduty:GET_detector (region us-west-2); expected guardduty/GET_detector.xml or .json",
+    "methodName": "guardduty:ListFilters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListUsers",
+    "resourceName": "alice",
+    "resourceType": "user",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "alice"
+    },
+    "methodName": "iam:ListAttachedUserPolicies",
+    "resourceName": "example-readonly-policy",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "alice"
+    },
+    "methodName": "iam:ListAccessKeys",
+    "resourceName": "AKIAEXAMPLEFAKE0001",
+    "resourceType": "access-key",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListUsers",
+    "resourceName": "bob",
+    "resourceType": "user",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:role/example-ec2-instance-role",
+      "create_date": "2024-03-01T12:00:00Z",
+      "max_session_duration": 3600,
+      "path": "/",
+      "trust_findings": [],
+      "trusted_principals": [
+        "Service:ec2.amazonaws.com"
+      ]
+    },
+    "methodName": "iam:ListRoles",
+    "resourceName": "example-ec2-instance-role",
+    "resourceType": "role",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:role/example-cross-account-role",
+      "create_date": "2024-03-01T12:00:00Z",
+      "max_session_duration": 3600,
+      "path": "/",
+      "trust_findings": [
+        "cross-account principal: 210987654321 (role account is 123456789012)"
+      ],
+      "trusted_principals": [
+        "AWS:arn:aws:iam::210987654321:root"
+      ]
+    },
+    "methodName": "iam:ListRoles",
+    "resourceName": "example-cross-account-role",
+    "resourceType": "role",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:role/example-open-role",
+      "create_date": "2024-03-01T12:00:00Z",
+      "max_session_duration": 3600,
+      "path": "/",
+      "trust_findings": [
+        "wildcard principal (*) in Allow statement"
+      ],
+      "trusted_principals": [
+        "AWS:*"
+      ]
+    },
+    "methodName": "iam:ListRoles",
+    "resourceName": "example-open-role",
+    "resourceType": "role",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "policy_arn": "arn:aws:iam::123456789012:policy/example-readonly-policy",
+      "role": "example-ec2-instance-role"
+    },
+    "methodName": "iam:ListAttachedRolePolicies",
+    "resourceName": "example-ec2-instance-role/example-readonly-policy",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:group/example-developers",
+      "create_date": "2024-01-10T08:00:00Z",
+      "path": "/"
+    },
+    "methodName": "iam:ListGroups",
+    "resourceName": "example-developers",
+    "resourceType": "group",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "group": "example-developers",
+      "policy_arn": "arn:aws:iam::123456789012:policy/example-readonly-policy"
+    },
+    "methodName": "iam:ListAttachedGroupPolicies",
+    "resourceName": "example-developers/example-readonly-policy",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:policy/example-readonly-policy",
+      "attachment_count": 2,
+      "create_date": "2024-01-20T08:00:00Z",
+      "default_version_id": "v1",
+      "is_attachable": true,
+      "path": "/",
+      "update_date": "2024-01-20T08:00:00Z"
+    },
+    "methodName": "iam:ListPolicies",
+    "resourceName": "example-readonly-policy",
+    "resourceType": "policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_things (region us-east-1); expected iot/GET_things.xml or .json",
+    "methodName": "iot:ListThings",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_policies (region us-east-1); expected iot/GET_policies.xml or .json",
+    "methodName": "iot:ListPolicies",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for iot:GET_certificates (region us-east-1); expected iot/GET_certificates.xml or .json",
+    "methodName": "iot:ListCertificates",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IoT"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListChannels (region us-east-1); expected ivs/POST_ListChannels.xml or .json",
+    "methodName": "ivs:ListChannels",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStreams (region us-east-1); expected ivs/POST_ListStreams.xml or .json",
+    "methodName": "ivs:ListStreams",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "error": "InvalidParameter: 1 validation error(s) found.\n- missing required field, ListStreamKeysInput.ChannelArn.\n",
+    "methodName": "ivs:ListStreamKeys",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ivschat:POST_ListRooms (region us-east-1); expected ivschat/POST_ListRooms.xml or .json",
+    "methodName": "ivsChat:ListRooms",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVSChat"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ivs:POST_ListStages (region us-east-1); expected ivs/POST_ListStages.xml or .json",
+    "methodName": "ivsRealtime:ListStages",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVSRealtime"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for kinesis:ListStreams (region us-west-2); expected kinesis/ListStreams.xml or .json",
+    "methodName": "kinesis:ListStreams",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for kinesis:ListStreams (region us-west-2); expected kinesis/ListStreams.xml or .json",
+    "methodName": "kinesis:ListShards",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for kinesis:ListStreams (region us-west-2); expected kinesis/ListStreams.xml or .json",
+    "methodName": "kinesis:ListStreamConsumers",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for kms:ListKeys (region us-east-1); expected kms/ListKeys.xml or .json",
+    "methodName": "kms:ListKeys",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "KMS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for lambda:GET_2015-03-31_functions (region us-east-1); expected lambda/GET_2015-03-31_functions.xml or .json",
+    "methodName": "lambda:ListFunctions",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Lambda"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for macie2:POST_jobs_list (region us-west-2); expected macie2/POST_jobs_list.xml or .json",
+    "methodName": "macie2:ListClassificationJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for macie2:POST_findings (region us-west-2); expected macie2/POST_findings.xml or .json",
+    "methodName": "macie2:ListFindings",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for macie2:POST_datasources_s3 (region us-west-2); expected macie2/POST_datasources_s3.xml or .json",
+    "methodName": "macie2:DescribeBuckets",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for mediaconvert:GET_2017-08-29_queues (region us-west-2); expected mediaconvert/GET_2017-08-29_queues.xml or .json",
+    "methodName": "mediaconvert:ListQueues",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for mediaconvert:GET_2017-08-29_jobs (region us-west-2); expected mediaconvert/GET_2017-08-29_jobs.xml or .json",
+    "methodName": "mediaconvert:ListJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for mediaconvert:GET_2017-08-29_presets (region us-west-2); expected mediaconvert/GET_2017-08-29_presets.xml or .json",
+    "methodName": "mediaconvert:ListPresets",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for rds:DescribeDBClusters (region us-west-2); expected rds/DescribeDBClusters.xml or .json",
+    "methodName": "neptune:DescribeDBClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for rds:DescribeDBInstances (region us-west-2); expected rds/DescribeDBInstances.xml or .json",
+    "methodName": "neptune:DescribeDBInstances",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for rds:DescribeDBClusterParameterGroups (region us-west-2); expected rds/DescribeDBClusterParameterGroups.xml or .json",
+    "methodName": "neptune:DescribeDBClusterParameterGroups",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for es:GET_2021-01-01_domain (region us-east-1); expected es/GET_2021-01-01_domain.xml or .json",
+    "methodName": "opensearch:ListDomains",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for es:GET_2021-01-01_domain (region us-east-1); expected es/GET_2021-01-01_domain.xml or .json",
+    "methodName": "opensearch:DescribeDomainAccessPolicies",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for es:GET_2021-01-01_domain (region us-east-1); expected es/GET_2021-01-01_domain.xml or .json",
+    "methodName": "opensearch:DescribeDomainEncryption",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for organizations:ListAccounts (region us-east-1); expected organizations/ListAccounts.xml or .json",
+    "methodName": "organizations:ListAccounts",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for organizations:ListRoots (region us-east-1); expected organizations/ListRoots.xml or .json",
+    "methodName": "organizations:ListOrganizationalUnits",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for organizations:ListPolicies (region us-east-1); expected organizations/ListPolicies.xml or .json",
+    "methodName": "organizations:ListPolicies",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for rds:DescribeDBInstances (region us-east-1); expected rds/DescribeDBInstances.xml or .json",
+    "methodName": "rds:DescribeDBInstances",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "RDS"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for redshift:DescribeClusters (region us-west-2); expected redshift/DescribeClusters.xml or .json",
+    "methodName": "redshift:DescribeClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Redshift"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for rekognition:ListCollections (region us-east-1); expected rekognition/ListCollections.xml or .json",
+    "methodName": "rekognition:ListCollections",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for rekognition:ListStreamProcessors (region us-east-1); expected rekognition/ListStreamProcessors.xml or .json",
+    "methodName": "rekognition:ListStreamProcessors",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for rekognition:DescribeProjects (region us-east-1); expected rekognition/DescribeProjects.xml or .json",
+    "methodName": "rekognition:DescribeProjects",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Rekognition"
+  },
+  {
+    "details": {},
+    "error": ": ",
+    "methodName": "route53:ListHostedZones",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "error": ": ",
+    "methodName": "route53:ListHealthChecks",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "methodName": "s3:ListBuckets",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "object_count": 3,
+      "region": "us-west-2"
+    },
+    "methodName": "s3:ListObjects",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {},
+    "methodName": "s3:ListBuckets",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "object_count": 2,
+      "region": "us-east-1"
+    },
+    "methodName": "s3:ListObjects",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "region": "us-west-2",
+      "status": "none"
+    },
+    "methodName": "s3:GetBucketPolicy",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "region": "us-west-2",
+      "status": "no_policy"
+    },
+    "methodName": "s3:GetBucketPolicyStatus",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "findings": [],
+      "grants": [
+        {
+          "grantee": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be",
+          "grantee_type": "CanonicalUser",
+          "permission": "FULL_CONTROL"
+        }
+      ],
+      "owner_display_name": "example-owner",
+      "owner_id": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be",
+      "region": "us-west-2",
+      "status": "ok"
+    },
+    "methodName": "s3:GetBucketAcl",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "block_public_acls": true,
+      "block_public_policy": true,
+      "ignore_public_acls": true,
+      "region": "us-west-2",
+      "restrict_public_buckets": true,
+      "status": "configured"
+    },
+    "methodName": "s3:GetPublicAccessBlock",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "findings": [
+        "Allow statement with wildcard principal (*)"
+      ],
+      "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PublicRead\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::example-public-assets/*\"}]}\n",
+      "region": "us-east-1",
+      "statement_count": 1,
+      "status": "present"
+    },
+    "methodName": "s3:GetBucketPolicy",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "region": "us-east-1",
+      "status": "public"
+    },
+    "methodName": "s3:GetBucketPolicyStatus",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "findings": [
+        "grant to AllUsers (http://acs.amazonaws.com/groups/global/AllUsers): READ"
+      ],
+      "grants": [
+        {
+          "grantee": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be",
+          "grantee_type": "CanonicalUser",
+          "permission": "FULL_CONTROL"
+        },
+        {
+          "grantee": "http://acs.amazonaws.com/groups/global/AllUsers",
+          "grantee_type": "Group",
+          "permission": "READ"
+        }
+      ],
+      "owner_display_name": "example-owner",
+      "owner_id": "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be",
+      "region": "us-east-1",
+      "status": "ok"
+    },
+    "methodName": "s3:GetBucketAcl",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "region": "us-east-1",
+      "status": "none"
+    },
+    "methodName": "s3:GetPublicAccessBlock",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for sagemaker:ListNotebookInstances (region us-west-2); expected sagemaker/ListNotebookInstances.xml or .json",
+    "methodName": "sagemaker:ListNotebookInstances",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for sagemaker:ListEndpoints (region us-west-2); expected sagemaker/ListEndpoints.xml or .json",
+    "methodName": "sagemaker:ListEndpoints",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for sagemaker:ListModels (region us-west-2); expected sagemaker/ListModels.xml or .json",
+    "methodName": "sagemaker:ListModels",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for sagemaker:ListTrainingJobs (region us-west-2); expected sagemaker/ListTrainingJobs.xml or .json",
+    "methodName": "sagemaker:ListTrainingJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for secretsmanager:ListSecrets (region us-east-1); expected secretsmanager/ListSecrets.xml or .json",
+    "methodName": "secretsmanager:ListSecrets",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SecretsManager"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for securityhub:POST_standards_get (region us-west-2); expected securityhub/POST_standards_get.xml or .json",
+    "methodName": "securityhub:GetEnabledStandards",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for securityhub:POST_findings (region us-west-2); expected securityhub/POST_findings.xml or .json",
+    "methodName": "securityhub:GetFindings",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for securityhub:GET_productSubscriptions (region us-west-2); expected securityhub/GET_productSubscriptions.xml or .json",
+    "methodName": "securityhub:ListEnabledProductsForImport",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for ses:ListIdentities (region us-east-1); expected ses/ListIdentities.xml or .json",
+    "methodName": "ses:ListIdentities",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SES"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for sns:ListTopics (region us-east-1); expected sns/ListTopics.xml or .json",
+    "methodName": "sns:ListTopics",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SNS"
+  },
+  {
+    "details": {},
+    "error": "AccessDenied: awtest replay: no fixture for sqs:ListQueues (region us-east-1); expected sqs/ListQueues.xml or .json",
+    "methodName": "sqs:ListQueues",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "SQS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for states:ListStateMachines (region us-west-2); expected states/ListStateMachines.xml or .json",
+    "methodName": "states:ListStateMachines",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Step Functions"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ssm:DescribeParameters (region us-west-2); expected ssm/DescribeParameters.xml or .json",
+    "methodName": "ssm:DescribeParameters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Systems Manager"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for transcribe:ListTranscriptionJobs (region us-east-1); expected transcribe/ListTranscriptionJobs.xml or .json",
+    "methodName": "transcribe:ListTranscriptionJobs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Transcribe"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for transcribe:ListVocabularies (region us-east-1); expected transcribe/ListVocabularies.xml or .json",
+    "methodName": "transcribe:ListVocabularies",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Transcribe"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for transcribe:ListLanguageModels (region us-east-1); expected transcribe/ListLanguageModels.xml or .json",
+    "methodName": "transcribe:ListLanguageModels",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "Transcribe"
+  },
+  {
+    "details": {},
+    "error": "UnauthorizedOperation: awtest replay: no fixture for ec2:DescribeVpcs (region us-west-2); expected ec2/DescribeVpcs.xml or .json",
+    "methodName": "ec2:DescribeVpcs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for waf:ListWebACLs (region us-east-1); expected waf/ListWebACLs.xml or .json",
+    "methodName": "waf:ListWebACLs",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "WAF"
+  }
+]
