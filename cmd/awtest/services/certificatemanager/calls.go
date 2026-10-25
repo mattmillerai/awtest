@@ -3,23 +3,24 @@ package certificatemanager
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/acm"
+	acmtypes "github.com/aws/aws-sdk-go-v2/service/acm/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/acm"
-	"time"
 )
 
 var CertificateManagerCalls = []types.AWSService{
 	{
 		Name: "acm:ListCertificates",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allCertificates []*acm.CertificateSummary
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allCertificates []acmtypes.CertificateSummary
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := acm.New(sess)
-				output, err := svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, acm.NewFromConfig)
+				output, err := svc.ListCertificates(ctx, &acm.ListCertificatesInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,17 +43,10 @@ var CertificateManagerCalls = []types.AWSService{
 				}
 			}
 
-			if certs, ok := output.([]*acm.CertificateSummary); ok {
+			if certs, ok := output.([]acmtypes.CertificateSummary); ok {
 				for _, cert := range certs {
-					domainName := ""
-					if cert.DomainName != nil {
-						domainName = *cert.DomainName
-					}
-
-					certArn := ""
-					if cert.CertificateArn != nil {
-						certArn = *cert.CertificateArn
-					}
+					domainName := aws.ToString(cert.DomainName)
+					certArn := aws.ToString(cert.CertificateArn)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "CertificateManager",

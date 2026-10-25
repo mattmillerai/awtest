@@ -3,24 +3,25 @@ package cognitouserpools
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+	cognitotypes "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
-	"time"
 )
 
 var CognitoUserPoolsCalls = []types.AWSService{
 	{
 		Name: "cognito-idp:ListUserPools",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allUserPools []*cognitoidentityprovider.UserPoolDescriptionType
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allUserPools []cognitotypes.UserPoolDescriptionType
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := cognitoidentityprovider.New(sess)
-				output, err := svc.ListUserPoolsWithContext(ctx, &cognitoidentityprovider.ListUserPoolsInput{
-					MaxResults: aws.Int64(60),
+				svc := awsv2.NewRegionalClient(cfg, region, cognitoidentityprovider.NewFromConfig)
+				output, err := svc.ListUserPools(ctx, &cognitoidentityprovider.ListUserPoolsInput{
+					MaxResults: aws.Int32(60),
 				})
 				if err != nil {
 					return nil, err
@@ -44,22 +45,11 @@ var CognitoUserPoolsCalls = []types.AWSService{
 				}
 			}
 
-			if pools, ok := output.([]*cognitoidentityprovider.UserPoolDescriptionType); ok {
+			if pools, ok := output.([]cognitotypes.UserPoolDescriptionType); ok {
 				for _, pool := range pools {
-					poolName := ""
-					if pool.Name != nil {
-						poolName = *pool.Name
-					}
-
-					poolId := ""
-					if pool.Id != nil {
-						poolId = *pool.Id
-					}
-
-					poolStatus := ""
-					if pool.Status != nil {
-						poolStatus = *pool.Status
-					}
+					poolName := aws.ToString(pool.Name)
+					poolId := aws.ToString(pool.Id)
+					poolStatus := string(pool.Status)
 
 					creationDate := ""
 					if pool.CreationDate != nil {

@@ -1,0 +1,1 @@
+{"apps":[{"appId":"d1a2b3c4d5e6f7","appArn":"arn:aws:amplify:us-west-2:123456789012:apps/d1a2b3c4d5e6f7","name":"demo-web-app","description":"Fictional demo app","platform":"WEB","repository":"https://example.com/demo/web.git"},{"appId":"d7f6e5d4c3b2a1","appArn":"arn:aws:amplify:us-west-2:123456789012:apps/d7f6e5d4c3b2a1","name":"demo-docs-app"}]}

@@ -18,6 +18,7 @@ const (
 	goldenPilotPath  = "testdata/golden/replay-pilot.json"
 	goldenBulk1Path  = "testdata/golden/replay-bulk1.json"
 	goldenBulk2Path  = "testdata/golden/replay-bulk2.json"
+	goldenBulk3Path  = "testdata/golden/replay-bulk3.json"
 )
 
 // v1TransportSuffix is the aws-sdk-go v1 error noise the v2 migration drops.
@@ -207,6 +208,10 @@ func TestGoldenReplaySample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	bulk3Dir, err := filepath.Abs("testdata/golden/bulk3")
+	if err != nil {
+		t.Fatal(err)
+	}
 	cases := []struct {
 		name       string
 		args       []string
@@ -219,6 +224,8 @@ func TestGoldenReplaySample(t *testing.T) {
 		{"bulk1", []string{"-replay", bulk1Dir, "-services", "batch,cloudformation,codepipeline,glacier,eventbridge", "-quiet", "-format", "json"}, goldenBulk1Path},
 		// Substring matching: none of these names occurs inside another service prefix.
 		{"bulk2", []string{"-replay", bulk2Dir, "-services", "appsync,secretsmanager,ses,rds,cognitoidentity", "-quiet", "-format", "json"}, goldenBulk2Path},
+		// Prefixes: amplify, acm, states, ssm, cognito-idp ("cognito-idp" does not match cognito-identity).
+		{"bulk3", []string{"-replay", bulk3Dir, "-services", "amplify,acm,states,ssm,cognito-idp", "-quiet", "-format", "json"}, goldenBulk3Path},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

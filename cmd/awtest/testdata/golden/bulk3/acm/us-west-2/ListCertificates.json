@@ -1,0 +1,1 @@
+{"CertificateSummaryList":[{"CertificateArn":"arn:aws:acm:us-west-2:123456789012:certificate/11111111-2222-3333-4444-555555555555","DomainName":"demo.example.com","Status":"ISSUED","Type":"AMAZON_ISSUED"},{"CertificateArn":"arn:aws:acm:us-west-2:123456789012:certificate/66666666-7777-8888-9999-000000000000"}]}

@@ -2,8 +2,8 @@ package cognitouserpools
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	cognitotypes "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 	"testing"
 	"time"
 )
@@ -12,17 +12,17 @@ func TestProcess_ValidPools(t *testing.T) {
 	process := CognitoUserPoolsCalls[0].Process
 
 	created := time.Date(2025, 6, 15, 10, 30, 0, 0, time.UTC)
-	pools := []*cognitoidentityprovider.UserPoolDescriptionType{
+	pools := []cognitotypes.UserPoolDescriptionType{
 		{
 			Name:         aws.String("my-pool"),
 			Id:           aws.String("us-east-1_abc123"),
-			Status:       aws.String("Enabled"),
+			Status:       cognitotypes.StatusTypeEnabled,
 			CreationDate: &created,
 		},
 		{
 			Name:         aws.String("another-pool"),
 			Id:           aws.String("us-west-2_def456"),
-			Status:       aws.String("Enabled"),
+			Status:       cognitotypes.StatusTypeEnabled,
 			CreationDate: &created,
 		},
 	}
@@ -62,7 +62,7 @@ func TestProcess_ValidPools(t *testing.T) {
 func TestProcess_EmptyResults(t *testing.T) {
 	process := CognitoUserPoolsCalls[0].Process
 
-	pools := []*cognitoidentityprovider.UserPoolDescriptionType{}
+	pools := []cognitotypes.UserPoolDescriptionType{}
 	results := process(pools, nil, false)
 
 	if len(results) != 0 {
@@ -90,7 +90,7 @@ func TestProcess_AccessDenied(t *testing.T) {
 func TestProcess_NilFields(t *testing.T) {
 	process := CognitoUserPoolsCalls[0].Process
 
-	pools := []*cognitoidentityprovider.UserPoolDescriptionType{
+	pools := []cognitotypes.UserPoolDescriptionType{
 		{
 			Name: nil,
 			Id:   nil,

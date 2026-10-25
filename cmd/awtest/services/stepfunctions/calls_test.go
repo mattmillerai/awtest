@@ -2,9 +2,9 @@ package stepfunctions
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	sfntypes "github.com/aws/aws-sdk-go-v2/service/sfn/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/sfn"
 	"testing"
 	"time"
 )
@@ -22,11 +22,11 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "STANDARD state machine with all fields",
-			input: []*sfn.StateMachineListItem{
+			input: []sfntypes.StateMachineListItem{
 				{
 					Name:            aws.String("my-workflow"),
 					StateMachineArn: aws.String("arn:aws:states:us-east-1:123456789:stateMachine:my-workflow"),
-					Type:            aws.String("STANDARD"),
+					Type:            sfntypes.StateMachineTypeStandard,
 					CreationDate:    func() *time.Time { t := time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC); return &t }(),
 				},
 			},
@@ -58,11 +58,11 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "EXPRESS state machine",
-			input: []*sfn.StateMachineListItem{
+			input: []sfntypes.StateMachineListItem{
 				{
 					Name:            aws.String("express-workflow"),
 					StateMachineArn: aws.String("arn:aws:states:us-west-2:123456789:stateMachine:express-workflow"),
-					Type:            aws.String("EXPRESS"),
+					Type:            sfntypes.StateMachineTypeExpress,
 					CreationDate:    func() *time.Time { t := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC); return &t }(),
 				},
 			},
@@ -75,9 +75,9 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple state machines",
-			input: []*sfn.StateMachineListItem{
-				{Name: aws.String("workflow-1"), Type: aws.String("STANDARD")},
-				{Name: aws.String("workflow-2"), Type: aws.String("EXPRESS")},
+			input: []sfntypes.StateMachineListItem{
+				{Name: aws.String("workflow-1"), Type: sfntypes.StateMachineTypeStandard},
+				{Name: aws.String("workflow-2"), Type: sfntypes.StateMachineTypeExpress},
 			},
 			expectedCount: 2,
 			checkResults: func(t *testing.T, results []types.ScanResult) {
@@ -91,7 +91,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*sfn.StateMachineListItem{},
+			input:         []sfntypes.StateMachineListItem{},
 			expectedCount: 0,
 		},
 		{
@@ -114,11 +114,11 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*sfn.StateMachineListItem{
+			input: []sfntypes.StateMachineListItem{
 				{
 					Name:            nil,
 					StateMachineArn: nil,
-					Type:            nil,
+					Type:            "",
 					CreationDate:    nil,
 				},
 			},

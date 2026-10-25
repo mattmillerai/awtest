@@ -3,36 +3,37 @@ package amplify
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/amplify"
+	amplifytypes "github.com/aws/aws-sdk-go-v2/service/amplify/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/amplify"
-	"time"
 )
 
 type AppWithBranches struct {
-	App      *amplify.App
-	Branches []*amplify.Branch
+	App      amplifytypes.App
+	Branches []amplifytypes.Branch
 	Region   string
 }
 
 var AmplifyCalls = []types.AWSService{
 	{
 		Name: "amplify:ListApps",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allAppsWithBranches []AppWithBranches
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := amplify.New(regionSess)
-				appsOutput, err := svc.ListAppsWithContext(ctx, &amplify.ListAppsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, amplify.NewFromConfig)
+				appsOutput, err := svc.ListApps(ctx, &amplify.ListAppsInput{})
 				if err != nil {
 					return nil, err
 				}
 
 				for _, app := range appsOutput.Apps {
-					branchesOutput, err := svc.ListBranchesWithContext(ctx, &amplify.ListBranchesInput{AppId: app.AppId})
+					branchesOutput, err := svc.ListBranches(ctx, &amplify.ListBranchesInput{AppId: app.AppId})
 					if err != nil {
 						return nil, err
 					}
@@ -65,7 +66,7 @@ var AmplifyCalls = []types.AWSService{
 			if appsWithBranches, ok := output.([]AppWithBranches); ok {
 				for _, appWithBranches := range appsWithBranches {
 					fmt.Println()
-					appName := *appWithBranches.App.Name
+					appName := aws.ToString(appWithBranches.App.Name)
 					utils.PrintResult(debug, "", "amplify:ListApps", fmt.Sprintf("Found Amplify App: %s", appName), nil)
 
 					results = append(results, types.ScanResult{
@@ -79,13 +80,14 @@ var AmplifyCalls = []types.AWSService{
 
 					if len(appWithBranches.Branches) > 0 {
 						for _, branch := range appWithBranches.Branches {
-							utils.PrintResult(debug, "", "amplify:ListBranches", fmt.Sprintf("Found Branch: %s (%s)", *branch.BranchName, appName), nil)
+							branchName := aws.ToString(branch.BranchName)
+							utils.PrintResult(debug, "", "amplify:ListBranches", fmt.Sprintf("Found Branch: %s (%s)", branchName, appName), nil)
 
 							results = append(results, types.ScanResult{
 								ServiceName:  "Amplify",
 								MethodName:   "amplify:ListApps",
 								ResourceType: "branch",
-								ResourceName: *branch.BranchName,
+								ResourceName: branchName,
 								Details:      map[string]interface{}{},
 								Timestamp:    time.Now(),
 							})

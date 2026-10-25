@@ -2,15 +2,15 @@ package certificatemanager
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/acm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	acmtypes "github.com/aws/aws-sdk-go-v2/service/acm/types"
 	"testing"
 )
 
 func TestProcess_ValidCertificates(t *testing.T) {
 	process := CertificateManagerCalls[0].Process
 
-	certs := []*acm.CertificateSummary{
+	certs := []acmtypes.CertificateSummary{
 		{
 			CertificateArn: aws.String("arn:aws:acm:us-east-1:123456789012:certificate/abc-123"),
 			DomainName:     aws.String("example.com"),
@@ -47,7 +47,7 @@ func TestProcess_ValidCertificates(t *testing.T) {
 func TestProcess_EmptyResults(t *testing.T) {
 	process := CertificateManagerCalls[0].Process
 
-	certs := []*acm.CertificateSummary{}
+	certs := []acmtypes.CertificateSummary{}
 	results := process(certs, nil, false)
 
 	if len(results) != 0 {
@@ -75,7 +75,7 @@ func TestProcess_AccessDenied(t *testing.T) {
 func TestProcess_NilFields(t *testing.T) {
 	process := CertificateManagerCalls[0].Process
 
-	certs := []*acm.CertificateSummary{
+	certs := []acmtypes.CertificateSummary{
 		{
 			CertificateArn: nil,
 			DomainName:     nil,

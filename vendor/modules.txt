@@ -47,8 +47,6 @@ github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restjson
 github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
-github.com/aws/aws-sdk-go/service/acm
-github.com/aws/aws-sdk-go/service/amplify
 github.com/aws/aws-sdk-go/service/apigateway
 github.com/aws/aws-sdk-go/service/athena
 github.com/aws/aws-sdk-go/service/backup
@@ -59,7 +57,6 @@ github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/codebuild
 github.com/aws/aws-sdk-go/service/codecommit
 github.com/aws/aws-sdk-go/service/codedeploy
-github.com/aws/aws-sdk-go/service/cognitoidentityprovider
 github.com/aws/aws-sdk-go/service/configservice
 github.com/aws/aws-sdk-go/service/directconnect
 github.com/aws/aws-sdk-go/service/dynamodb
@@ -91,10 +88,8 @@ github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sagemaker
 github.com/aws/aws-sdk-go/service/securityhub
-github.com/aws/aws-sdk-go/service/sfn
 github.com/aws/aws-sdk-go/service/sns
 github.com/aws/aws-sdk-go/service/sqs
-github.com/aws/aws-sdk-go/service/ssm
 github.com/aws/aws-sdk-go/service/sso
 github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/sts
@@ -162,6 +157,18 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
 github.com/aws/aws-sdk-go-v2/internal/v4a
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/crypto
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/v4
+# github.com/aws/aws-sdk-go-v2/service/acm v1.50.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/acm
+github.com/aws/aws-sdk-go-v2/service/acm/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/acm/schemas
+github.com/aws/aws-sdk-go-v2/service/acm/types
+# github.com/aws/aws-sdk-go-v2/service/amplify v1.49.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/amplify
+github.com/aws/aws-sdk-go-v2/service/amplify/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/amplify/schemas
+github.com/aws/aws-sdk-go-v2/service/amplify/types
 # github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/appsync
@@ -191,6 +198,14 @@ github.com/aws/aws-sdk-go-v2/service/cognitoidentity
 github.com/aws/aws-sdk-go-v2/service/cognitoidentity/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cognitoidentity/schemas
 github.com/aws/aws-sdk-go-v2/service/cognitoidentity/types
+# github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/document
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/internal/document
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas
+github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr
@@ -257,11 +272,23 @@ github.com/aws/aws-sdk-go-v2/service/secretsmanager/types
 github.com/aws/aws-sdk-go-v2/service/ses
 github.com/aws/aws-sdk-go-v2/service/ses/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/ses/types
+# github.com/aws/aws-sdk-go-v2/service/sfn v1.52.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/sfn
+github.com/aws/aws-sdk-go-v2/service/sfn/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/sfn/schemas
+github.com/aws/aws-sdk-go-v2/service/sfn/types
 # github.com/aws/aws-sdk-go-v2/service/signin v1.10.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/signin
 github.com/aws/aws-sdk-go-v2/service/signin/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/signin/types
+# github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/ssm
+github.com/aws/aws-sdk-go-v2/service/ssm/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/ssm/schemas
+github.com/aws/aws-sdk-go-v2/service/ssm/types
 # github.com/aws/aws-sdk-go-v2/service/sso v1.38.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/sso

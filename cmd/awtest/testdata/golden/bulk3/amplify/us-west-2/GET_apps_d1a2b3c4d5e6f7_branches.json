@@ -1,0 +1,1 @@
+{"branches":[{"branchArn":"arn:aws:amplify:us-west-2:123456789012:apps/d1a2b3c4d5e6f7/branches/main","branchName":"main","stage":"PRODUCTION","displayName":"main"},{"branchArn":"arn:aws:amplify:us-west-2:123456789012:apps/d1a2b3c4d5e6f7/branches/dev","branchName":"dev","stage":"DEVELOPMENT"}]}

@@ -3,28 +3,29 @@ package stepfunctions
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sfn"
+	sfntypes "github.com/aws/aws-sdk-go-v2/service/sfn/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sfn"
-	"time"
 )
 
 var StepFunctionsCalls = []types.AWSService{
 	{
 		Name: "states:ListStateMachines",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allStateMachines []*sfn.StateMachineListItem
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allStateMachines []sfntypes.StateMachineListItem
 			var lastErr error
 			anyRegionSucceeded := false
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := sfn.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, sfn.NewFromConfig)
 				input := &sfn.ListStateMachinesInput{}
 				regionFailed := false
 				for {
-					output, err := svc.ListStateMachinesWithContext(ctx, input)
+					output, err := svc.ListStateMachines(ctx, input)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -60,7 +61,7 @@ var StepFunctionsCalls = []types.AWSService{
 				}
 			}
 
-			stateMachines, ok := output.([]*sfn.StateMachineListItem)
+			stateMachines, ok := output.([]sfntypes.StateMachineListItem)
 			if !ok {
 				utils.HandleAWSError(debug, "states:ListStateMachines", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -72,20 +73,9 @@ var StepFunctionsCalls = []types.AWSService{
 			}
 
 			for _, sm := range stateMachines {
-				name := ""
-				if sm.Name != nil {
-					name = *sm.Name
-				}
-
-				arn := ""
-				if sm.StateMachineArn != nil {
-					arn = *sm.StateMachineArn
-				}
-
-				smType := ""
-				if sm.Type != nil {
-					smType = *sm.Type
-				}
+				name := aws.ToString(sm.Name)
+				arn := aws.ToString(sm.StateMachineArn)
+				smType := string(sm.Type)
 
 				creationDate := ""
 				if sm.CreationDate != nil {

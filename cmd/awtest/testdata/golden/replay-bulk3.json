@@ -1,0 +1,112 @@
+[
+  {
+    "details": {},
+    "methodName": "amplify:ListApps",
+    "resourceName": "demo-web-app",
+    "resourceType": "app",
+    "serviceName": "Amplify"
+  },
+  {
+    "details": {},
+    "methodName": "amplify:ListApps",
+    "resourceName": "main",
+    "resourceType": "branch",
+    "serviceName": "Amplify"
+  },
+  {
+    "details": {},
+    "methodName": "amplify:ListApps",
+    "resourceName": "dev",
+    "resourceType": "branch",
+    "serviceName": "Amplify"
+  },
+  {
+    "details": {},
+    "methodName": "amplify:ListApps",
+    "resourceName": "demo-docs-app",
+    "resourceType": "app",
+    "serviceName": "Amplify"
+  },
+  {
+    "details": {},
+    "methodName": "acm:ListCertificates",
+    "resourceName": "demo.example.com",
+    "resourceType": "certificate",
+    "serviceName": "CertificateManager"
+  },
+  {
+    "details": {},
+    "methodName": "acm:ListCertificates",
+    "resourceName": "",
+    "resourceType": "certificate",
+    "serviceName": "CertificateManager"
+  },
+  {
+    "details": {
+      "CreationDate": "2023-11-14 22:13:20",
+      "Id": "us-west-2_AbCdEfGhI",
+      "Status": "Enabled"
+    },
+    "methodName": "cognito-idp:ListUserPools",
+    "resourceName": "demo-user-pool",
+    "resourceType": "user-pool",
+    "serviceName": "CognitoUserPools"
+  },
+  {
+    "details": {
+      "CreationDate": "",
+      "Id": "us-west-2_JkLmNoPqR",
+      "Status": ""
+    },
+    "methodName": "cognito-idp:ListUserPools",
+    "resourceName": "demo-legacy-pool",
+    "resourceType": "user-pool",
+    "serviceName": "CognitoUserPools"
+  },
+  {
+    "details": {
+      "CreationDate": "2023-11-14 22:13:20",
+      "StateMachineArn": "arn:aws:states:us-west-2:123456789012:stateMachine:demo-order-workflow",
+      "Type": "STANDARD"
+    },
+    "methodName": "states:ListStateMachines",
+    "resourceName": "demo-order-workflow",
+    "resourceType": "state-machine",
+    "serviceName": "Step Functions"
+  },
+  {
+    "details": {
+      "CreationDate": "",
+      "StateMachineArn": "arn:aws:states:us-west-2:123456789012:stateMachine:demo-express-flow",
+      "Type": ""
+    },
+    "methodName": "states:ListStateMachines",
+    "resourceName": "demo-express-flow",
+    "resourceType": "state-machine",
+    "serviceName": "Step Functions"
+  },
+  {
+    "details": {
+      "Description": "Fictional database host",
+      "LastModifiedDate": "2023-11-14 22:13:20",
+      "Type": "String",
+      "Version": 3
+    },
+    "methodName": "ssm:DescribeParameters",
+    "resourceName": "/demo/app/db-host",
+    "resourceType": "parameter",
+    "serviceName": "Systems Manager"
+  },
+  {
+    "details": {
+      "Description": "",
+      "LastModifiedDate": "",
+      "Type": "",
+      "Version": 0
+    },
+    "methodName": "ssm:DescribeParameters",
+    "resourceName": "/demo/app/flag",
+    "resourceType": "parameter",
+    "serviceName": "Systems Manager"
+  }
+]

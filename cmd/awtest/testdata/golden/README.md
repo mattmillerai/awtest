@@ -61,6 +61,22 @@ resources, error text and, for the regional loops, the visited regions.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk2`
 green without regenerating it.
 
+## Bulk 3 golden (amplify, certificatemanager, stepfunctions, systemsmanager, cognitouserpools)
+
+`replay-bulk3.json` is the v1 baseline for the third bulk migration batch:
+`amplify:ListApps` (apps plus their branches), `acm:ListCertificates`,
+`states:ListStateMachines`, `ssm:DescribeParameters` and
+`cognito-idp:ListUserPools`. It is produced from the fictional fixtures in
+`bulk3/` (fixture dir `testdata/golden/bulk3`) with
+`awtest -replay <abs>/testdata/golden/bulk3 -services amplify,certificatemanager,stepfunctions,systemsmanager,cognitouserpools -quiet -format json`.
+The golden pins resource names and types and, for stepfunctions,
+systemsmanager and cognitouserpools, their populated and sparse `details`.
+The functional tests in each service package additionally cover pagination,
+swallowed per-region errors, error text and the visited regions.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk3`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

@@ -3,28 +3,29 @@ package systemsmanager
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	ssmtypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
-	"time"
 )
 
 var SystemsManagerCalls = []types.AWSService{
 	{
 		Name: "ssm:DescribeParameters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allParameters []*ssm.ParameterMetadata
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allParameters []ssmtypes.ParameterMetadata
 			var lastErr error
 			anyRegionSucceeded := false
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := ssm.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, ssm.NewFromConfig)
 				input := &ssm.DescribeParametersInput{}
 				regionFailed := false
 				for {
-					output, err := svc.DescribeParametersWithContext(ctx, input)
+					output, err := svc.DescribeParameters(ctx, input)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -60,7 +61,7 @@ var SystemsManagerCalls = []types.AWSService{
 				}
 			}
 
-			parameters, ok := output.([]*ssm.ParameterMetadata)
+			parameters, ok := output.([]ssmtypes.ParameterMetadata)
 			if !ok {
 				utils.HandleAWSError(debug, "ssm:DescribeParameters", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -72,30 +73,16 @@ var SystemsManagerCalls = []types.AWSService{
 			}
 
 			for _, param := range parameters {
-				name := ""
-				if param.Name != nil {
-					name = *param.Name
-				}
-
-				paramType := ""
-				if param.Type != nil {
-					paramType = *param.Type
-				}
-
-				description := ""
-				if param.Description != nil {
-					description = *param.Description
-				}
+				name := aws.ToString(param.Name)
+				paramType := string(param.Type)
+				description := aws.ToString(param.Description)
 
 				lastModified := ""
 				if param.LastModifiedDate != nil {
 					lastModified = param.LastModifiedDate.Format("2006-01-02 15:04:05")
 				}
 
-				var version int64
-				if param.Version != nil {
-					version = *param.Version
-				}
+				version := param.Version
 
 				results = append(results, types.ScanResult{
 					ServiceName:  "Systems Manager",

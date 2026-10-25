@@ -2,9 +2,9 @@ package systemsmanager
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ssmtypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ssm"
 	"testing"
 	"time"
 )
@@ -22,13 +22,13 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "string parameter with all fields",
-			input: []*ssm.ParameterMetadata{
+			input: []ssmtypes.ParameterMetadata{
 				{
 					Name:             aws.String("/app/config/db-host"),
-					Type:             aws.String("String"),
+					Type:             ssmtypes.ParameterTypeString,
 					Description:      aws.String("Database hostname"),
 					LastModifiedDate: aws.Time(time.Date(2025, 6, 15, 10, 30, 0, 0, time.UTC)),
-					Version:          aws.Int64(3),
+					Version:          3,
 				},
 			},
 			expectedCount: 1,
@@ -62,11 +62,11 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "secure string parameter",
-			input: []*ssm.ParameterMetadata{
+			input: []ssmtypes.ParameterMetadata{
 				{
 					Name:    aws.String("/app/secrets/api-key"),
-					Type:    aws.String("SecureString"),
-					Version: aws.Int64(1),
+					Type:    ssmtypes.ParameterTypeSecureString,
+					Version: 1,
 				},
 			},
 			expectedCount: 1,
@@ -82,9 +82,9 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple parameters",
-			input: []*ssm.ParameterMetadata{
-				{Name: aws.String("/param-1"), Type: aws.String("String")},
-				{Name: aws.String("/param-2"), Type: aws.String("SecureString")},
+			input: []ssmtypes.ParameterMetadata{
+				{Name: aws.String("/param-1"), Type: ssmtypes.ParameterTypeString},
+				{Name: aws.String("/param-2"), Type: ssmtypes.ParameterTypeSecureString},
 			},
 			expectedCount: 2,
 			checkResults: func(t *testing.T, results []types.ScanResult) {
@@ -98,7 +98,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*ssm.ParameterMetadata{},
+			input:         []ssmtypes.ParameterMetadata{},
 			expectedCount: 0,
 		},
 		{
@@ -121,13 +121,13 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*ssm.ParameterMetadata{
+			input: []ssmtypes.ParameterMetadata{
 				{
 					Name:             nil,
-					Type:             nil,
+					Type:             "",
 					Description:      nil,
 					LastModifiedDate: nil,
-					Version:          nil,
+					Version:          0,
 				},
 			},
 			expectedCount: 1,

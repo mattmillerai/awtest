@@ -76,6 +76,12 @@
 //     migrated as well: appsync (ListGraphqlApis), secretsmanager
 //     (ListSecrets), ses (ListIdentities) and rds (DescribeDBInstances), all
 //     non-paginated regional loops, and cognitoidentity (ListIdentityPools).
+//     Bulk 3 is migrated too: amplify (amplify:ListApps with ListBranches
+//     follow-ups), certificatemanager (acm:ListCertificates) and
+//     cognitouserpools (cognito-idp:ListUserPools), non-paginated regional
+//     loops, plus stepfunctions (states:ListStateMachines) and systemsmanager
+//     (ssm:DescribeParameters), regional loops with manual NextToken
+//     pagination whose failing regions are skipped.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

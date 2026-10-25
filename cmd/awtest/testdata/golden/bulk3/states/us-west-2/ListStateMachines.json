@@ -1,0 +1,1 @@
+{"stateMachines":[{"name":"demo-order-workflow","stateMachineArn":"arn:aws:states:us-west-2:123456789012:stateMachine:demo-order-workflow","type":"STANDARD","creationDate":1700000000},{"name":"demo-express-flow","stateMachineArn":"arn:aws:states:us-west-2:123456789012:stateMachine:demo-express-flow"}]}

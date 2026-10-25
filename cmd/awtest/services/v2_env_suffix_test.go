@@ -4,11 +4,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/service/acm"
+	"github.com/aws/aws-sdk-go-v2/service/amplify"
 	"github.com/aws/aws-sdk-go-v2/service/appsync"
 	"github.com/aws/aws-sdk-go-v2/service/batch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
@@ -18,6 +21,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
+	"github.com/aws/aws-sdk-go-v2/service/sfn"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
@@ -60,6 +65,12 @@ var v2EnvSuffix = map[string][]string{
 	"ses":             {"SES"},
 	"rds":             {"RDS"},
 	"cognitoidentity": {"COGNITO_IDENTITY"},
+
+	"amplify":     {"AMPLIFY"},
+	"acm":         {"ACM"},
+	"states":      {"SFN"},
+	"ssm":         {"SSM"},
+	"cognito-idp": {"COGNITO_IDENTITY_PROVIDER"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -81,6 +92,12 @@ var v2ServiceIDs = map[string][]string{
 	"ses":             {ses.ServiceID},
 	"rds":             {rds.ServiceID},
 	"cognitoidentity": {cognitoidentity.ServiceID},
+
+	"amplify":     {amplify.ServiceID},
+	"acm":         {acm.ServiceID},
+	"states":      {sfn.ServiceID},
+	"ssm":         {ssm.ServiceID},
+	"cognito-idp": {cognitoidentityprovider.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>
