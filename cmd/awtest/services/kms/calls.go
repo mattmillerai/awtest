@@ -3,23 +3,24 @@ package kms
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
+	kmstypes "github.com/aws/aws-sdk-go-v2/service/kms/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kms"
-	"time"
 )
 
 var KMSCalls = []types.AWSService{
 	{
 		Name: "kms:ListKeys",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allKeys []*kms.KeyListEntry
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allKeys []kmstypes.KeyListEntry
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := kms.New(sess)
-				output, err := svc.ListKeysWithContext(ctx, &kms.ListKeysInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, kms.NewFromConfig)
+				output, err := svc.ListKeys(ctx, &kms.ListKeysInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,12 +43,9 @@ var KMSCalls = []types.AWSService{
 				}
 			}
 
-			if keys, ok := output.([]*kms.KeyListEntry); ok {
+			if keys, ok := output.([]kmstypes.KeyListEntry); ok {
 				for _, key := range keys {
-					keyId := ""
-					if key.KeyId != nil {
-						keyId = *key.KeyId
-					}
+					keyId := aws.ToString(key.KeyId)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "KMS",

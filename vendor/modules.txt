@@ -86,7 +86,6 @@ github.com/aws/aws-sdk-go/service/ivs
 github.com/aws/aws-sdk-go/service/ivschat
 github.com/aws/aws-sdk-go/service/ivsrealtime
 github.com/aws/aws-sdk-go/service/kinesis
-github.com/aws/aws-sdk-go/service/kms
 github.com/aws/aws-sdk-go/service/lambda
 github.com/aws/aws-sdk-go/service/macie2
 github.com/aws/aws-sdk-go/service/mediaconvert
@@ -178,6 +177,11 @@ github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding
 # github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.7
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url
+# github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/kms
+github.com/aws/aws-sdk-go-v2/service/kms/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/kms/types
 # github.com/aws/aws-sdk-go-v2/service/signin v1.10.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/signin
