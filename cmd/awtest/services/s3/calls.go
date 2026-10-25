@@ -3,23 +3,24 @@ package s3
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"time"
 )
 
 var S3Calls = []types.AWSService{
 	{
 		Name: "s3:ListBuckets",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := s3.New(sess)
-			output, err := svc.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", s3.NewFromConfig)
+			output, err := svc.ListBuckets(ctx, &s3.ListBucketsInput{})
 			return map[string]interface{}{
 				"output": output,
-				"sess":   sess,
+				"cfg":    cfg,
 				"ctx":    ctx,
 			}, err
 		},
@@ -27,6 +28,7 @@ var S3Calls = []types.AWSService{
 			var results []types.ScanResult
 
 			if err != nil {
+				err = awsv2.Wrap(err)
 				utils.HandleAWSError(debug, "s3:ListBuckets", err)
 				return []types.ScanResult{
 					{
@@ -40,16 +42,17 @@ var S3Calls = []types.AWSService{
 
 			if outputMap, ok := output.(map[string]interface{}); ok {
 				s3Output, _ := outputMap["output"].(*s3.ListBucketsOutput)
-				sess, _ := outputMap["sess"].(*session.Session)
+				cfg, _ := outputMap["cfg"].(aws.Config)
 				ctx, _ := outputMap["ctx"].(context.Context)
 				if ctx == nil {
 					ctx = context.Background()
 				}
+				if s3Output == nil {
+					return results
+				}
+				defaultSvc := awsv2.NewRegionalClient(cfg, "", s3.NewFromConfig)
 				for _, bucket := range s3Output.Buckets {
-					bucketName := ""
-					if bucket.Name != nil {
-						bucketName = *bucket.Name
-					}
+					bucketName := aws.ToString(bucket.Name)
 
 					// Add bucket result
 					results = append(results, types.ScanResult{
@@ -65,32 +68,37 @@ var S3Calls = []types.AWSService{
 					utils.PrintResult(debug, "", "s3:ListBuckets", fmt.Sprintf("S3 bucket: %s", utils.ColorizeItem(bucketName)), nil)
 
 					// Get the region of the bucket
-					svc := s3.New(sess)
-					locationOutput, err := svc.GetBucketLocationWithContext(ctx, &s3.GetBucketLocationInput{
+					locationOutput, err := defaultSvc.GetBucketLocation(ctx, &s3.GetBucketLocationInput{
 						Bucket: aws.String(bucketName),
 					})
 
 					if err == nil {
 						// This is the correct region. Perform ListObjects here.
-						region := locationOutput.LocationConstraint
-						if region == nil {
-							region = aws.String("us-east-1") // default to us-east-1 if the bucket region is not specified
+						region := string(locationOutput.LocationConstraint)
+						if region == "" {
+							region = "us-east-1" // default to us-east-1 if the bucket region is not specified
 						}
 
-						sessWithRegion := sess.Copy(&aws.Config{Region: region})
-						svc := s3.New(sessWithRegion)
-						listObjInput := &s3.ListObjectsV2Input{Bucket: bucket.Name}
+						svc := awsv2.NewRegionalClient(cfg, region, s3.NewFromConfig)
 
 						// Counter for the objects
 						objCount := 0
-						// Function to handle each page of results
-						err = svc.ListObjectsV2PagesWithContext(ctx, listObjInput, func(page *s3.ListObjectsV2Output, lastPage bool) bool {
+						paginator := s3.NewListObjectsV2Paginator(svc, &s3.ListObjectsV2Input{Bucket: bucket.Name})
+						for paginator.HasMorePages() {
+							var page *s3.ListObjectsV2Output
+							page, err = paginator.NextPage(ctx)
+							if err != nil {
+								break
+							}
 							objCount += len(page.Contents)
-							// Continue fetching pages only if we have less than 10000 objects and this is not the last page
-							return objCount < 10000 && !lastPage
-						})
+							// Continue fetching pages only if we have less than 10000 objects (HasMorePages is false on the last page)
+							if objCount >= 10000 {
+								break
+							}
+						}
 
 						if err != nil {
+							err = awsv2.Wrap(err)
 							utils.HandleAWSError(debug, "s3:ListObjects", err)
 							results = append(results, types.ScanResult{
 								ServiceName:  "S3",
@@ -115,7 +123,7 @@ var S3Calls = []types.AWSService{
 								ResourceName: bucketName,
 								Details: map[string]interface{}{
 									"object_count": objCount,
-									"region":       *region,
+									"region":       region,
 								},
 								Timestamp: time.Now(),
 							})

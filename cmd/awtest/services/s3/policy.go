@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 )
 
 // maxBuckets caps the buckets examined by s3:GetBucketPolicy.
@@ -31,10 +31,7 @@ func NormalizeBucketRegion(loc *string) string {
 }
 
 func errCode(err error) string {
-	if ae, ok := err.(awserr.Error); ok {
-		return ae.Code()
-	}
-	return ""
+	return awsv2.ErrorCode(err)
 }
 
 // isDeniedCode reports whether err is an access-denied style S3 error.
@@ -135,11 +132,11 @@ func PolicyFacts(doc string) (count int, findings []string, err error) {
 }
 
 // ACLFacts converts ACL grants into detail maps and factual findings.
-func ACLFacts(grants []*s3.Grant) ([]map[string]interface{}, []string) {
+func ACLFacts(grants []s3types.Grant) ([]map[string]interface{}, []string) {
 	out := []map[string]interface{}{}
 	findings := []string{}
 	for _, g := range grants {
-		if g == nil || g.Grantee == nil {
+		if g.Grantee == nil {
 			continue
 		}
 		gr := g.Grantee
@@ -152,14 +149,8 @@ func ACLFacts(grants []*s3.Grant) ([]map[string]interface{}, []string) {
 		case gr.EmailAddress != nil:
 			grantee = *gr.EmailAddress
 		}
-		perm := ""
-		if g.Permission != nil {
-			perm = *g.Permission
-		}
-		gtype := ""
-		if gr.Type != nil {
-			gtype = *gr.Type
-		}
+		perm := string(g.Permission)
+		gtype := string(gr.Type)
 		out = append(out, map[string]interface{}{"grantee_type": gtype, "grantee": grantee, "permission": perm})
 		switch grantee {
 		case allUsersURI:

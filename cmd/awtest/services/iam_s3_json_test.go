@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/diff"
 	"github.com/mattmillerai/awtest/cmd/awtest/formatters"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/iam"
@@ -27,9 +27,9 @@ func TestIAMS3DetailsSerializeAndDiffParse(t *testing.T) {
 		t.Fatal(err)
 	}
 	count, findings, _ := s3svc.PolicyFacts(`{"Statement":[{"Effect":"Allow","Principal":"*"}]}`)
-	grants, aclFindings := s3svc.ACLFacts([]*s3.Grant{{
-		Grantee:    &s3.Grantee{Type: aws.String("Group"), URI: aws.String("http://acs.amazonaws.com/groups/global/AllUsers")},
-		Permission: aws.String("READ"),
+	grants, aclFindings := s3svc.ACLFacts([]s3types.Grant{{
+		Grantee:    &s3types.Grantee{Type: s3types.TypeGroup, URI: aws.String("http://acs.amazonaws.com/groups/global/AllUsers")},
+		Permission: s3types.PermissionRead,
 	}})
 	now := time.Now()
 	results := []types.ScanResult{

@@ -2,7 +2,7 @@
 // migration.
 //
 // main wires this package in (see "Migration status" below) and the pilot
-// services, sts, kms and ecr, have been migrated. It holds the configuration, retry, endpoint and
+// services, sts, kms, ecr and s3, have been migrated. It holds the configuration, retry, endpoint and
 // error-normalisation behaviour that migrated services rely on.
 //
 // Rules for future callers:
@@ -64,7 +64,12 @@
 //     carried in its output), kms (kms:ListKeys, a regional loop over
 //     types.RegionsFor) and ecr (ecr:DescribeRepositories, ecr:ListImages and
 //     ecr:GetRepositoryPolicy, regional loops with manual NextToken
-//     pagination). Every other service is still v1.
+//     pagination) and s3 (s3:ListBuckets, whose Process also makes the
+//     GetBucketLocation and region-pinned ListObjectsV2 follow-ups, and
+//     s3:GetBucketPolicy, whose Process runs four read-only checks per bucket
+//     in the bucket's own region; both carry the v2 config in their output
+//     and build the per-bucket-region clients with NewRegionalClient). Every
+//     other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
 //     from the context and returns the error normalised with Wrap

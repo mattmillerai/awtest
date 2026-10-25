@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
@@ -21,17 +22,18 @@ func init() {
 
 var getBucketPolicyCall = types.AWSService{
 	Name: "s3:GetBucketPolicy",
-	Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-		svc := s3.New(sess)
-		output, err := svc.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
+	CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+		svc := awsv2.NewRegionalClient(cfg, "", s3.NewFromConfig)
+		output, err := svc.ListBuckets(ctx, &s3.ListBucketsInput{})
 		return map[string]interface{}{
 			"output": output,
-			"sess":   sess,
+			"cfg":    cfg,
 			"ctx":    ctx,
 		}, err
 	},
 	Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 		if err != nil {
+			err = awsv2.Wrap(err)
 			utils.HandleAWSError(debug, "s3:GetBucketPolicy", err)
 			return []types.ScanResult{{ServiceName: "S3", MethodName: "s3:GetBucketPolicy", Error: err, Timestamp: time.Now()}}
 		}
@@ -40,12 +42,12 @@ var getBucketPolicyCall = types.AWSService{
 			return nil
 		}
 		lb, _ := m["output"].(*s3.ListBucketsOutput)
-		sess, _ := m["sess"].(*session.Session)
+		cfg, hasCfg := m["cfg"].(aws.Config)
 		ctx, _ := m["ctx"].(context.Context)
 		if ctx == nil {
 			ctx = context.Background()
 		}
-		if lb == nil || sess == nil {
+		if lb == nil || !hasCfg {
 			return nil
 		}
 
@@ -64,12 +66,12 @@ var getBucketPolicyCall = types.AWSService{
 			utils.PrintResult(debug, "", "s3:GetBucketPolicy", fmt.Sprintf("S3 buckets: %d found, limited to the first %d", len(lb.Buckets), maxBuckets), nil)
 		}
 
-		defaultSvc := s3.New(sess)
+		defaultSvc := awsv2.NewRegionalClient(cfg, "", s3.NewFromConfig)
 		for _, b := range buckets {
 			if b.Name == nil {
 				continue
 			}
-			results = append(results, scanBucket(ctx, debug, sess, defaultSvc, *b.Name)...)
+			results = append(results, scanBucket(ctx, debug, cfg, defaultSvc, *b.Name)...)
 		}
 		return results
 	},
@@ -77,12 +79,13 @@ var getBucketPolicyCall = types.AWSService{
 }
 
 // scanBucket resolves the bucket region and runs the four read-only checks.
-func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultSvc *s3.S3, bucket string) []types.ScanResult {
+func scanBucket(ctx context.Context, debug bool, cfg aws.Config, defaultSvc *s3.Client, bucket string) []types.ScanResult {
 	region := "unknown"
 	svc := defaultSvc
-	if loc, err := defaultSvc.GetBucketLocationWithContext(ctx, &s3.GetBucketLocationInput{Bucket: aws.String(bucket)}); err == nil {
-		region = NormalizeBucketRegion(loc.LocationConstraint)
-		svc = s3.New(sess.Copy(&aws.Config{Region: aws.String(region)}))
+	if loc, err := defaultSvc.GetBucketLocation(ctx, &s3.GetBucketLocationInput{Bucket: aws.String(bucket)}); err == nil {
+		constraint := string(loc.LocationConstraint)
+		region = NormalizeBucketRegion(&constraint)
+		svc = awsv2.NewRegionalClient(cfg, region, s3.NewFromConfig)
 	}
 
 	var results []types.ScanResult
@@ -106,6 +109,7 @@ func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultS
 	}
 	// fail handles an error that is neither denied nor a "none" status.
 	fail := func(method string, err error) {
+		err = awsv2.Wrap(err)
 		utils.HandleAWSError(debug, method, err)
 		results = append(results, types.ScanResult{
 			ServiceName:  "S3",
@@ -119,14 +123,14 @@ func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultS
 	}
 
 	// a. policy
-	if out, err := svc.GetBucketPolicyWithContext(ctx, &s3.GetBucketPolicyInput{Bucket: aws.String(bucket)}); err != nil {
+	if out, err := svc.GetBucketPolicy(ctx, &s3.GetBucketPolicyInput{Bucket: aws.String(bucket)}); err != nil {
 		if st, ok := statusFromError(err, codeNoPolicy, "none"); ok {
 			record("s3:GetBucketPolicy", "policy", st, nil, nil)
 		} else {
 			fail("s3:GetBucketPolicy", err)
 		}
 	} else {
-		doc := aws.StringValue(out.Policy)
+		doc := aws.ToString(out.Policy)
 		details := map[string]interface{}{"policy": doc}
 		count, findings, perr := PolicyFacts(doc)
 		details["statement_count"] = count
@@ -138,7 +142,7 @@ func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultS
 	}
 
 	// b. policy status
-	if out, err := svc.GetBucketPolicyStatusWithContext(ctx, &s3.GetBucketPolicyStatusInput{Bucket: aws.String(bucket)}); err != nil {
+	if out, err := svc.GetBucketPolicyStatus(ctx, &s3.GetBucketPolicyStatusInput{Bucket: aws.String(bucket)}); err != nil {
 		if st, ok := statusFromError(err, codeNoPolicy, "no_policy"); ok {
 			record("s3:GetBucketPolicyStatus", "policy status", st, nil, nil)
 		} else {
@@ -146,14 +150,14 @@ func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultS
 		}
 	} else {
 		st := "not_public"
-		if out.PolicyStatus != nil && aws.BoolValue(out.PolicyStatus.IsPublic) {
+		if out.PolicyStatus != nil && aws.ToBool(out.PolicyStatus.IsPublic) {
 			st = "public"
 		}
 		record("s3:GetBucketPolicyStatus", "policy status", st, nil, nil)
 	}
 
 	// c. ACL
-	if out, err := svc.GetBucketAclWithContext(ctx, &s3.GetBucketAclInput{Bucket: aws.String(bucket)}); err != nil {
+	if out, err := svc.GetBucketAcl(ctx, &s3.GetBucketAclInput{Bucket: aws.String(bucket)}); err != nil {
 		if st, ok := statusFromError(err, "", ""); ok {
 			record("s3:GetBucketAcl", "acl", st, nil, nil)
 		} else {
@@ -163,29 +167,29 @@ func scanBucket(ctx context.Context, debug bool, sess *session.Session, defaultS
 		grants, findings := ACLFacts(out.Grants)
 		details := map[string]interface{}{"grants": grants, "findings": findings}
 		if out.Owner != nil {
-			details["owner_id"] = aws.StringValue(out.Owner.ID)
-			details["owner_display_name"] = aws.StringValue(out.Owner.DisplayName)
+			details["owner_id"] = aws.ToString(out.Owner.ID)
+			details["owner_display_name"] = aws.ToString(out.Owner.DisplayName)
 		}
 		record("s3:GetBucketAcl", "acl", "ok", details, nil)
 	}
 
 	// d. public access block
-	if out, err := svc.GetPublicAccessBlockWithContext(ctx, &s3.GetPublicAccessBlockInput{Bucket: aws.String(bucket)}); err != nil {
+	if out, err := svc.GetPublicAccessBlock(ctx, &s3.GetPublicAccessBlockInput{Bucket: aws.String(bucket)}); err != nil {
 		if st, ok := statusFromError(err, codeNoPublicBlck, "none"); ok {
 			record("s3:GetPublicAccessBlock", "public access block", st, nil, nil)
 		} else {
 			fail("s3:GetPublicAccessBlock", err)
 		}
 	} else {
-		cfg := out.PublicAccessBlockConfiguration
-		if cfg == nil {
-			cfg = &s3.PublicAccessBlockConfiguration{}
+		pab := out.PublicAccessBlockConfiguration
+		if pab == nil {
+			pab = &s3types.PublicAccessBlockConfiguration{}
 		}
 		record("s3:GetPublicAccessBlock", "public access block", "configured", map[string]interface{}{
-			"block_public_acls":       aws.BoolValue(cfg.BlockPublicAcls),
-			"ignore_public_acls":      aws.BoolValue(cfg.IgnorePublicAcls),
-			"block_public_policy":     aws.BoolValue(cfg.BlockPublicPolicy),
-			"restrict_public_buckets": aws.BoolValue(cfg.RestrictPublicBuckets),
+			"block_public_acls":       aws.ToBool(pab.BlockPublicAcls),
+			"ignore_public_acls":      aws.ToBool(pab.IgnorePublicAcls),
+			"block_public_policy":     aws.ToBool(pab.BlockPublicPolicy),
+			"restrict_public_buckets": aws.ToBool(pab.RestrictPublicBuckets),
 		}, nil)
 	}
 	return results
