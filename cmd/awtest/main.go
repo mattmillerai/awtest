@@ -9,15 +9,17 @@ import (
 	"strings"
 	"time"
 
+	awsv2cfg "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/logrusorgru/aurora"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/formatters"
 	"github.com/mattmillerai/awtest/cmd/awtest/replay"
 	"github.com/mattmillerai/awtest/cmd/awtest/services"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/logrusorgru/aurora"
 )
 
 var (
@@ -230,6 +232,26 @@ func main() {
 	}
 
 	utils.ApplyEndpoint(sess, endpoint)
+
+	// The aws-sdk-go-v2 config mirrors the v1 session above (same credential
+	// paths, region and --endpoint-url). It is carried in the scan context for
+	// services implementing CallV2; v1 services ignore it.
+	var cfgV2 awsv2cfg.Config
+	if replaySrv != nil {
+		cfgV2, err = replay.NewConfig(replaySrv, *awsRegion)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: creating replay config: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		cfgV2, err = awsv2.LoadConfig(context.Background(),
+			v2Options(*awsRegion, endpoint, *awsAccessKeyID, *awsSecretAccessKey, *awsSessionToken, awsProfile, *quiet, *debug))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to create AWS SDK v2 config: ", err)
+			os.Exit(1)
+		}
+	}
+
 	endpointNotice := ""
 	if endpoint != "" {
 		endpointNotice = fmt.Sprintf("Using custom endpoint: %s (results do not come from real AWS)", endpoint)
@@ -297,6 +319,8 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
+
+	ctx = types.WithAWSConfig(ctx, cfgV2)
 
 	var regionStats *regionFailures
 	if *allRegions {
@@ -368,6 +392,20 @@ func main() {
 	if !*quiet {
 		printUpdateNotice(updateCh)
 	}
+}
+
+// v2Options maps the command-line inputs to awsv2.Options with the same
+// credential rules as the v1 session in main: static keys when both are given
+// (the session token only matters for ASIA keys, which awsv2 enforces), the
+// named profile otherwise, and the default chain when neither is set.
+func v2Options(region, endpoint, keyID, secret, token, profile string, quiet, debug bool) awsv2.Options {
+	opts := awsv2.Options{Region: region, Endpoint: endpoint, Quiet: quiet, Debug: debug}
+	if keyID != "" && secret != "" {
+		opts.AccessKeyID, opts.SecretAccessKey, opts.SessionToken = keyID, secret, token
+	} else {
+		opts.Profile = profile
+	}
+	return opts
 }
 
 // printRegionFailures prints the one-line -all-regions failure summary and,

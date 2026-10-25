@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 // ErrorCategory classifies AWS errors for retry/skip/report decisions.
@@ -26,8 +26,10 @@ func classifyAWSError(err error) ErrorCategory {
 		return ErrorNone
 	}
 
-	if awsErr, ok := err.(awserr.Error); ok {
-		switch awsErr.Code() {
+	// Both SDKs: an aws-sdk-go v1 awserr.Error or an aws-sdk-go-v2 API error.
+	// The throttle codes must stay in sync with awsv2.AwtestThrottleCodes.
+	if code, _, ok := utils.AWSErrorInfo(err); ok {
+		switch code {
 		case "RequestLimitExceeded", "Throttling", "TooManyRequestsException":
 			return ErrorThrottle
 		case "AccessDeniedException", "AccessDenied", "UnauthorizedOperation", "AuthorizationError", "UnauthorizedAccess":
@@ -56,7 +58,7 @@ func safeScan(ctx context.Context, service types.AWSService, sess *session.Sessi
 		}
 	}()
 
-	output, err := service.Call(ctx, sess)
+	output, err := service.Invoke(ctx, sess)
 	serviceResults := service.Process(output, err, debug)
 
 	if err != nil {

@@ -2,8 +2,6 @@ package utils
 
 import (
 	"sync"
-
-	"github.com/aws/aws-sdk-go/aws/awserr"
 )
 
 var (
@@ -42,8 +40,8 @@ func suppressRepeatedError(debug bool, callName string, err error) bool {
 		return false
 	}
 	code := "error"
-	if awsErr, ok := err.(awserr.Error); ok {
-		code = awsErr.Code()
+	if c, _, ok := AWSErrorInfo(err); ok {
+		code = c
 	}
 	key := callName + "|" + code
 	if _, seen := dedupeSeen[key]; seen {

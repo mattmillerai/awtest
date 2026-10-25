@@ -1,10 +1,9 @@
 // Package awsv2 holds the aws-sdk-go v2 scaffolding for the planned v1 -> v2
 // migration.
 //
-// Nothing in cmd/awtest imports this package yet and no service call has been
-// migrated. It exists so the configuration, retry, endpoint and
-// error-normalisation behaviour can be compiled and tested in isolation before
-// services move over.
+// main wires this package in (see "Migration status" below) but no service
+// call has been migrated yet. It holds the configuration, retry, endpoint and
+// error-normalisation behaviour that migrated services rely on.
 //
 // Rules for future callers:
 //
@@ -52,6 +51,35 @@
 // the credential chain and so never reaches it; the resolver is cleared from
 // the returned config. The result is that the chain talks either to the real
 // AWS STS endpoint or only to the explicit endpoint.
+//
+// # Migration status
+//
+// aws-sdk-go v1 and v2 coexist while services are migrated one at a time:
+//
+//   - types.AWSService has two mutually exclusive implementations: Call (v1,
+//     takes a *session.Session) and CallV2 (v2, takes an aws.Config). Exactly
+//     one is set. Every service is still v1 today.
+//   - Callers never invoke either field directly; they use
+//     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
+//     from the context and returns the error normalised with Wrap
+//     ("<code>: <message>"); for a v1 service it calls Call unchanged. A v2
+//     service without a config in the context gets an error, not a panic.
+//   - main builds the v2 aws.Config next to the v1 session with LoadConfig
+//     (same region, credential paths and validated --endpoint-url; replay
+//     mode uses replay.NewConfig, whose Options.Transport confines requests to
+//     the replay server) and derives the scan context with
+//     types.WithAWSConfig, so every scan path (worker pool, all-regions,
+//     safeScan, scanRegion) carries it.
+//   - Error handling shared by both SDKs (classifyAWSError, failureDetail,
+//     utils.HandleAWSError) reads codes through utils.AWSErrorInfo, which
+//     accepts a v1 awserr.Error or a v2 API error (ErrorCode/ErrorMessage see
+//     through *Error). A test cross-checks that classifyAWSError's throttle
+//     codes equal AwtestThrottleCodes.
+//   - discoverRegions (-all-regions) still uses a v1 ec2 client and the v1
+//     session; it has not been migrated.
+//   - The dynamic guards in services and replay tests run every service
+//     through Invoke with both a v1 session and a v2 config built the guarded
+//     way, so a migrated service is covered automatically.
 //
 // # Residual risk (out of scope)
 //

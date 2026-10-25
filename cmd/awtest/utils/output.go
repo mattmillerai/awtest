@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/logrusorgru/aurora"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"strings"
 )
 
@@ -107,11 +106,11 @@ func PrintAccessGranted(debug bool, serviceName, resource string, additionalInfo
 func HandleAWSError(debug bool, callName string, err error) error {
 	if Quiet {
 		// Still detect invalid key errors even in quiet mode
-		if awsErr, ok := err.(awserr.Error); ok {
-			if awsErr.Code() == types.InvalidAccessKeyId || awsErr.Code() == types.InvalidClientTokenId {
-				prettyMsg, exists := types.AwsErrorMessages[awsErr.Code()]
+		if code, msg, ok := AWSErrorInfo(err); ok {
+			if code == types.InvalidAccessKeyId || code == types.InvalidClientTokenId {
+				prettyMsg, exists := types.AwsErrorMessages[code]
 				if !exists {
-					prettyMsg = awsErr.Message()
+					prettyMsg = msg
 				}
 				return &types.InvalidKeyError{Message: prettyMsg}
 			}
@@ -124,20 +123,20 @@ func HandleAWSError(debug bool, callName string, err error) error {
 			PrintResult(debug, "", callName, result, err)
 		}
 	}
-	if awsErr, ok := err.(awserr.Error); ok {
-		prettyMsg, exists := types.AwsErrorMessages[awsErr.Code()]
+	if code, msg, ok := AWSErrorInfo(err); ok {
+		prettyMsg, exists := types.AwsErrorMessages[code]
 		if !exists {
-			prettyMsg = awsErr.Message()
+			prettyMsg = msg
 		}
 
-		if awsErr.Code() == "UnauthorizedOperation" ||
-			awsErr.Code() == "AccessDenied" ||
-			awsErr.Code() == "AccessDeniedException" ||
-			awsErr.Code() == "AuthorizationError" {
+		if code == "UnauthorizedOperation" ||
+			code == "AccessDenied" ||
+			code == "AccessDeniedException" ||
+			code == "AuthorizationError" {
 			if !debug {
 				prettyMsg = "Access denied to this service."
 			}
-		} else if awsErr.Code() == types.InvalidAccessKeyId || awsErr.Code() == types.InvalidClientTokenId {
+		} else if code == types.InvalidAccessKeyId || code == types.InvalidClientTokenId {
 			emit(fmt.Sprintf("Error: %s", prettyMsg))
 			return &types.InvalidKeyError{Message: prettyMsg}
 		}

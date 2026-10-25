@@ -8,10 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 const (
@@ -196,7 +197,7 @@ func callRegionOnce(ctx context.Context, service types.AWSService, sess *session
 			results, err = nil, errRegionPanic
 		}
 	}()
-	output, err := service.Call(ctx, sess)
+	output, err := service.Invoke(ctx, sess)
 	if err != nil {
 		return nil, err
 	}
@@ -207,6 +208,9 @@ func failureDetail(err error) string {
 	var awsErr awserr.Error
 	if errors.As(err, &awsErr) {
 		return awsErr.Code()
+	}
+	if code := awsv2.ErrorCode(err); code != "" {
+		return code
 	}
 	return fmt.Sprint(err)
 }

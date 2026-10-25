@@ -144,8 +144,14 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 		allowed[r] = true
 	}
 
+	targets := guardTargets()
+	setAmbientEndpoints(t, targets)
+	cfg := guardedV2Config(t, guard, srv.URL)
+
 	used := 0
-	for _, svc := range AllServices() {
+	scopeUsed := map[string]bool{}
+	for _, tg := range targets {
+		svc := tg.svc
 		guard.setCurrent(svc.Name)
 		mu.Lock()
 		current = svc.Name
@@ -158,13 +164,14 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 					t.Errorf("panic in %s: %v", svc.Name, r)
 				}
 			}()
-			ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+			ctx, cancel := context.WithTimeout(types.WithAWSConfig(ctx, cfg), 15*time.Second)
 			defer cancel()
-			_, _ = svc.Call(ctx, sess)
+			_, _ = svc.Invoke(ctx, sess)
 		}()
 		if !scope.Used() {
 			continue
 		}
+		scopeUsed[svc.Name] = true
 		used++
 		mu.Lock()
 		var bad []string
@@ -184,6 +191,19 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 	if v := guard.snapshot(); len(v) > 0 {
 		t.Errorf("%d request(s) bypassed the custom endpoint:\n  %s", len(v), strings.Join(v, "\n  "))
 	}
+	// The v2 stand-in must have consulted the scope and signed for each scoped
+	// region (not only the config's default region).
+	syn := syntheticV2Service().Name
+	if !scopeUsed[syn] {
+		t.Errorf("synthetic v2 service did not consult the region scope")
+	}
+	mu.Lock()
+	for _, r := range scoped {
+		if !signed[syn][r] {
+			t.Errorf("synthetic v2 service sent no request signed for scoped region %s (signed: %v)", r, signed[syn])
+		}
+	}
+	mu.Unlock()
 	if used < 30 {
 		t.Errorf("only %d services consulted the region scope, want >= 30", used)
 	}

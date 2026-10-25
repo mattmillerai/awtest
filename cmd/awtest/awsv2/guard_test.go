@@ -319,6 +319,20 @@ func f() string { return aws.ToString(aws.String("x")) }`, 0},
 		{"Region key is allowed", hdr + `import "github.com/aws/aws-sdk-go-v2/aws"
 var _ = aws.String
 var _ = thing{Region: "r"}`, 0},
+		{"Options Transport is the sanctioned way to restrict the HTTP client", hdr + `import (
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+)
+func f(rt int) (aws.Config, error) {
+	return awsv2.LoadConfig(nil, awsv2.Options{Region: "r", Transport: rt, HTTPTimeout: 1})
+}`, 0},
+		{"Options HTTPClient is still forbidden outside tests", hdr + `import (
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+)
+func f(c int) (aws.Config, error) {
+	return awsv2.LoadConfig(nil, awsv2.Options{Region: "r", HTTPClient: c})
+}`, 1},
 		{"v1 only", hdr + `import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sts"

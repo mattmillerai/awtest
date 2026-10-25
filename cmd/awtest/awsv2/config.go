@@ -3,9 +3,11 @@ package awsv2
 import (
 	"context"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
@@ -46,6 +48,13 @@ type Options struct {
 	RetryBackoff retry.BackoffDelayer
 	// HTTPClient overrides the SDK's HTTP client (used by tests).
 	HTTPClient aws.HTTPClient
+	// Transport, when non-nil and HTTPClient is nil, makes the SDK use an
+	// http.Client with this transport and HTTPTimeout. It lets non-test code
+	// (replay mode) restrict where requests can go without a forbidden
+	// HTTPClient literal outside this package.
+	Transport http.RoundTripper
+	// HTTPTimeout is the http.Client timeout used with Transport; 0 means none.
+	HTTPTimeout time.Duration
 	// Stderr receives debug logging; os.Stderr when nil.
 	Stderr io.Writer
 }
@@ -89,6 +98,8 @@ func LoadConfig(ctx context.Context, opts Options) (aws.Config, error) {
 	}
 	if opts.HTTPClient != nil {
 		loadOpts = append(loadOpts, config.WithHTTPClient(opts.HTTPClient))
+	} else if opts.Transport != nil {
+		loadOpts = append(loadOpts, config.WithHTTPClient(&http.Client{Transport: opts.Transport, Timeout: opts.HTTPTimeout}))
 	}
 
 	switch {

@@ -18,11 +18,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 var (
@@ -236,14 +237,20 @@ func fakeStaticSession(t *testing.T) *session.Session {
 func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 	guard, srv, counter := setupGuard(t)
 
+	// Every target gets both a v1 session and a v2 config built the guarded
+	// way (explicit test HTTP client, ambient AWS_ENDPOINT_URL* set); Invoke
+	// uses whichever SDK the service implements.
 	sess := fakeStaticSession(t)
 	utils.ApplyEndpoint(sess, srv.URL)
+	targets := guardTargets()
+	setAmbientEndpoints(t, targets)
+	cfg := guardedV2Config(t, guard, srv.URL)
 
-	all := AllServices()
 	var noRequest []string
 	reached := 0
 
-	for _, svc := range all {
+	for _, tg := range targets {
+		svc := tg.svc
 		guard.setCurrent(svc.Name)
 		before := counter.get()
 		func() {
@@ -252,9 +259,9 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 					t.Errorf("panic in %s: %v", svc.Name, r)
 				}
 			}()
-			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg), 15*time.Second)
 			defer cancel()
-			_, _ = svc.Call(ctx, sess)
+			_, _ = svc.Invoke(ctx, sess)
 		}()
 		if counter.get() > before {
 			reached++
@@ -268,10 +275,15 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 		sort.Strings(v)
 		t.Errorf("%d request(s) bypassed the custom endpoint and would have hit real AWS:\n  %s", len(v), strings.Join(v, "\n  "))
 	}
-	if min := len(all) * 9 / 10; reached < min {
-		t.Errorf("only %d of %d calls reached the test server (want >= %d); did not: %v", reached, len(all), min, noRequest)
+	if min := len(targets) * 9 / 10; reached < min {
+		t.Errorf("only %d of %d calls reached the test server (want >= %d); did not: %v", reached, len(targets), min, noRequest)
 	} else if len(noRequest) > 0 {
 		t.Logf("calls that made no request: %v", noRequest)
+	}
+	for _, name := range noRequest {
+		if name == syntheticV2Service().Name {
+			t.Errorf("synthetic v2 service made no request to the test server")
+		}
 	}
 
 	t.Run("control: bypassing client is detected", func(t *testing.T) {
@@ -285,6 +297,25 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 		_, _ = bypass.ListBuckets(&s3.ListBucketsInput{})
 		if len(g2.snapshot()) == 0 {
 			t.Error("bypassing client was not recorded as a violation")
+		}
+	})
+
+	// Negative control for v2: a service that builds its client with a plain
+	// NewFromConfig lets the ambient AWS_ENDPOINT_URL_STS win over the
+	// configured endpoint; the same harness must record that.
+	t.Run("control: unguarded v2 client is detected", func(t *testing.T) {
+		g2 := &guardTransport{allowedHost: guard.allowedHost, delegate: guard.delegate}
+		cfg2 := guardedV2Config(t, g2, srv.URL)
+		ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg2), 15*time.Second)
+		defer cancel()
+		bad := unguardedSyntheticV2Service()
+		_, _ = bad.Invoke(ctx, sess)
+		v := g2.snapshot()
+		if len(v) == 0 {
+			t.Fatal("unguarded v2 client was not recorded as an endpoint bypass")
+		}
+		if !strings.Contains(v[0], "ambient-endpoint.invalid") {
+			t.Errorf("violation does not point at the ambient endpoint: %v", v)
 		}
 	})
 }
