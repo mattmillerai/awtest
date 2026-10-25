@@ -46,6 +46,21 @@ package additionally cover sparse resources and error text.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk1`
 green without regenerating it.
 
+## Bulk 2 golden (appsync, secretsmanager, ses, rds, cognitoidentity)
+
+`replay-bulk2.json` is the v1 baseline for the second bulk migration batch:
+`appsync:ListGraphqlApis`, `secretsmanager:ListSecrets`, `ses:ListIdentities`,
+`rds:DescribeDBInstances` and `cognitoidentity:ListIdentityPools`. It is
+produced from the fictional fixtures in `bulk2/` (fixture dir
+`testdata/golden/bulk2`) with
+`awtest -replay <abs>/testdata/golden/bulk2 -services appsync,secretsmanager,ses,rds,cognitoidentity -quiet -format json`.
+The golden pins names-only results (rds also its `availability_zone` detail).
+The functional tests in each service package additionally cover sparse
+resources, error text and, for the regional loops, the visited regions.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk2`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

@@ -1,0 +1,1 @@
+{"graphqlApis":[{"name":"demo-orders-api","apiId":"abcdefghijklmnopqrstuvwxyz","authenticationType":"API_KEY","arn":"arn:aws:appsync:us-west-2:123456789012:apis/abcdefghijklmnopqrstuvwxyz","tags":{"env":"demo"}},{"name":"demo-inventory-api","apiId":"zyxwvutsrqponmlkjihgfedcba","authenticationType":"AWS_IAM"}]}

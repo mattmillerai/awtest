@@ -17,6 +17,7 @@ const (
 	goldenSamplePath = "testdata/golden/replay-sample.json"
 	goldenPilotPath  = "testdata/golden/replay-pilot.json"
 	goldenBulk1Path  = "testdata/golden/replay-bulk1.json"
+	goldenBulk2Path  = "testdata/golden/replay-bulk2.json"
 )
 
 // v1TransportSuffix is the aws-sdk-go v1 error noise the v2 migration drops.
@@ -202,6 +203,10 @@ func TestGoldenReplaySample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	bulk2Dir, err := filepath.Abs("testdata/golden/bulk2")
+	if err != nil {
+		t.Fatal(err)
+	}
 	cases := []struct {
 		name       string
 		args       []string
@@ -212,6 +217,8 @@ func TestGoldenReplaySample(t *testing.T) {
 		{"pilot", []string{"-replay", pilotDir, "-services", "ecr,kms", "-exclude-services", "secretsmanager", "-quiet", "-format", "json"}, goldenPilotPath},
 		// No substring of these names appears in another service's prefix.
 		{"bulk1", []string{"-replay", bulk1Dir, "-services", "batch,cloudformation,codepipeline,glacier,eventbridge", "-quiet", "-format", "json"}, goldenBulk1Path},
+		// Substring matching: none of these names occurs inside another service prefix.
+		{"bulk2", []string{"-replay", bulk2Dir, "-services", "appsync,secretsmanager,ses,rds,cognitoidentity", "-quiet", "-format", "json"}, goldenBulk2Path},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

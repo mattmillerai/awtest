@@ -72,8 +72,11 @@
 //     is migrated too: batch (batch:ListJobs), cloudformation
 //     (cloudformation:ListStacks), codepipeline (codepipeline:ListPipelines),
 //     glacier (glacier:ListVaults) and eventbridge
-//     (eventbridge:ListEventBuses), all single non-paginated calls. Every
-//     other service is still v1.
+//     (eventbridge:ListEventBuses), all single non-paginated calls. Bulk 2 is
+//     migrated as well: appsync (ListGraphqlApis), secretsmanager
+//     (ListSecrets), ses (ListIdentities) and rds (DescribeDBInstances), all
+//     non-paginated regional loops, and cognitoidentity (ListIdentityPools).
+//     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
 //     from the context and returns the error normalised with Wrap

@@ -1,0 +1,1 @@
+<ListIdentitiesResponse xmlns="http://ses.amazonaws.com/doc/2010-12-01/"><ListIdentitiesResult><Identities><member>demo.example.com</member><member>alerts@demo.example.com</member></Identities></ListIdentitiesResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></ListIdentitiesResponse>

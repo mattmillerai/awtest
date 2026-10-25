@@ -50,7 +50,6 @@ github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/acm
 github.com/aws/aws-sdk-go/service/amplify
 github.com/aws/aws-sdk-go/service/apigateway
-github.com/aws/aws-sdk-go/service/appsync
 github.com/aws/aws-sdk-go/service/athena
 github.com/aws/aws-sdk-go/service/backup
 github.com/aws/aws-sdk-go/service/cloudfront
@@ -60,7 +59,6 @@ github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/codebuild
 github.com/aws/aws-sdk-go/service/codecommit
 github.com/aws/aws-sdk-go/service/codedeploy
-github.com/aws/aws-sdk-go/service/cognitoidentity
 github.com/aws/aws-sdk-go/service/cognitoidentityprovider
 github.com/aws/aws-sdk-go/service/configservice
 github.com/aws/aws-sdk-go/service/directconnect
@@ -87,15 +85,12 @@ github.com/aws/aws-sdk-go/service/mediaconvert
 github.com/aws/aws-sdk-go/service/neptune
 github.com/aws/aws-sdk-go/service/opensearchservice
 github.com/aws/aws-sdk-go/service/organizations
-github.com/aws/aws-sdk-go/service/rds
 github.com/aws/aws-sdk-go/service/redshift
 github.com/aws/aws-sdk-go/service/rekognition
 github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sagemaker
-github.com/aws/aws-sdk-go/service/secretsmanager
 github.com/aws/aws-sdk-go/service/securityhub
-github.com/aws/aws-sdk-go/service/ses
 github.com/aws/aws-sdk-go/service/sfn
 github.com/aws/aws-sdk-go/service/sns
 github.com/aws/aws-sdk-go/service/sqs
@@ -167,6 +162,12 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
 github.com/aws/aws-sdk-go-v2/internal/v4a
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/crypto
 github.com/aws/aws-sdk-go-v2/internal/v4a/internal/v4
+# github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/appsync
+github.com/aws/aws-sdk-go-v2/service/appsync/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/appsync/schemas
+github.com/aws/aws-sdk-go-v2/service/appsync/types
 # github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/batch
@@ -184,6 +185,12 @@ github.com/aws/aws-sdk-go-v2/service/codepipeline
 github.com/aws/aws-sdk-go-v2/service/codepipeline/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas
 github.com/aws/aws-sdk-go-v2/service/codepipeline/types
+# github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.42.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity/schemas
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr
@@ -227,6 +234,11 @@ github.com/aws/aws-sdk-go-v2/service/internal/s3shared/config
 github.com/aws/aws-sdk-go-v2/service/kms
 github.com/aws/aws-sdk-go-v2/service/kms/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/kms/types
+# github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/rds
+github.com/aws/aws-sdk-go-v2/service/rds/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/rds/types
 # github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/s3
@@ -234,6 +246,17 @@ github.com/aws/aws-sdk-go-v2/service/s3/internal/arn
 github.com/aws/aws-sdk-go-v2/service/s3/internal/customizations
 github.com/aws/aws-sdk-go-v2/service/s3/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/s3/types
+# github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/secretsmanager
+github.com/aws/aws-sdk-go-v2/service/secretsmanager/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/secretsmanager/schemas
+github.com/aws/aws-sdk-go-v2/service/secretsmanager/types
+# github.com/aws/aws-sdk-go-v2/service/ses v1.42.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/ses
+github.com/aws/aws-sdk-go-v2/service/ses/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/ses/types
 # github.com/aws/aws-sdk-go-v2/service/signin v1.10.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/signin

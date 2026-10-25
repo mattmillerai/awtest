@@ -3,23 +3,25 @@ package cognitoidentity
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
+	cogtypes "github.com/aws/aws-sdk-go-v2/service/cognitoidentity/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cognitoidentity"
-	"time"
 )
 
 var CognitoIdentityCalls = []types.AWSService{
 	{
 		Name: "cognitoidentity:ListIdentityPools",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := cognitoidentity.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", cognitoidentity.NewFromConfig)
 			input := &cognitoidentity.ListIdentityPoolsInput{
-				MaxResults: aws.Int64(60), // You can adjust this as needed
+				MaxResults: aws.Int32(60), // You can adjust this as needed
 			}
-			output, err := svc.ListIdentityPoolsWithContext(ctx, input)
+			output, err := svc.ListIdentityPools(ctx, input)
 			if err != nil {
 				return nil, err
 			}
@@ -40,19 +42,24 @@ var CognitoIdentityCalls = []types.AWSService{
 				}
 			}
 
-			if identityPools, ok := output.([]*cognitoidentity.IdentityPoolShortDescription); ok {
-				for _, pool := range identityPools {
-					results = append(results, types.ScanResult{
-						ServiceName:  "CognitoIdentity",
-						MethodName:   "cognitoidentity:ListIdentityPools",
-						ResourceType: "identity-pool",
-						ResourceName: *pool.IdentityPoolName,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			identityPools, ok := output.([]cogtypes.IdentityPoolShortDescription)
+			if !ok {
+				utils.HandleAWSError(debug, "cognitoidentity:ListIdentityPools", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "cognitoidentity:ListIdentityPools", fmt.Sprintf("Found Identity Pool: %s (%s)", *pool.IdentityPoolName, *pool.IdentityPoolId), nil)
-				}
+			for _, pool := range identityPools {
+				poolName := aws.ToString(pool.IdentityPoolName)
+				results = append(results, types.ScanResult{
+					ServiceName:  "CognitoIdentity",
+					MethodName:   "cognitoidentity:ListIdentityPools",
+					ResourceType: "identity-pool",
+					ResourceName: poolName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "cognitoidentity:ListIdentityPools", fmt.Sprintf("Found Identity Pool: %s (%s)", poolName, aws.ToString(pool.IdentityPoolId)), nil)
 			}
 			return results
 		},

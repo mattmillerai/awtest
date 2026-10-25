@@ -3,23 +3,24 @@ package secretsmanager
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	smtypes "github.com/aws/aws-sdk-go-v2/service/secretsmanager/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
-	"time"
 )
 
 var SecretsManagerCalls = []types.AWSService{
 	{
 		Name: "secretsmanager:ListSecrets",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allSecrets []*secretsmanager.SecretListEntry
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allSecrets []smtypes.SecretListEntry
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := secretsmanager.New(sess)
-				output, err := svc.ListSecretsWithContext(ctx, &secretsmanager.ListSecretsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, secretsmanager.NewFromConfig)
+				output, err := svc.ListSecrets(ctx, &secretsmanager.ListSecretsInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,24 +43,25 @@ var SecretsManagerCalls = []types.AWSService{
 				}
 			}
 
-			if secrets, ok := output.([]*secretsmanager.SecretListEntry); ok {
-				for _, secret := range secrets {
-					secretName := ""
-					if secret.Name != nil {
-						secretName = *secret.Name
-					}
+			secrets, ok := output.([]smtypes.SecretListEntry)
+			if !ok {
+				utils.HandleAWSError(debug, "secretsmanager:ListSecrets", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					results = append(results, types.ScanResult{
-						ServiceName:  "SecretsManager",
-						MethodName:   "secretsmanager:ListSecrets",
-						ResourceType: "secret",
-						ResourceName: secretName,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			for _, secret := range secrets {
+				secretName := aws.ToString(secret.Name)
 
-					utils.PrintResult(debug, "", "secretsmanager:ListSecrets", fmt.Sprintf("Found secret: %s", secretName), nil)
-				}
+				results = append(results, types.ScanResult{
+					ServiceName:  "SecretsManager",
+					MethodName:   "secretsmanager:ListSecrets",
+					ResourceType: "secret",
+					ResourceName: secretName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "secretsmanager:ListSecrets", fmt.Sprintf("Found secret: %s", secretName), nil)
 			}
 			return results
 		},

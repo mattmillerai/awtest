@@ -3,23 +3,24 @@ package appsync
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/appsync"
+	appsynctypes "github.com/aws/aws-sdk-go-v2/service/appsync/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/appsync"
-	"time"
 )
 
 var AppSyncCalls = []types.AWSService{
 	{
 		Name: "appsync:ListGraphqlApis",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allApis []*appsync.GraphqlApi
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allApis []appsynctypes.GraphqlApi
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := appsync.New(regionSess)
-				output, err := svc.ListGraphqlApisWithContext(ctx, &appsync.ListGraphqlApisInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, appsync.NewFromConfig)
+				output, err := svc.ListGraphqlApis(ctx, &appsync.ListGraphqlApisInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,19 +43,24 @@ var AppSyncCalls = []types.AWSService{
 				}
 			}
 
-			if apis, ok := output.([]*appsync.GraphqlApi); ok {
-				for _, api := range apis {
-					results = append(results, types.ScanResult{
-						ServiceName:  "AppSync",
-						MethodName:   "appsync:ListGraphqlApis",
-						ResourceType: "graphql-api",
-						ResourceName: *api.Name,
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
-					})
+			apis, ok := output.([]appsynctypes.GraphqlApi)
+			if !ok {
+				utils.HandleAWSError(debug, "appsync:ListGraphqlApis", fmt.Errorf("unexpected output type %T", output))
+				return results
+			}
 
-					utils.PrintResult(debug, "", "appsync:ListGraphqlApis", fmt.Sprintf("Found AppSync API: %s", *api.Name), nil)
-				}
+			for _, api := range apis {
+				apiName := aws.ToString(api.Name)
+				results = append(results, types.ScanResult{
+					ServiceName:  "AppSync",
+					MethodName:   "appsync:ListGraphqlApis",
+					ResourceType: "graphql-api",
+					ResourceName: apiName,
+					Details:      map[string]interface{}{},
+					Timestamp:    time.Now(),
+				})
+
+				utils.PrintResult(debug, "", "appsync:ListGraphqlApis", fmt.Sprintf("Found AppSync API: %s", apiName), nil)
 			}
 			return results
 		},

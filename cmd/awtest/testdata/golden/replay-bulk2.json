@@ -1,0 +1,76 @@
+[
+  {
+    "details": {},
+    "methodName": "appsync:ListGraphqlApis",
+    "resourceName": "demo-orders-api",
+    "resourceType": "graphql-api",
+    "serviceName": "AppSync"
+  },
+  {
+    "details": {},
+    "methodName": "appsync:ListGraphqlApis",
+    "resourceName": "demo-inventory-api",
+    "resourceType": "graphql-api",
+    "serviceName": "AppSync"
+  },
+  {
+    "details": {},
+    "methodName": "cognitoidentity:ListIdentityPools",
+    "resourceName": "demo_identity_pool",
+    "resourceType": "identity-pool",
+    "serviceName": "CognitoIdentity"
+  },
+  {
+    "details": {},
+    "methodName": "cognitoidentity:ListIdentityPools",
+    "resourceName": "demo_guest_pool",
+    "resourceType": "identity-pool",
+    "serviceName": "CognitoIdentity"
+  },
+  {
+    "details": {
+      "availability_zone": "us-west-2a"
+    },
+    "methodName": "rds:DescribeDBInstances",
+    "resourceName": "demo-postgres-1",
+    "resourceType": "db-instance",
+    "serviceName": "RDS"
+  },
+  {
+    "details": {
+      "availability_zone": ""
+    },
+    "methodName": "rds:DescribeDBInstances",
+    "resourceName": "demo-mysql-1",
+    "resourceType": "db-instance",
+    "serviceName": "RDS"
+  },
+  {
+    "details": {},
+    "methodName": "secretsmanager:ListSecrets",
+    "resourceName": "demo/db-password",
+    "resourceType": "secret",
+    "serviceName": "SecretsManager"
+  },
+  {
+    "details": {},
+    "methodName": "secretsmanager:ListSecrets",
+    "resourceName": "",
+    "resourceType": "secret",
+    "serviceName": "SecretsManager"
+  },
+  {
+    "details": {},
+    "methodName": "ses:ListIdentities",
+    "resourceName": "demo.example.com",
+    "resourceType": "identity",
+    "serviceName": "SES"
+  },
+  {
+    "details": {},
+    "methodName": "ses:ListIdentities",
+    "resourceName": "alerts@demo.example.com",
+    "resourceType": "identity",
+    "serviceName": "SES"
+  }
+]
