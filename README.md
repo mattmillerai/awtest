@@ -140,6 +140,7 @@ Resources Found:    11
 | `--services` | Include only specific services (comma-separated) | all |
 | `--exclude-services` | Exclude specific services (comma-separated) | none |
 | `--endpoint-url` | Custom AWS-compatible endpoint URL used for every service (e.g. `http://localhost:4566`); also read from `AWS_ENDPOINT_URL` | none |
+| `--replay` | Offline replay mode: serve canned responses from a fixture directory (or `builtin:sample`) on `127.0.0.1` and scan that; no AWS access (see [Replay mode](#replay-mode-offline-demos-and-labs)) | none |
 | `--all-regions` | Scan every enabled AWS region instead of the default four US regions (opt-in; many more API calls) | `false` |
 | `--timeout` | Maximum scan duration (e.g., `5m`, `300s`) | `5m` |
 | `--speed` | Speed preset: `safe`, `fast`, `insane` (controls scan parallelism) | `safe` |
@@ -165,6 +166,43 @@ awtest -endpoint-url http://localhost:4566 -aki test -sak test
 - A notice is printed to stderr unless `-quiet` is set; results do not come from real AWS.
 - The scheme must be `http` or `https`; anything else exits with code 2.
 - The flag takes precedence over the `AWS_ENDPOINT_URL` environment variable.
+
+### Replay mode (offline demos and labs)
+
+`-replay` runs the normal scan against canned API responses instead of AWS. awtest starts a small HTTP server in-process, serves your fixture files from it, and points every service at it (it builds on the `-endpoint-url` mechanism). Nothing is sent to AWS, so it is useful for demos, training, screenshots, and testing report tooling.
+
+```bash
+awtest -replay builtin:sample -services sts,s3,iam,ec2
+awtest -replay ./my-fixtures -format json -quiet > scan.json
+```
+
+`builtin:sample` uses fixtures embedded in the binary (source: `cmd/awtest/replay/sample`). All sample data is **fictional**: account `123456789012`, `example-*` names, and documentation-range IPs.
+
+**Fixture layout.** Only regular `.xml` and `.json` files are read (each up to 5 MB, all loaded at startup). `<service>` is the SigV4 signing name (`sts`, `iam`, `ec2`, `s3`, `lambda`, `dynamodb`, `monitoring` for CloudWatch, ...), `<region>` is the signing region and `<Action>` is the API action name:
+
+```
+<service>/<Action>.xml                        any region, any resource
+<service>/<region>/<Action>.xml               one region
+<service>/<Action>/<resource>.xml             one resource (bucket, user, role, ...)
+<service>/<region>/<Action>/<resource>.xml
+```
+
+- `.xml` files are served as `text/xml` (query/S3 protocols), `.json` as `application/x-amz-json-1.1`. Put the raw wire-format response in the file, e.g. the XML an `iam:ListUsers` call returns. A duplicate (same service, region, action and resource) is an error that names both files.
+- **Status suffix:** `<name>.<3-digit-status>.<ext>` sets the HTTP status (default `200`), e.g. `s3/GetBucketPolicy/example-logs.404.xml` containing a `NoSuchBucketPolicy` error.
+- **Lookup order:** region + resource, region, resource, generic. Region-specific files win over generic ones. This makes a generic empty response a useful fallback: per-region scans stop at the first error, so give `ec2/DescribeInstances.xml` an empty reservation list and put real instances only in `ec2/us-east-1/DescribeInstances.xml`; the other regions then return "no instances" instead of an error.
+- **Operation names:** JSON services use the `X-Amz-Target` action; query services (IAM, STS, EC2, ...) the `Action` parameter; S3 uses `ListBuckets`, `GetBucketLocation`, `GetBucketPolicy`, `GetBucketPolicyStatus`, `GetBucketAcl`, `GetPublicAccessBlock`, `ListObjectsV2` with the bucket as the resource; other REST calls are named `METHOD_path` (e.g. `lambda/GET_2015-03-31_functions.json`). For query and JSON services the resource is the `UserName`, `RoleName`, `GroupName`, `PolicyName`, `InstanceId`, `TableName`, `FunctionName` or `Name` parameter when present.
+- **Unknown calls:** a request with no fixture gets an AccessDenied-style error in the right wire format for its protocol, so scans degrade the way a restricted account would. A single stderr line lists the calls that had no fixture (unless `-quiet`).
+
+**Safety.**
+- The server listens on `127.0.0.1` only (random port) and stops when awtest exits.
+- Credentials are fake (`AKIAREPLAYFAKE000000`). Credential flags, `AWS_*` credential variables, `AWS_PROFILE` and `~/.aws` are ignored entirely (a note is printed if you supplied any), and `AWS_ENDPOINT_URL` is ignored. Combining `-replay` with `-endpoint-url` is a usage error (exit 2), as is a missing or invalid fixture directory.
+- The HTTP client can only connect to the replay server and never uses a proxy, so nothing leaves the machine even if some code path ignored the endpoint.
+- The background update check is skipped.
+- A stderr notice states that results do not come from real AWS (suppressed by `-quiet`).
+
+`-all-regions` works too: with no `ec2:DescribeRegions` fixture, awtest uses its built-in region list. Replay output is ordinary `-format json` output, so [`awtest diff`](#comparing-scans-awtest-diff) works on it, e.g. to check how a change to your fixtures alters the findings.
+
+Recording fixtures from a real account is a possible future follow-up and is not part of this feature.
 
 ### Scanning all regions
 

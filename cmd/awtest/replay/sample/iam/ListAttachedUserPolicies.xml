@@ -1,0 +1,1 @@
+<ListAttachedUserPoliciesResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><ListAttachedUserPoliciesResult><IsTruncated>false</IsTruncated><AttachedPolicies></AttachedPolicies></ListAttachedUserPoliciesResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></ListAttachedUserPoliciesResponse>

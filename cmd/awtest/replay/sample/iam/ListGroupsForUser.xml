@@ -1,0 +1,1 @@
+<ListGroupsForUserResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><ListGroupsForUserResult><IsTruncated>false</IsTruncated><Groups></Groups></ListGroupsForUserResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></ListGroupsForUserResponse>

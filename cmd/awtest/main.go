@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mattmillerai/awtest/cmd/awtest/formatters"
+	"github.com/mattmillerai/awtest/cmd/awtest/replay"
 	"github.com/mattmillerai/awtest/cmd/awtest/services"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
@@ -56,6 +57,8 @@ func main() {
 
 	endpointURL := flag.String("endpoint-url", "", "Custom AWS-compatible endpoint URL (e.g. http://localhost:4566) used for ALL services; env AWS_ENDPOINT_URL is used if unset")
 
+	replayDir := flag.String("replay", "", "Offline replay mode: serve canned responses from a fixture directory (or builtin:sample) on 127.0.0.1 and scan that; no AWS access, fake credentials")
+
 	allRegions := flag.Bool("all-regions", false, "Scan every enabled AWS region instead of the default four US regions (many more API calls and CloudTrail events; see README)")
 
 	timeout := flag.Duration("timeout", 5*time.Minute, "Maximum scan timeout duration (e.g., 5m, 300s)")
@@ -69,7 +72,7 @@ func main() {
 	registerShortFlags(flag.CommandLine, outputFile, version)
 
 	flag.Usage = func() {
-		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nUse -endpoint-url to target LocalStack or a mock instead of AWS.\nUse -all-regions to scan every enabled region (opt-in).\n\nFlags:\n")
+		fmt.Fprint(flag.CommandLine.Output(), "Usage:\n  awtest [flags]\n  awtest diff [-format text|json] <before.json> <after.json>\n\nCommands:\n  diff    Compare two JSON scan outputs offline (exit 0: no differences, 1: differences, 2: error)\n\nUse -endpoint-url to target LocalStack or a mock instead of AWS.\nUse -replay <dir|builtin:sample> to scan canned responses offline (no AWS access).\nUse -all-regions to scan every enabled region (opt-in).\n\nFlags:\n")
 		flag.PrintDefaults()
 	}
 
@@ -99,10 +102,25 @@ func main() {
 		os.Exit(0)
 	}
 
-	endpoint, err := utils.ResolveEndpointURL(*endpointURL, os.Getenv)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		os.Exit(2)
+	var replaySrv *replay.Server
+	endpoint := ""
+	var err error
+	if *replayDir != "" {
+		if strings.TrimSpace(*endpointURL) != "" {
+			fmt.Fprintln(os.Stderr, "Error: -replay cannot be combined with -endpoint-url (replay serves its own local endpoint)")
+			os.Exit(2)
+		}
+		replaySrv, err = startReplay(*replayDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: -replay %s: %s\n", *replayDir, err)
+			os.Exit(2)
+		}
+	} else {
+		endpoint, err = utils.ResolveEndpointURL(*endpointURL, os.Getenv)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+			os.Exit(2)
+		}
 	}
 
 	utils.Quiet = *quiet
@@ -116,7 +134,7 @@ func main() {
 
 	// Start background update check (non-blocking, only for release builds)
 	updateCh := make(chan updateNotice, 1)
-	if !*quiet && Version != "dev" {
+	if !*quiet && Version != "dev" && replaySrv == nil {
 		go func() {
 			msg, warn := checkForUpdate(Version)
 			updateCh <- updateNotice{msg, warn}
@@ -145,6 +163,10 @@ func main() {
 		awsSessionToken = awsSessionTokenAbbr
 	}
 
+	if replaySrv != nil && !*quiet && replayCredsSupplied(*awsAccessKeyID, *awsSecretAccessKey, *awsSessionToken, os.Getenv) {
+		fmt.Fprintln(os.Stderr, "Note: supplied AWS credentials/profile are ignored in replay mode (fake credentials are used)")
+	}
+
 	if *awsAccessKeyID == "" {
 		*awsAccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
 	}
@@ -159,7 +181,15 @@ func main() {
 	awsProfile := os.Getenv("AWS_PROFILE")
 	var sess *session.Session
 
-	if *awsAccessKeyID == "" || *awsSecretAccessKey == "" {
+	if replaySrv != nil {
+		// Replay never consults the profile, shared config or real credentials.
+		awsProfile = ""
+		sess, err = replay.NewSession(replaySrv, *awsRegion)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: creating replay session: %v\n", err)
+			os.Exit(1)
+		}
+	} else if *awsAccessKeyID == "" || *awsSecretAccessKey == "" {
 		if awsProfile != "" {
 			// Use the AWS_PROFILE if set and no access keys are provided
 			sess, err = session.NewSessionWithOptions(session.Options{
@@ -208,6 +238,14 @@ func main() {
 		}
 	}
 
+	replayNotice := ""
+	if replaySrv != nil {
+		replayNotice = fmt.Sprintf("Replay mode: serving canned responses from %s at %s (results do not come from real AWS; credentials are fake)", *replayDir, replaySrv.URL)
+		if !*quiet {
+			fmt.Fprintln(os.Stderr, replayNotice)
+		}
+	}
+
 	if *debug {
 		fmt.Println("Debug mode enabled")
 		fmt.Println("-----------------------------")
@@ -231,6 +269,9 @@ func main() {
 		fmt.Println("Region:", *awsRegion)
 		if endpointNotice != "" {
 			fmt.Println(endpointNotice)
+		}
+		if replayNotice != "" {
+			fmt.Println(replayNotice)
 		}
 		fmt.Println("-----------------------------")
 	}
@@ -276,6 +317,12 @@ func main() {
 
 	if regionStats != nil && !*quiet {
 		printRegionFailures(os.Stderr, regionStats, *debug, utils.SuppressedErrorLines())
+	}
+
+	if replaySrv != nil && !*quiet {
+		if line := unmatchedSummary(replaySrv.Unmatched()); line != "" {
+			fmt.Fprintln(os.Stderr, line)
+		}
 	}
 
 	if len(skippedServices) > 0 {
