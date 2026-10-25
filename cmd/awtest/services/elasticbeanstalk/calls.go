@@ -3,20 +3,23 @@ package elasticbeanstalk
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
+	ebtypes "github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/elasticbeanstalk"
-	"time"
 )
 
 var ElasticBeanstalkCalls = []types.AWSService{
 	{
 		Name: "elasticbeanstalk:DescribeApplications",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := elasticbeanstalk.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", elasticbeanstalk.NewFromConfig)
 			input := &elasticbeanstalk.DescribeApplicationsInput{}
-			output, err := svc.DescribeApplicationsWithContext(ctx, input)
+			output, err := svc.DescribeApplications(ctx, input)
 			if err != nil {
 				return nil, err
 			}
@@ -36,15 +39,16 @@ var ElasticBeanstalkCalls = []types.AWSService{
 					},
 				}
 			}
-			if applications, ok := output.([]*elasticbeanstalk.ApplicationDescription); ok {
+			if applications, ok := output.([]ebtypes.ApplicationDescription); ok {
 				for _, app := range applications {
-					utils.PrintResult(debug, "", "elasticbeanstalk:DescribeApplications", fmt.Sprintf("Found Application: %s", *app.ApplicationName), nil)
+					name := aws.ToString(app.ApplicationName)
+					utils.PrintResult(debug, "", "elasticbeanstalk:DescribeApplications", fmt.Sprintf("Found Application: %s", name), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "ElasticBeanstalk",
 						MethodName:   "elasticbeanstalk:DescribeApplications",
 						ResourceType: "application",
-						ResourceName: *app.ApplicationName,
+						ResourceName: name,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -56,10 +60,10 @@ var ElasticBeanstalkCalls = []types.AWSService{
 	},
 	{
 		Name: "elasticbeanstalk:DescribeEvents",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := elasticbeanstalk.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", elasticbeanstalk.NewFromConfig)
 			input := &elasticbeanstalk.DescribeEventsInput{}
-			output, err := svc.DescribeEventsWithContext(ctx, input)
+			output, err := svc.DescribeEvents(ctx, input)
 			if err != nil {
 				return nil, err
 			}
@@ -79,15 +83,16 @@ var ElasticBeanstalkCalls = []types.AWSService{
 					},
 				}
 			}
-			if events, ok := output.([]*elasticbeanstalk.EventDescription); ok {
+			if events, ok := output.([]ebtypes.EventDescription); ok {
 				for _, event := range events {
-					utils.PrintResult(debug, "", "elasticbeanstalk:DescribeEvents", fmt.Sprintf("Found Event: %s", *event.Message), nil)
+					message := aws.ToString(event.Message)
+					utils.PrintResult(debug, "", "elasticbeanstalk:DescribeEvents", fmt.Sprintf("Found Event: %s", message), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "ElasticBeanstalk",
 						MethodName:   "elasticbeanstalk:DescribeEvents",
 						ResourceType: "event",
-						ResourceName: *event.Message,
+						ResourceName: message,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

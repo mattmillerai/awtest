@@ -1,0 +1,1 @@
+{"ConfigurationRecorders":[{"name":"default","roleARN":"arn:aws:iam::123456789012:role/demo-config-role"},{"name":"bare-recorder"}]}

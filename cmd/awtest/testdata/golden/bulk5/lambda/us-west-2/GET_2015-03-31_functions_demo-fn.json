@@ -1,0 +1,1 @@
+{"Code":{"RepositoryType":"S3","Location":"https://awslambda-us-west-2-tasks.s3.us-west-2.amazonaws.com/snapshots/123456789012/demo-fn-code"},"Configuration":{"FunctionName":"demo-fn"}}

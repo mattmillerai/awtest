@@ -14,19 +14,24 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
 	github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.2
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.6
 	github.com/aws/aws-sdk-go-v2/service/codepipeline v1.56.1
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.42.6
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.5
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.6
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.102.1
 	github.com/aws/aws-sdk-go-v2/service/efs v1.51.0
 	github.com/aws/aws-sdk-go-v2/service/eks v1.104.3
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.64.1
+	github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk v1.43.5
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 	github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
+	github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6
 	github.com/aws/aws-sdk-go-v2/service/ses v1.42.5

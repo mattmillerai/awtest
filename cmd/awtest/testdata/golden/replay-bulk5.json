@@ -1,0 +1,137 @@
+[
+  {
+    "details": {},
+    "methodName": "cloudtrail:DescribeTrails",
+    "resourceName": "demo-trail",
+    "resourceType": "trail",
+    "serviceName": "CloudTrail"
+  },
+  {
+    "details": {},
+    "methodName": "cloudtrail:ListTrails",
+    "resourceName": "demo-trail",
+    "resourceType": "trail",
+    "serviceName": "CloudTrail"
+  },
+  {
+    "details": {
+      "RecordingStatus": "Recording",
+      "RoleARN": "arn:aws:iam::123456789012:role/demo-config-role"
+    },
+    "methodName": "config:DescribeConfigurationRecorders",
+    "resourceName": "default",
+    "resourceType": "configuration-recorder",
+    "serviceName": "Config"
+  },
+  {
+    "details": {
+      "RecordingStatus": "Stopped",
+      "RoleARN": ""
+    },
+    "methodName": "config:DescribeConfigurationRecorders",
+    "resourceName": "bare-recorder",
+    "resourceType": "configuration-recorder",
+    "serviceName": "Config"
+  },
+  {
+    "details": {
+      "Owner": "AWS",
+      "State": "ACTIVE"
+    },
+    "methodName": "config:DescribeConfigRules",
+    "resourceName": "demo-s3-versioning",
+    "resourceType": "config-rule",
+    "serviceName": "Config"
+  },
+  {
+    "details": {
+      "Owner": "",
+      "State": ""
+    },
+    "methodName": "config:DescribeConfigRules",
+    "resourceName": "bare-rule",
+    "resourceType": "config-rule",
+    "serviceName": "Config"
+  },
+  {
+    "details": {},
+    "methodName": "elasticbeanstalk:DescribeApplications",
+    "resourceName": "demo-app",
+    "resourceType": "application",
+    "serviceName": "ElasticBeanstalk"
+  },
+  {
+    "details": {},
+    "methodName": "elasticbeanstalk:DescribeEvents",
+    "resourceName": "Environment health has transitioned to Ok",
+    "resourceType": "event",
+    "serviceName": "ElasticBeanstalk"
+  },
+  {
+    "details": {
+      "code_location": "https://awslambda-us-west-2-tasks.s3.us-west-2.amazonaws.com/snapshots/123456789012/demo-fn-code",
+      "description": "Fictional demo function",
+      "environment_variables": {
+        "STAGE": "demo"
+      },
+      "handler": "app.handler",
+      "kms_key_arn": "arn:aws:kms:us-west-2:123456789012:key/11111111-2222-3333-4444-555555555555",
+      "last_modified": "2023-01-01T00:00:00.000+0000",
+      "memory_size": "256 MB",
+      "region": "us-west-2",
+      "role": "arn:aws:iam::123456789012:role/demo-fn-role",
+      "runtime": "python3.12",
+      "timeout": "30 seconds"
+    },
+    "methodName": "lambda:ListFunctions",
+    "resourceName": "demo-fn",
+    "resourceType": "function",
+    "serviceName": "Lambda"
+  },
+  {
+    "details": {
+      "code_location": "",
+      "handler": "",
+      "last_modified": "",
+      "memory_size": "",
+      "region": "us-west-2",
+      "role": "",
+      "runtime": "",
+      "timeout": ""
+    },
+    "methodName": "lambda:ListFunctions",
+    "resourceName": "bare-fn",
+    "resourceType": "function",
+    "serviceName": "Lambda"
+  },
+  {
+    "details": {
+      "ClusterStatus": "available",
+      "DBName": "analytics",
+      "Encrypted": true,
+      "Endpoint": "demo-warehouse.abcdefghij.us-west-2.redshift.amazonaws.com:5439",
+      "MasterUsername": "demoadmin",
+      "NodeType": "ra3.xlplus",
+      "NumberOfNodes": 2
+    },
+    "methodName": "redshift:DescribeClusters",
+    "resourceName": "demo-warehouse",
+    "resourceType": "cluster",
+    "serviceName": "Redshift"
+  },
+  {
+    "details": {
+      "ClusterStatus": "",
+      "DBName": "",
+      "Encrypted": false,
+      "Endpoint": "",
+      "MasterUsername": "",
+      "NodeType": "",
+      "NumberOfNodes": 0
+    },
+    "methodName": "redshift:DescribeClusters",
+    "resourceName": "bare-warehouse",
+    "resourceType": "cluster",
+    "serviceName": "Redshift"
+  }
+]

@@ -91,6 +91,24 @@ populated and sparse `details`, error text and the visited regions.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk4`
 green without regenerating it.
 
+## Bulk 5 golden (redshift, config, lambda, cloudtrail, elasticbeanstalk)
+
+`replay-bulk5.json` is the v1 baseline for the fifth bulk migration batch:
+`redshift:DescribeClusters`, `config:DescribeConfigurationRecorders` (which also
+yields the `DescribeConfigRules` results), `lambda:ListFunctions`,
+`cloudtrail:DescribeTrails` / `cloudtrail:ListTrails` and
+`elasticbeanstalk:DescribeApplications` / `elasticbeanstalk:DescribeEvents`. It
+is produced from the fictional fixtures in `bulk5/` (fixture dir
+`testdata/golden/bulk5`) with
+`awtest -replay <abs>/testdata/golden/bulk5 -services redshift,config,lambda,cloudtrail,elasticbeanstalk -quiet -format json`.
+The functional tests in each service package additionally cover Marker
+pagination and swallowed per-region errors (redshift), abort-on-first-error
+loops (config, lambda), populated and sparse `details`, error text and the
+visited regions.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk5`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

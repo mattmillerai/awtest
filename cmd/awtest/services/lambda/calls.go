@@ -3,44 +3,45 @@ package lambda
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	lambdatypes "github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	"time"
 )
 
 type LambdaDetails struct {
-	Function      *lambda.FunctionConfiguration
+	Function      lambdatypes.FunctionConfiguration
 	Region        string
 	Code          *lambda.GetFunctionOutput
-	Configuration *lambda.FunctionConfiguration
+	Configuration *lambda.GetFunctionConfigurationOutput
 }
 
 var LambdaCalls = []types.AWSService{
 	{
 		Name: "lambda:ListFunctions",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allDetails []LambdaDetails
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := lambda.New(regionSess)
-				output, err := svc.ListFunctionsWithContext(ctx, &lambda.ListFunctionsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, lambda.NewFromConfig)
+				output, err := svc.ListFunctions(ctx, &lambda.ListFunctionsInput{})
 				if err != nil {
 					return nil, err
 				}
 
 				for _, function := range output.Functions {
-					getFuncOutput, err := svc.GetFunctionWithContext(ctx, &lambda.GetFunctionInput{
+					getFuncOutput, err := svc.GetFunction(ctx, &lambda.GetFunctionInput{
 						FunctionName: function.FunctionName,
 					})
 					if err != nil {
 						return nil, err
 					}
 
-					configOutput, err := svc.GetFunctionConfigurationWithContext(ctx, &lambda.GetFunctionConfigurationInput{
+					configOutput, err := svc.GetFunctionConfiguration(ctx, &lambda.GetFunctionConfigurationInput{
 						FunctionName: function.FunctionName,
 					})
 					if err != nil {
@@ -84,8 +85,8 @@ var LambdaCalls = []types.AWSService{
 						}
 
 						codeLocation := ""
-						if detail.Code.Code.Location != nil {
-							codeLocation = *detail.Code.Code.Location
+						if detail.Code != nil && detail.Code.Code != nil {
+							codeLocation = aws.ToString(detail.Code.Code.Location)
 						}
 
 						memorySize := ""
@@ -101,9 +102,7 @@ var LambdaCalls = []types.AWSService{
 						if detail.Configuration.Timeout != nil {
 							timeout = fmt.Sprintf("%d seconds", *detail.Configuration.Timeout)
 						}
-						if detail.Configuration.Runtime != nil {
-							runtime = *detail.Configuration.Runtime
-						}
+						runtime = string(detail.Configuration.Runtime)
 						if detail.Configuration.Handler != nil {
 							handler = *detail.Configuration.Handler
 						}
@@ -135,7 +134,7 @@ var LambdaCalls = []types.AWSService{
 						if detail.Configuration.Environment != nil && len(detail.Configuration.Environment.Variables) > 0 {
 							envVars := make(map[string]string)
 							for key, value := range detail.Configuration.Environment.Variables {
-								envVars[key] = aws.StringValue(value)
+								envVars[key] = value
 							}
 							funcDetails["environment_variables"] = envVars
 						}
@@ -173,7 +172,7 @@ var LambdaCalls = []types.AWSService{
 						if detail.Configuration.Environment != nil && len(detail.Configuration.Environment.Variables) > 0 {
 							utils.PrintResult(debug, "", "lambda:ListFunctions", "Environment Variables:", nil)
 							for key, value := range detail.Configuration.Environment.Variables {
-								utils.PrintResult(debug, "", "lambda:ListFunctions", fmt.Sprintf("  %s: %s", key, aws.StringValue(value)), nil)
+								utils.PrintResult(debug, "", "lambda:ListFunctions", fmt.Sprintf("  %s: %s", key, value), nil)
 							}
 						}
 

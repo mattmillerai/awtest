@@ -3,28 +3,29 @@ package redshift
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/redshift"
+	redshifttypes "github.com/aws/aws-sdk-go-v2/service/redshift/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/redshift"
-	"time"
 )
 
 var RedshiftCalls = []types.AWSService{
 	{
 		Name: "redshift:DescribeClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allClusters []*redshift.Cluster
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allClusters []redshifttypes.Cluster
 			var lastErr error
 			anyRegionSucceeded := false
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := redshift.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, redshift.NewFromConfig)
 				input := &redshift.DescribeClustersInput{}
 				regionFailed := false
 				for {
-					output, err := svc.DescribeClustersWithContext(ctx, input)
+					output, err := svc.DescribeClusters(ctx, input)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -60,7 +61,7 @@ var RedshiftCalls = []types.AWSService{
 				}
 			}
 
-			clusters, ok := output.([]*redshift.Cluster)
+			clusters, ok := output.([]redshifttypes.Cluster)
 			if !ok {
 				utils.HandleAWSError(debug, "redshift:DescribeClusters", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -104,21 +105,15 @@ var RedshiftCalls = []types.AWSService{
 						addr = *cluster.Endpoint.Address
 					}
 					if cluster.Endpoint.Port != nil {
-						endpoint = fmt.Sprintf("%s:%d", addr, *cluster.Endpoint.Port)
+						endpoint = fmt.Sprintf("%s:%d", addr, int64(*cluster.Endpoint.Port))
 					} else {
 						endpoint = addr
 					}
 				}
 
-				encrypted := false
-				if cluster.Encrypted != nil {
-					encrypted = *cluster.Encrypted
-				}
+				encrypted := aws.ToBool(cluster.Encrypted)
 
-				var numNodes int64
-				if cluster.NumberOfNodes != nil {
-					numNodes = *cluster.NumberOfNodes
-				}
+				numNodes := int64(aws.ToInt32(cluster.NumberOfNodes))
 
 				results = append(results, types.ScanResult{
 					ServiceName:  "Redshift",

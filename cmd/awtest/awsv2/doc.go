@@ -89,6 +89,13 @@
 //     follow-ups), non-paginated regional loops; and elasticache
 //     (elasticache:DescribeCacheClusters, manual Marker pagination, failing
 //     regions skipped).
+//     Bulk 5 is migrated too: redshift (redshift:DescribeClusters, manual Marker
+//     pagination, failing regions skipped), config (config:DescribeConfigurationRecorders
+//     with the recorder status and DescribeConfigRules calls) and lambda
+//     (lambda:ListFunctions with GetFunction / GetFunctionConfiguration
+//     follow-ups), regional loops that abort on the first error, plus
+//     cloudtrail (DescribeTrails, ListTrails) and elasticbeanstalk
+//     (DescribeApplications, DescribeEvents), single non-paginated calls.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

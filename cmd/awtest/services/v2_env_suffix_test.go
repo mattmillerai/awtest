@@ -9,19 +9,24 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/appsync"
 	"github.com/aws/aws-sdk-go-v2/service/batch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+	"github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/efs"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
+	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
+	"github.com/aws/aws-sdk-go-v2/service/redshift"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
@@ -81,6 +86,14 @@ var v2EnvSuffix = map[string][]string{
 	"efs":         {"EFS"},
 	"eks":         {"EKS"},
 	"elasticache": {"ELASTICACHE"},
+
+	"redshift": {"REDSHIFT"},
+	"config":   {"CONFIG_SERVICE"},
+	"lambda":   {"LAMBDA"},
+	// cloudtrail covers both cloudtrail:DescribeTrails and cloudtrail:ListTrails;
+	// elasticbeanstalk covers DescribeApplications and DescribeEvents.
+	"cloudtrail":       {"CLOUDTRAIL"},
+	"elasticbeanstalk": {"ELASTIC_BEANSTALK"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -113,6 +126,12 @@ var v2ServiceIDs = map[string][]string{
 	"efs":         {efs.ServiceID},
 	"eks":         {eks.ServiceID},
 	"elasticache": {elasticache.ServiceID},
+
+	"redshift":         {redshift.ServiceID},
+	"config":           {configservice.ServiceID},
+	"lambda":           {lambda.ServiceID},
+	"cloudtrail":       {cloudtrail.ServiceID},
+	"elasticbeanstalk": {elasticbeanstalk.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

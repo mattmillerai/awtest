@@ -1,0 +1,1 @@
+{"FunctionName":"demo-fn","Runtime":"python3.12","MemorySize":256,"Timeout":30,"Handler":"app.handler","Role":"arn:aws:iam::123456789012:role/demo-fn-role","LastModified":"2023-01-01T00:00:00.000+0000","Description":"Fictional demo function","KMSKeyArn":"arn:aws:kms:us-west-2:123456789012:key/11111111-2222-3333-4444-555555555555","Environment":{"Variables":{"STAGE":"demo"}}}

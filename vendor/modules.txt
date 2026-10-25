@@ -51,21 +51,14 @@ github.com/aws/aws-sdk-go/service/apigateway
 github.com/aws/aws-sdk-go/service/athena
 github.com/aws/aws-sdk-go/service/backup
 github.com/aws/aws-sdk-go/service/cloudfront
-github.com/aws/aws-sdk-go/service/cloudtrail
 github.com/aws/aws-sdk-go/service/cloudwatch
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/codebuild
 github.com/aws/aws-sdk-go/service/codecommit
 github.com/aws/aws-sdk-go/service/codedeploy
-github.com/aws/aws-sdk-go/service/configservice
 github.com/aws/aws-sdk-go/service/directconnect
 github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/ec2
-github.com/aws/aws-sdk-go/service/ecs
-github.com/aws/aws-sdk-go/service/efs
-github.com/aws/aws-sdk-go/service/eks
-github.com/aws/aws-sdk-go/service/elasticache
-github.com/aws/aws-sdk-go/service/elasticbeanstalk
 github.com/aws/aws-sdk-go/service/emr
 github.com/aws/aws-sdk-go/service/eventbridge
 github.com/aws/aws-sdk-go/service/glue
@@ -82,7 +75,6 @@ github.com/aws/aws-sdk-go/service/mediaconvert
 github.com/aws/aws-sdk-go/service/neptune
 github.com/aws/aws-sdk-go/service/opensearchservice
 github.com/aws/aws-sdk-go/service/organizations
-github.com/aws/aws-sdk-go/service/redshift
 github.com/aws/aws-sdk-go/service/rekognition
 github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
@@ -186,6 +178,12 @@ github.com/aws/aws-sdk-go-v2/service/batch/types
 github.com/aws/aws-sdk-go-v2/service/cloudformation
 github.com/aws/aws-sdk-go-v2/service/cloudformation/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cloudformation/types
+# github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cloudtrail
+github.com/aws/aws-sdk-go-v2/service/cloudtrail/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas
+github.com/aws/aws-sdk-go-v2/service/cloudtrail/types
 # github.com/aws/aws-sdk-go-v2/service/codepipeline v1.56.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/codepipeline
@@ -206,6 +204,12 @@ github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/internal/document
 github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas
 github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types
+# github.com/aws/aws-sdk-go-v2/service/configservice v1.74.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/configservice
+github.com/aws/aws-sdk-go-v2/service/configservice/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/configservice/schemas
+github.com/aws/aws-sdk-go-v2/service/configservice/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr
@@ -236,6 +240,11 @@ github.com/aws/aws-sdk-go-v2/service/eks/types
 github.com/aws/aws-sdk-go-v2/service/elasticache
 github.com/aws/aws-sdk-go-v2/service/elasticache/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/elasticache/types
+# github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk v1.43.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk
+github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk/types
 # github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/eventbridge
@@ -274,11 +283,22 @@ github.com/aws/aws-sdk-go-v2/service/internal/s3shared/config
 github.com/aws/aws-sdk-go-v2/service/kms
 github.com/aws/aws-sdk-go-v2/service/kms/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/kms/types
+# github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/lambda
+github.com/aws/aws-sdk-go-v2/service/lambda/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/lambda/schemas
+github.com/aws/aws-sdk-go-v2/service/lambda/types
 # github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/rds
 github.com/aws/aws-sdk-go-v2/service/rds/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/rds/types
+# github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/redshift
+github.com/aws/aws-sdk-go-v2/service/redshift/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/redshift/types
 # github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/s3

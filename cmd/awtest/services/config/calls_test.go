@@ -2,31 +2,32 @@ package config
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/configservice"
 	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	cstypes "github.com/aws/aws-sdk-go-v2/service/configservice/types"
 )
 
 func TestProcess_ValidConfig(t *testing.T) {
 	process := ConfigCalls[0].Process
 	results := process(&configResults{
-		Recorders: []*configservice.ConfigurationRecorder{
+		Recorders: []cstypes.ConfigurationRecorder{
 			{
 				Name:    aws.String("default"),
 				RoleARN: aws.String("arn:aws:iam::123456789012:role/config-role"),
 			},
 		},
-		RecorderStatuses: []*configservice.ConfigurationRecorderStatus{
+		RecorderStatuses: []cstypes.ConfigurationRecorderStatus{
 			{
 				Name:      aws.String("default"),
-				Recording: aws.Bool(true),
+				Recording: true,
 			},
 		},
-		Rules: []*configservice.ConfigRule{
+		Rules: []cstypes.ConfigRule{
 			{
 				ConfigRuleName:  aws.String("s3-bucket-versioning"),
-				ConfigRuleState: aws.String("ACTIVE"),
-				Source:          &configservice.Source{Owner: aws.String("AWS")},
+				ConfigRuleState: cstypes.ConfigRuleStateActive,
+				Source:          &cstypes.Source{Owner: cstypes.OwnerAws},
 			},
 		},
 	}, nil, false)
@@ -79,16 +80,16 @@ func TestProcess_ValidConfig(t *testing.T) {
 func TestProcess_RecorderStopped(t *testing.T) {
 	process := ConfigCalls[0].Process
 	results := process(&configResults{
-		Recorders: []*configservice.ConfigurationRecorder{
+		Recorders: []cstypes.ConfigurationRecorder{
 			{
 				Name:    aws.String("default"),
 				RoleARN: aws.String("arn:aws:iam::123456789012:role/config-role"),
 			},
 		},
-		RecorderStatuses: []*configservice.ConfigurationRecorderStatus{
+		RecorderStatuses: []cstypes.ConfigurationRecorderStatus{
 			{
 				Name:      aws.String("default"),
-				Recording: aws.Bool(false),
+				Recording: false,
 			},
 		},
 	}, nil, false)
@@ -104,12 +105,12 @@ func TestProcess_RecorderStopped(t *testing.T) {
 func TestProcess_EmptyRecorders(t *testing.T) {
 	process := ConfigCalls[0].Process
 	results := process(&configResults{
-		Recorders: []*configservice.ConfigurationRecorder{},
-		Rules: []*configservice.ConfigRule{
+		Recorders: []cstypes.ConfigurationRecorder{},
+		Rules: []cstypes.ConfigRule{
 			{
 				ConfigRuleName:  aws.String("my-rule"),
-				ConfigRuleState: aws.String("ACTIVE"),
-				Source:          &configservice.Source{Owner: aws.String("AWS")},
+				ConfigRuleState: cstypes.ConfigRuleStateActive,
+				Source:          &cstypes.Source{Owner: cstypes.OwnerAws},
 			},
 		},
 	}, nil, false)
@@ -125,19 +126,19 @@ func TestProcess_EmptyRecorders(t *testing.T) {
 func TestProcess_EmptyRules(t *testing.T) {
 	process := ConfigCalls[0].Process
 	results := process(&configResults{
-		Recorders: []*configservice.ConfigurationRecorder{
+		Recorders: []cstypes.ConfigurationRecorder{
 			{
 				Name:    aws.String("default"),
 				RoleARN: aws.String("arn:aws:iam::123456789012:role/config-role"),
 			},
 		},
-		RecorderStatuses: []*configservice.ConfigurationRecorderStatus{
+		RecorderStatuses: []cstypes.ConfigurationRecorderStatus{
 			{
 				Name:      aws.String("default"),
-				Recording: aws.Bool(true),
+				Recording: true,
 			},
 		},
-		Rules: []*configservice.ConfigRule{},
+		Rules: []cstypes.ConfigRule{},
 	}, nil, false)
 
 	if len(results) != 1 {
@@ -170,16 +171,16 @@ func TestProcess_AccessDenied(t *testing.T) {
 func TestProcess_NilFields(t *testing.T) {
 	process := ConfigCalls[0].Process
 	results := process(&configResults{
-		Recorders: []*configservice.ConfigurationRecorder{
+		Recorders: []cstypes.ConfigurationRecorder{
 			{
 				Name:    nil,
 				RoleARN: nil,
 			},
 		},
-		Rules: []*configservice.ConfigRule{
+		Rules: []cstypes.ConfigRule{
 			{
 				ConfigRuleName:  nil,
-				ConfigRuleState: nil,
+				ConfigRuleState: "",
 				Source:          nil,
 			},
 		},

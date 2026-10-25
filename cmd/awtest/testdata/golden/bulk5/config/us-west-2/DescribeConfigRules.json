@@ -1,0 +1,1 @@
+{"ConfigRules":[{"ConfigRuleName":"demo-s3-versioning","ConfigRuleState":"ACTIVE","Source":{"Owner":"AWS","SourceIdentifier":"S3_BUCKET_VERSIONING_ENABLED"}},{"ConfigRuleName":"bare-rule"}]}

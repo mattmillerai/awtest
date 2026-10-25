@@ -3,20 +3,22 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudtrail"
-	"time"
 )
 
 var CloudTrailCalls = []types.AWSService{
 	{
 		Name: "cloudtrail:DescribeTrails",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := cloudtrail.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", cloudtrail.NewFromConfig)
 			input := &cloudtrail.DescribeTrailsInput{}
-			return svc.DescribeTrailsWithContext(ctx, input)
+			return svc.DescribeTrails(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -34,13 +36,14 @@ var CloudTrailCalls = []types.AWSService{
 			}
 			if trails, ok := output.(*cloudtrail.DescribeTrailsOutput); ok {
 				for _, trail := range trails.TrailList {
-					utils.PrintResult(debug, "", "cloudtrail:DescribeTrails", fmt.Sprintf("Trail: %s", *trail.Name), nil)
+					name := aws.ToString(trail.Name)
+					utils.PrintResult(debug, "", "cloudtrail:DescribeTrails", fmt.Sprintf("Trail: %s", name), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "CloudTrail",
 						MethodName:   "cloudtrail:DescribeTrails",
 						ResourceType: "trail",
-						ResourceName: *trail.Name,
+						ResourceName: name,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -52,10 +55,10 @@ var CloudTrailCalls = []types.AWSService{
 	},
 	{
 		Name: "cloudtrail:ListTrails",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := cloudtrail.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", cloudtrail.NewFromConfig)
 			input := &cloudtrail.ListTrailsInput{}
-			return svc.ListTrailsWithContext(ctx, input)
+			return svc.ListTrails(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -73,13 +76,14 @@ var CloudTrailCalls = []types.AWSService{
 			}
 			if trailsOutput, ok := output.(*cloudtrail.ListTrailsOutput); ok {
 				for _, trail := range trailsOutput.Trails {
-					utils.PrintResult(debug, "", "cloudtrail:ListTrails", fmt.Sprintf("Trail: %s", *trail.Name), nil)
+					name := aws.ToString(trail.Name)
+					utils.PrintResult(debug, "", "cloudtrail:ListTrails", fmt.Sprintf("Trail: %s", name), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "CloudTrail",
 						MethodName:   "cloudtrail:ListTrails",
 						ResourceType: "trail",
-						ResourceName: *trail.Name,
+						ResourceName: name,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

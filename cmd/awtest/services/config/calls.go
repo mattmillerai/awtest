@@ -3,44 +3,45 @@ package config
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/configservice"
+	configtypes "github.com/aws/aws-sdk-go-v2/service/configservice/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/configservice"
-	"time"
 )
 
 type configResults struct {
-	Recorders        []*configservice.ConfigurationRecorder
-	RecorderStatuses []*configservice.ConfigurationRecorderStatus
-	Rules            []*configservice.ConfigRule
+	Recorders        []configtypes.ConfigurationRecorder
+	RecorderStatuses []configtypes.ConfigurationRecorderStatus
+	Rules            []configtypes.ConfigRule
 }
 
 var ConfigCalls = []types.AWSService{
 	{
 		Name: "config:DescribeConfigurationRecorders",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allRecorders []*configservice.ConfigurationRecorder
-			var allRecorderStatuses []*configservice.ConfigurationRecorderStatus
-			var allRules []*configservice.ConfigRule
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allRecorders []configtypes.ConfigurationRecorder
+			var allRecorderStatuses []configtypes.ConfigurationRecorderStatus
+			var allRules []configtypes.ConfigRule
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := configservice.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, configservice.NewFromConfig)
 
-				recOutput, err := svc.DescribeConfigurationRecordersWithContext(ctx, &configservice.DescribeConfigurationRecordersInput{})
+				recOutput, err := svc.DescribeConfigurationRecorders(ctx, &configservice.DescribeConfigurationRecordersInput{})
 				if err != nil {
 					return nil, err
 				}
 				allRecorders = append(allRecorders, recOutput.ConfigurationRecorders...)
 
-				statusOutput, err := svc.DescribeConfigurationRecorderStatusWithContext(ctx, &configservice.DescribeConfigurationRecorderStatusInput{})
+				statusOutput, err := svc.DescribeConfigurationRecorderStatus(ctx, &configservice.DescribeConfigurationRecorderStatusInput{})
 				if err != nil {
 					return nil, err
 				}
 				allRecorderStatuses = append(allRecorderStatuses, statusOutput.ConfigurationRecordersStatus...)
 
-				rulesOutput, err := svc.DescribeConfigRulesWithContext(ctx, &configservice.DescribeConfigRulesInput{})
+				rulesOutput, err := svc.DescribeConfigRules(ctx, &configservice.DescribeConfigRulesInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -67,21 +68,14 @@ var ConfigCalls = []types.AWSService{
 				// Build a map of recorder name -> recording status
 				recorderStatusMap := make(map[string]bool)
 				for _, status := range data.RecorderStatuses {
-					if status.Name != nil && status.Recording != nil {
-						recorderStatusMap[*status.Name] = *status.Recording
+					if status.Name != nil {
+						recorderStatusMap[*status.Name] = status.Recording
 					}
 				}
 
 				for _, recorder := range data.Recorders {
-					recorderName := ""
-					if recorder.Name != nil {
-						recorderName = *recorder.Name
-					}
-
-					roleArn := ""
-					if recorder.RoleARN != nil {
-						roleArn = *recorder.RoleARN
-					}
+					recorderName := aws.ToString(recorder.Name)
+					roleArn := aws.ToString(recorder.RoleARN)
 
 					recording := false
 					if isRecording, found := recorderStatusMap[recorderName]; found {
@@ -110,19 +104,12 @@ var ConfigCalls = []types.AWSService{
 				}
 
 				for _, rule := range data.Rules {
-					ruleName := ""
-					if rule.ConfigRuleName != nil {
-						ruleName = *rule.ConfigRuleName
-					}
-
-					ruleState := ""
-					if rule.ConfigRuleState != nil {
-						ruleState = *rule.ConfigRuleState
-					}
+					ruleName := aws.ToString(rule.ConfigRuleName)
+					ruleState := string(rule.ConfigRuleState)
 
 					sourceOwner := ""
-					if rule.Source != nil && rule.Source.Owner != nil {
-						sourceOwner = *rule.Source.Owner
+					if rule.Source != nil {
+						sourceOwner = string(rule.Source.Owner)
 					}
 
 					results = append(results, types.ScanResult{

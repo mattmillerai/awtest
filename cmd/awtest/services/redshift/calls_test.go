@@ -2,10 +2,11 @@ package redshift
 
 import (
 	"fmt"
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/redshift"
 	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	redshifttypes "github.com/aws/aws-sdk-go-v2/service/redshift/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 func TestProcess(t *testing.T) {
@@ -21,19 +22,19 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "valid cluster with all fields",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{
 					ClusterIdentifier: aws.String("my-redshift-cluster"),
 					NodeType:          aws.String("dc2.large"),
 					ClusterStatus:     aws.String("available"),
 					MasterUsername:    aws.String("admin"),
 					DBName:            aws.String("mydb"),
-					Endpoint: &redshift.Endpoint{
+					Endpoint: &redshifttypes.Endpoint{
 						Address: aws.String("my-redshift-cluster.abc123.us-east-1.redshift.amazonaws.com"),
-						Port:    aws.Int64(5439),
+						Port:    aws.Int32(5439),
 					},
 					Encrypted:     aws.Bool(false),
-					NumberOfNodes: aws.Int64(2),
+					NumberOfNodes: aws.Int32(2),
 				},
 			},
 			expectedCount: 1,
@@ -76,13 +77,13 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "encrypted cluster",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{
 					ClusterIdentifier: aws.String("encrypted-cluster"),
 					NodeType:          aws.String("ra3.xlplus"),
 					ClusterStatus:     aws.String("available"),
 					Encrypted:         aws.Bool(true),
-					NumberOfNodes:     aws.Int64(4),
+					NumberOfNodes:     aws.Int32(4),
 				},
 			},
 			expectedCount: 1,
@@ -98,7 +99,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple clusters",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{ClusterIdentifier: aws.String("cluster-1"), NodeType: aws.String("dc2.large")},
 				{ClusterIdentifier: aws.String("cluster-2"), NodeType: aws.String("ra3.xlplus")},
 			},
@@ -114,7 +115,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*redshift.Cluster{},
+			input:         []redshifttypes.Cluster{},
 			expectedCount: 0,
 		},
 		{
@@ -137,12 +138,12 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "endpoint with nil address",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{
 					ClusterIdentifier: aws.String("partial-endpoint"),
-					Endpoint: &redshift.Endpoint{
+					Endpoint: &redshifttypes.Endpoint{
 						Address: nil,
-						Port:    aws.Int64(5439),
+						Port:    aws.Int32(5439),
 					},
 				},
 			},
@@ -155,10 +156,10 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "endpoint with nil port",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{
 					ClusterIdentifier: aws.String("no-port"),
-					Endpoint: &redshift.Endpoint{
+					Endpoint: &redshifttypes.Endpoint{
 						Address: aws.String("my-cluster.abc123.us-east-1.redshift.amazonaws.com"),
 						Port:    nil,
 					},
@@ -173,7 +174,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*redshift.Cluster{
+			input: []redshifttypes.Cluster{
 				{
 					ClusterIdentifier: nil,
 					NodeType:          nil,

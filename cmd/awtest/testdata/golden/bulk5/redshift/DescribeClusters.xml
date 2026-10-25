@@ -1,0 +1,1 @@
+<DescribeClustersResponse xmlns="http://redshift.amazonaws.com/doc/2012-12-01/"><DescribeClustersResult><Clusters></Clusters></DescribeClustersResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></DescribeClustersResponse>
