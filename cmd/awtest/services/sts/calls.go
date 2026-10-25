@@ -2,25 +2,27 @@ package sts
 
 import (
 	"context"
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 var STSCalls = []types.AWSService{
 	{
 		Name: "sts:GetCallerIdentity",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := sts.New(sess)
-			output, err := svc.GetCallerIdentityWithContext(ctx, &sts.GetCallerIdentityInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", sts.NewFromConfig)
+			output, err := svc.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 			return map[string]interface{}{
 				"output": output,
 				"ctx":    ctx,
-				"sess":   sess,
+				"cfg":    cfg,
 			}, err
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -40,23 +42,17 @@ var STSCalls = []types.AWSService{
 
 			if outputMap, ok := output.(map[string]interface{}); ok {
 				stsOutput, _ := outputMap["output"].(*sts.GetCallerIdentityOutput)
+				if stsOutput == nil {
+					return results
+				}
 				ctx, _ := outputMap["ctx"].(context.Context)
 				if ctx == nil {
 					ctx = context.Background()
 				}
-				sess, _ := outputMap["sess"].(*session.Session)
-				userId := ""
-				account := ""
-				arn := ""
-				if stsOutput.UserId != nil {
-					userId = *stsOutput.UserId
-				}
-				if stsOutput.Account != nil {
-					account = *stsOutput.Account
-				}
-				if stsOutput.Arn != nil {
-					arn = *stsOutput.Arn
-				}
+				cfg, hasCfg := outputMap["cfg"].(aws.Config)
+				userId := aws.ToString(stsOutput.UserId)
+				account := aws.ToString(stsOutput.Account)
+				arn := aws.ToString(stsOutput.Arn)
 
 				// Add identity result
 				results = append(results, types.ScanResult{
@@ -80,21 +76,21 @@ var STSCalls = []types.AWSService{
 				userName := arnParts[len(arnParts)-1]
 				utils.PrintResult(debug, "", "iam-user", userName, nil)
 
+				if !hasCfg {
+					return results
+				}
+
 				// List attached user policies by calling the IAM service using the Policy Simulator
-				iamSess := sess.Copy()
-				svc := iam.New(iamSess)
-				attachedPolicyOutput, err := svc.ListAttachedUserPoliciesWithContext(ctx, &iam.ListAttachedUserPoliciesInput{
+				svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
+				attachedPolicyOutput, err := svc.ListAttachedUserPolicies(ctx, &iam.ListAttachedUserPoliciesInput{
 					UserName: &userName,
 				})
 
 				if err != nil {
-					utils.HandleAWSError(debug, "iam:ListAttachedUserPolicies", err)
+					utils.HandleAWSError(debug, "iam:ListAttachedUserPolicies", awsv2.Wrap(err))
 				} else {
 					for _, policy := range attachedPolicyOutput.AttachedPolicies {
-						policyArn := ""
-						if policy.PolicyArn != nil {
-							policyArn = *policy.PolicyArn
-						}
+						policyArn := aws.ToString(policy.PolicyArn)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "IAM",
@@ -110,19 +106,14 @@ var STSCalls = []types.AWSService{
 				}
 
 				// List user policies by calling the IAM service
-				policyOutput, err := svc.ListUserPoliciesWithContext(ctx, &iam.ListUserPoliciesInput{
+				policyOutput, err := svc.ListUserPolicies(ctx, &iam.ListUserPoliciesInput{
 					UserName: &userName,
 				})
 
 				if err != nil {
-					utils.HandleAWSError(debug, "iam:ListUserPolicies", err)
+					utils.HandleAWSError(debug, "iam:ListUserPolicies", awsv2.Wrap(err))
 				} else {
-					for _, policy := range policyOutput.PolicyNames {
-						policyName := ""
-						if policy != nil {
-							policyName = *policy
-						}
-
+					for _, policyName := range policyOutput.PolicyNames {
 						results = append(results, types.ScanResult{
 							ServiceName:  "IAM",
 							MethodName:   "iam:ListUserPolicies",

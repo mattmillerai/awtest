@@ -147,7 +147,10 @@ func scanV2Bypass(filename string, src []byte) ([]string, error) {
 		case *ast.CompositeLit:
 			if sel, ok := x.Type.(*ast.SelectorExpr); ok {
 				p := pathOf(sel)
-				if isV2ServiceOrFeature(p) {
+				if isV2ServiceOrFeature(p) && sel.Sel.Name == "Options" {
+					// Only client Options are forbidden; request inputs
+					// (sts.GetCallerIdentityInput{...}) are how a service
+					// builds its calls.
 					report(x.Pos(), "composite literal of %s.%s", p, sel.Sel.Name)
 				} else if p == v2AwsPath && sel.Sel.Name == "Config" {
 					report(x.Pos(), "composite literal of aws.Config")
@@ -252,6 +255,8 @@ func f() { awsv2.NewClient(nil, awsv2.ClientParams{}, wrap(sts.NewFromConfig)) }
 func f() { other.NewClient(nil, sts.NewFromConfig) }`, 1},
 		{"service options literal", hdr + `import "github.com/aws/aws-sdk-go-v2/service/sts"
 var _ = sts.Options{}`, 1},
+		{"service input literal is allowed", hdr + `import "github.com/aws/aws-sdk-go-v2/service/sts"
+var _ = &sts.GetCallerIdentityInput{}`, 0},
 		{"aws.Config literal", hdr + `import "github.com/aws/aws-sdk-go-v2/aws"
 var _ = aws.Config{}`, 1},
 		{"&aws.Config literal", hdr + `import "github.com/aws/aws-sdk-go-v2/aws"

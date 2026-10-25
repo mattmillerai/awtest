@@ -81,7 +81,12 @@ func (g guardTarget) ambientSuffixes() []string {
 func guardTargets() []guardTarget {
 	var out []guardTarget
 	for _, svc := range AllServices() {
-		out = append(out, guardTarget{svc: svc})
+		tg := guardTarget{svc: svc}
+		if svc.Name == "sts:GetCallerIdentity" {
+			// Process makes IAM follow-up calls with the same config.
+			tg.envSuffixes = []string{"STS", "IAM"}
+		}
+		out = append(out, tg)
 	}
 	return append(out, guardTarget{svc: syntheticV2Service(), envSuffixes: []string{"STS"}})
 }

@@ -1,8 +1,8 @@
 // Package awsv2 holds the aws-sdk-go v2 scaffolding for the planned v1 -> v2
 // migration.
 //
-// main wires this package in (see "Migration status" below) but no service
-// call has been migrated yet. It holds the configuration, retry, endpoint and
+// main wires this package in (see "Migration status" below) and the first
+// service, sts, has been migrated. It holds the configuration, retry, endpoint and
 // error-normalisation behaviour that migrated services rely on.
 //
 // Rules for future callers:
@@ -58,7 +58,10 @@
 //
 //   - types.AWSService has two mutually exclusive implementations: Call (v1,
 //     takes a *session.Session) and CallV2 (v2, takes an aws.Config). Exactly
-//     one is set. Every service is still v1 today.
+//     one is set. Migrated to v2 (CallV2): sts
+//     (sts:GetCallerIdentity, whose Process also makes the IAM
+//     ListAttachedUserPolicies / ListUserPolicies follow-ups with the v2 config
+//     carried in its output). Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
 //     from the context and returns the error normalised with Wrap
