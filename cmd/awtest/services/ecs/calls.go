@@ -3,30 +3,31 @@ package ecs
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	ecstypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecs"
-	"time"
 )
 
 var ECSCalls = []types.AWSService{
 	{
 		Name: "ecs:ListClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allClusters []*ecs.Cluster
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allClusters []ecstypes.Cluster
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := ecs.New(regionSess)
-				output, err := svc.ListClustersWithContext(ctx, &ecs.ListClustersInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, ecs.NewFromConfig)
+				output, err := svc.ListClusters(ctx, &ecs.ListClustersInput{})
 				if err != nil {
 					return nil, err
 				}
 
 				if len(output.ClusterArns) > 0 {
-					describeOutput, err := svc.DescribeClustersWithContext(ctx, &ecs.DescribeClustersInput{
+					describeOutput, err := svc.DescribeClusters(ctx, &ecs.DescribeClustersInput{
 						Clusters: output.ClusterArns,
 					})
 					if err != nil {
@@ -51,16 +52,16 @@ var ECSCalls = []types.AWSService{
 					},
 				}
 			}
-			if clusters, ok := output.([]*ecs.Cluster); ok {
+			if clusters, ok := output.([]ecstypes.Cluster); ok {
 				if len(clusters) == 0 {
 					utils.PrintResult(debug, "", "ecs:ListClusters", "No ECS clusters found.", nil)
 				} else {
 					for _, cluster := range clusters {
-						clusterName := aws.StringValue(cluster.ClusterName)
-						status := aws.StringValue(cluster.Status)
-						runningTasks := aws.Int64Value(cluster.RunningTasksCount)
-						pendingTasks := aws.Int64Value(cluster.PendingTasksCount)
-						activeServices := aws.Int64Value(cluster.ActiveServicesCount)
+						clusterName := aws.ToString(cluster.ClusterName)
+						status := aws.ToString(cluster.Status)
+						runningTasks := int64(cluster.RunningTasksCount)
+						pendingTasks := int64(cluster.PendingTasksCount)
+						activeServices := int64(cluster.ActiveServicesCount)
 
 						utils.PrintResult(debug, "", "ecs:ListClusters", fmt.Sprintf("ECS cluster: %s", utils.ColorizeItem(clusterName)), nil)
 						utils.PrintResult(debug, "", "ecs:ListClusters", fmt.Sprintf("Status: %s", status), nil)

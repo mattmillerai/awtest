@@ -1,0 +1,1 @@
+<DescribeCacheClustersResponse xmlns="http://elasticache.amazonaws.com/doc/2015-02-02/"><DescribeCacheClustersResult><CacheClusters/></DescribeCacheClustersResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></DescribeCacheClustersResponse>

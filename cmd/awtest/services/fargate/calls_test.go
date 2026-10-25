@@ -2,9 +2,9 @@ package fargate
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ecstypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ecs"
 	"testing"
 )
 
@@ -21,7 +21,7 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "valid Fargate task with all fields",
-			input: []*ecs.Task{
+			input: []ecstypes.Task{
 				{
 					TaskArn:           aws.String("arn:aws:ecs:us-east-1:123456:task/my-cluster/abc123"),
 					ClusterArn:        aws.String("arn:aws:ecs:us-east-1:123456:cluster/my-cluster"),
@@ -30,7 +30,7 @@ func TestProcess(t *testing.T) {
 					TaskDefinitionArn: aws.String("arn:aws:ecs:us-east-1:123456:task-definition/my-task:1"),
 					Cpu:               aws.String("256"),
 					Memory:            aws.String("512"),
-					LaunchType:        aws.String("FARGATE"),
+					LaunchType:        ecstypes.LaunchTypeFargate,
 				},
 			},
 			expectedCount: 1,
@@ -73,9 +73,9 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple Fargate tasks",
-			input: []*ecs.Task{
-				{TaskArn: aws.String("arn:task-1"), LaunchType: aws.String("FARGATE")},
-				{TaskArn: aws.String("arn:task-2"), LaunchType: aws.String("FARGATE")},
+			input: []ecstypes.Task{
+				{TaskArn: aws.String("arn:task-1"), LaunchType: ecstypes.LaunchTypeFargate},
+				{TaskArn: aws.String("arn:task-2"), LaunchType: ecstypes.LaunchTypeFargate},
 			},
 			expectedCount: 2,
 			checkResults: func(t *testing.T, results []types.ScanResult) {
@@ -89,7 +89,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*ecs.Task{},
+			input:         []ecstypes.Task{},
 			expectedCount: 0,
 		},
 		{
@@ -112,7 +112,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*ecs.Task{
+			input: []ecstypes.Task{
 				{
 					TaskArn:           nil,
 					ClusterArn:        nil,
@@ -121,7 +121,7 @@ func TestProcess(t *testing.T) {
 					TaskDefinitionArn: nil,
 					Cpu:               nil,
 					Memory:            nil,
-					LaunchType:        nil,
+					LaunchType:        "",
 				},
 			},
 			expectedCount: 1,

@@ -3,29 +3,30 @@ package eks
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/eks"
+	ekstypes "github.com/aws/aws-sdk-go-v2/service/eks/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/eks"
-	"time"
 )
 
 var EKSCalls = []types.AWSService{
 	{
 		Name: "eks:ListClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allClusters []*eks.Cluster
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allClusters []*ekstypes.Cluster
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := eks.New(regionSess)
-				listOutput, err := svc.ListClustersWithContext(ctx, &eks.ListClustersInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, eks.NewFromConfig)
+				listOutput, err := svc.ListClusters(ctx, &eks.ListClustersInput{})
 				if err != nil {
 					return nil, err
 				}
 				for _, clusterName := range listOutput.Clusters {
-					descOutput, err := svc.DescribeClusterWithContext(ctx, &eks.DescribeClusterInput{
-						Name: clusterName,
+					descOutput, err := svc.DescribeCluster(ctx, &eks.DescribeClusterInput{
+						Name: aws.String(clusterName),
 					})
 					if err != nil {
 						continue
@@ -50,7 +51,7 @@ var EKSCalls = []types.AWSService{
 				}
 			}
 
-			clusters, ok := output.([]*eks.Cluster)
+			clusters, ok := output.([]*ekstypes.Cluster)
 			if !ok {
 				utils.HandleAWSError(debug, "eks:ListClusters", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -62,43 +63,18 @@ var EKSCalls = []types.AWSService{
 			}
 
 			for _, cluster := range clusters {
-				name := ""
-				if cluster.Name != nil {
-					name = *cluster.Name
-				}
-
-				arn := ""
-				if cluster.Arn != nil {
-					arn = *cluster.Arn
-				}
-
-				status := ""
-				if cluster.Status != nil {
-					status = *cluster.Status
-				}
-
-				version := ""
-				if cluster.Version != nil {
-					version = *cluster.Version
-				}
-
-				endpoint := ""
-				if cluster.Endpoint != nil {
-					endpoint = *cluster.Endpoint
-				}
-
-				roleArn := ""
-				if cluster.RoleArn != nil {
-					roleArn = *cluster.RoleArn
-				}
+				name := aws.ToString(cluster.Name)
+				arn := aws.ToString(cluster.Arn)
+				status := string(cluster.Status)
+				version := aws.ToString(cluster.Version)
+				endpoint := aws.ToString(cluster.Endpoint)
+				roleArn := aws.ToString(cluster.RoleArn)
 
 				vpcId := ""
 				var subnetCount int
 				var sgCount int
 				if cluster.ResourcesVpcConfig != nil {
-					if cluster.ResourcesVpcConfig.VpcId != nil {
-						vpcId = *cluster.ResourcesVpcConfig.VpcId
-					}
+					vpcId = aws.ToString(cluster.ResourcesVpcConfig.VpcId)
 					subnetCount = len(cluster.ResourcesVpcConfig.SubnetIds)
 					sgCount = len(cluster.ResourcesVpcConfig.SecurityGroupIds)
 				}

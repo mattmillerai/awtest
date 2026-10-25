@@ -1,0 +1,1 @@
+{"FileSystems":[{"FileSystemId":"fs-0a1b2c3d","Name":"demo-share","LifeCycleState":"available","NumberOfMountTargets":2,"Encrypted":true,"OwnerId":"123456789012","CreationToken":"demo-token","PerformanceMode":"generalPurpose","SizeInBytes":{"Value":6144}},{"FileSystemId":"fs-4e5f6a7b","OwnerId":"123456789012","CreationToken":"bare-token","PerformanceMode":"generalPurpose"}]}

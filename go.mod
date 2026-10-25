@@ -18,6 +18,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.42.6
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.5
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.102.1
+	github.com/aws/aws-sdk-go-v2/service/efs v1.51.0
+	github.com/aws/aws-sdk-go-v2/service/eks v1.104.3
+	github.com/aws/aws-sdk-go-v2/service/elasticache v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.5

@@ -1,0 +1,142 @@
+[
+  {
+    "details": {
+      "active_services": 2,
+      "pending_tasks": 1,
+      "running_tasks": 3,
+      "status": "ACTIVE"
+    },
+    "methodName": "ecs:ListClusters",
+    "resourceName": "demo-cluster",
+    "resourceType": "cluster",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
+      "active_services": 0,
+      "pending_tasks": 0,
+      "running_tasks": 0,
+      "status": ""
+    },
+    "methodName": "ecs:ListClusters",
+    "resourceName": "bare-cluster",
+    "resourceType": "cluster",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
+      "Encrypted": true,
+      "LifeCycleState": "available",
+      "Name": "demo-share",
+      "NumberOfMountTargets": 2,
+      "SizeInBytes": 6144
+    },
+    "methodName": "efs:DescribeFileSystems",
+    "resourceName": "fs-0a1b2c3d",
+    "resourceType": "file-system",
+    "serviceName": "EFS"
+  },
+  {
+    "details": {
+      "Encrypted": false,
+      "LifeCycleState": "",
+      "Name": "",
+      "NumberOfMountTargets": 0,
+      "SizeInBytes": 0
+    },
+    "methodName": "efs:DescribeFileSystems",
+    "resourceName": "fs-4e5f6a7b",
+    "resourceType": "file-system",
+    "serviceName": "EFS"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:eks:us-west-2:123456789012:cluster/demo-cluster",
+      "Endpoint": "https://ABCDEF0123456789.gr7.us-west-2.eks.amazonaws.com",
+      "RoleArn": "arn:aws:iam::123456789012:role/demo-eks-role",
+      "SecurityGroups": 1,
+      "Status": "ACTIVE",
+      "Subnets": 3,
+      "Version": "1.29",
+      "VpcId": "vpc-0a1b2c3d"
+    },
+    "methodName": "eks:ListClusters",
+    "resourceName": "demo-cluster",
+    "resourceType": "cluster",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "Endpoint": "",
+      "RoleArn": "",
+      "SecurityGroups": 0,
+      "Status": "",
+      "Subnets": 0,
+      "Version": "",
+      "VpcId": ""
+    },
+    "methodName": "eks:ListClusters",
+    "resourceName": "bare-cluster",
+    "resourceType": "cluster",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {
+      "CacheClusterStatus": "available",
+      "CacheNodeType": "cache.t3.micro",
+      "Engine": "redis",
+      "EngineVersion": "7.0.7",
+      "NumCacheNodes": 1,
+      "PreferredAvailabilityZone": "us-west-2a"
+    },
+    "methodName": "elasticache:DescribeCacheClusters",
+    "resourceName": "demo-redis",
+    "resourceType": "cluster",
+    "serviceName": "ElastiCache"
+  },
+  {
+    "details": {
+      "CacheClusterStatus": "",
+      "CacheNodeType": "",
+      "Engine": "",
+      "EngineVersion": "",
+      "NumCacheNodes": 0,
+      "PreferredAvailabilityZone": ""
+    },
+    "methodName": "elasticache:DescribeCacheClusters",
+    "resourceName": "bare-cache",
+    "resourceType": "cluster",
+    "serviceName": "ElastiCache"
+  },
+  {
+    "details": {
+      "ClusterArn": "arn:aws:ecs:us-west-2:123456789012:cluster/demo-cluster",
+      "Cpu": "256",
+      "DesiredStatus": "RUNNING",
+      "LastStatus": "RUNNING",
+      "LaunchType": "FARGATE",
+      "Memory": "512",
+      "TaskDefinitionArn": "arn:aws:ecs:us-west-2:123456789012:task-definition/demo-task:7"
+    },
+    "methodName": "ecs:ListFargateTasks",
+    "resourceName": "arn:aws:ecs:us-west-2:123456789012:task/demo-cluster/0123456789abcdef0",
+    "resourceType": "task",
+    "serviceName": "Fargate"
+  },
+  {
+    "details": {
+      "ClusterArn": "",
+      "Cpu": "",
+      "DesiredStatus": "",
+      "LastStatus": "PENDING",
+      "LaunchType": "",
+      "Memory": "",
+      "TaskDefinitionArn": ""
+    },
+    "methodName": "ecs:ListFargateTasks",
+    "resourceName": "arn:aws:ecs:us-west-2:123456789012:task/demo-cluster/0123456789abcdef1",
+    "resourceType": "task",
+    "serviceName": "Fargate"
+  }
+]

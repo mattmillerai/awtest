@@ -82,6 +82,13 @@
 //     loops, plus stepfunctions (states:ListStateMachines) and systemsmanager
 //     (ssm:DescribeParameters), regional loops with manual NextToken
 //     pagination whose failing regions are skipped.
+//     Bulk 4 is migrated too: ecs (ecs:ListClusters with DescribeClusters) and
+//     fargate (ecs:ListFargateTasks, manual NextToken pagination, failing
+//     regions skipped), both on the ecs module; efs
+//     (efs:DescribeFileSystems) and eks (eks:ListClusters with DescribeCluster
+//     follow-ups), non-paginated regional loops; and elasticache
+//     (elasticache:DescribeCacheClusters, manual Marker pagination, failing
+//     regions skipped).
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

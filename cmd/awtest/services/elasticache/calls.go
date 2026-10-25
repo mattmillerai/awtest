@@ -3,30 +3,31 @@ package elasticache
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/elasticache"
+	ectypes "github.com/aws/aws-sdk-go-v2/service/elasticache/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/elasticache"
-	"time"
 )
 
 var ElastiCacheCalls = []types.AWSService{
 	{
 		Name: "elasticache:DescribeCacheClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allClusters []*elasticache.CacheCluster
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allClusters []ectypes.CacheCluster
 			var lastErr error
 			anyRegionSucceeded := false
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := elasticache.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, elasticache.NewFromConfig)
 				input := &elasticache.DescribeCacheClustersInput{
 					ShowCacheNodeInfo: aws.Bool(true),
 				}
 				regionFailed := false
 				for {
-					output, err := svc.DescribeCacheClustersWithContext(ctx, input)
+					output, err := svc.DescribeCacheClusters(ctx, input)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -62,7 +63,7 @@ var ElastiCacheCalls = []types.AWSService{
 				}
 			}
 
-			clusters, ok := output.([]*elasticache.CacheCluster)
+			clusters, ok := output.([]ectypes.CacheCluster)
 			if !ok {
 				utils.HandleAWSError(debug, "elasticache:DescribeCacheClusters", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -74,40 +75,13 @@ var ElastiCacheCalls = []types.AWSService{
 			}
 
 			for _, cluster := range clusters {
-				clusterId := ""
-				if cluster.CacheClusterId != nil {
-					clusterId = *cluster.CacheClusterId
-				}
-
-				engine := ""
-				if cluster.Engine != nil {
-					engine = *cluster.Engine
-				}
-
-				engineVersion := ""
-				if cluster.EngineVersion != nil {
-					engineVersion = *cluster.EngineVersion
-				}
-
-				nodeType := ""
-				if cluster.CacheNodeType != nil {
-					nodeType = *cluster.CacheNodeType
-				}
-
-				status := ""
-				if cluster.CacheClusterStatus != nil {
-					status = *cluster.CacheClusterStatus
-				}
-
-				var numNodes int64
-				if cluster.NumCacheNodes != nil {
-					numNodes = *cluster.NumCacheNodes
-				}
-
-				az := ""
-				if cluster.PreferredAvailabilityZone != nil {
-					az = *cluster.PreferredAvailabilityZone
-				}
+				clusterId := aws.ToString(cluster.CacheClusterId)
+				engine := aws.ToString(cluster.Engine)
+				engineVersion := aws.ToString(cluster.EngineVersion)
+				nodeType := aws.ToString(cluster.CacheNodeType)
+				status := aws.ToString(cluster.CacheClusterStatus)
+				numNodes := int64(aws.ToInt32(cluster.NumCacheNodes))
+				az := aws.ToString(cluster.PreferredAvailabilityZone)
 
 				results = append(results, types.ScanResult{
 					ServiceName:  "ElastiCache",

@@ -2,9 +2,9 @@ package elasticache
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ectypes "github.com/aws/aws-sdk-go-v2/service/elasticache/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/elasticache"
 	"testing"
 )
 
@@ -21,14 +21,14 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "valid Redis cluster with all fields",
-			input: []*elasticache.CacheCluster{
+			input: []ectypes.CacheCluster{
 				{
-					CacheClusterId:          aws.String("my-redis-cluster"),
-					Engine:                  aws.String("redis"),
-					EngineVersion:           aws.String("7.0.7"),
-					CacheNodeType:           aws.String("cache.t3.micro"),
-					CacheClusterStatus:      aws.String("available"),
-					NumCacheNodes:           aws.Int64(1),
+					CacheClusterId:            aws.String("my-redis-cluster"),
+					Engine:                    aws.String("redis"),
+					EngineVersion:             aws.String("7.0.7"),
+					CacheNodeType:             aws.String("cache.t3.micro"),
+					CacheClusterStatus:        aws.String("available"),
+					NumCacheNodes:             aws.Int32(1),
 					PreferredAvailabilityZone: aws.String("us-east-1a"),
 				},
 			},
@@ -69,14 +69,14 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "Memcached cluster",
-			input: []*elasticache.CacheCluster{
+			input: []ectypes.CacheCluster{
 				{
 					CacheClusterId:     aws.String("my-memcached"),
 					Engine:             aws.String("memcached"),
 					EngineVersion:      aws.String("1.6.22"),
 					CacheNodeType:      aws.String("cache.m5.large"),
 					CacheClusterStatus: aws.String("available"),
-					NumCacheNodes:      aws.Int64(3),
+					NumCacheNodes:      aws.Int32(3),
 				},
 			},
 			expectedCount: 1,
@@ -92,7 +92,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple clusters",
-			input: []*elasticache.CacheCluster{
+			input: []ectypes.CacheCluster{
 				{CacheClusterId: aws.String("redis-1"), Engine: aws.String("redis")},
 				{CacheClusterId: aws.String("memcached-1"), Engine: aws.String("memcached")},
 			},
@@ -108,7 +108,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*elasticache.CacheCluster{},
+			input:         []ectypes.CacheCluster{},
 			expectedCount: 0,
 		},
 		{
@@ -131,14 +131,14 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*elasticache.CacheCluster{
+			input: []ectypes.CacheCluster{
 				{
-					CacheClusterId:          nil,
-					Engine:                  nil,
-					EngineVersion:           nil,
-					CacheNodeType:           nil,
-					CacheClusterStatus:      nil,
-					NumCacheNodes:           nil,
+					CacheClusterId:            nil,
+					Engine:                    nil,
+					EngineVersion:             nil,
+					CacheNodeType:             nil,
+					CacheClusterStatus:        nil,
+					NumCacheNodes:             nil,
 					PreferredAvailabilityZone: nil,
 				},
 			},

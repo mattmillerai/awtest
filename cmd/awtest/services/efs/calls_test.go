@@ -2,9 +2,9 @@ package efs
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	efstypes "github.com/aws/aws-sdk-go-v2/service/efs/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/efs"
 	"testing"
 )
 
@@ -21,13 +21,13 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "valid file systems with all fields",
-			input: []*efs.FileSystemDescription{
+			input: []efstypes.FileSystemDescription{
 				{
 					FileSystemId:         aws.String("fs-12345678"),
 					Name:                 aws.String("my-efs"),
-					LifeCycleState:       aws.String("available"),
-					SizeInBytes:          &efs.FileSystemSize{Value: aws.Int64(1024000)},
-					NumberOfMountTargets: aws.Int64(2),
+					LifeCycleState:       efstypes.LifeCycleStateAvailable,
+					SizeInBytes:          &efstypes.FileSystemSize{Value: 1024000},
+					NumberOfMountTargets: 2,
 					Encrypted:            aws.Bool(true),
 				},
 			},
@@ -65,17 +65,17 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "encrypted vs unencrypted",
-			input: []*efs.FileSystemDescription{
+			input: []efstypes.FileSystemDescription{
 				{
 					FileSystemId:   aws.String("fs-encrypted"),
-					LifeCycleState: aws.String("available"),
-					SizeInBytes:    &efs.FileSystemSize{Value: aws.Int64(500)},
+					LifeCycleState: efstypes.LifeCycleStateAvailable,
+					SizeInBytes:    &efstypes.FileSystemSize{Value: 500},
 					Encrypted:      aws.Bool(true),
 				},
 				{
 					FileSystemId:   aws.String("fs-unencrypted"),
-					LifeCycleState: aws.String("available"),
-					SizeInBytes:    &efs.FileSystemSize{Value: aws.Int64(1000)},
+					LifeCycleState: efstypes.LifeCycleStateAvailable,
+					SizeInBytes:    &efstypes.FileSystemSize{Value: 1000},
 					Encrypted:      aws.Bool(false),
 				},
 			},
@@ -91,7 +91,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*efs.FileSystemDescription{},
+			input:         []efstypes.FileSystemDescription{},
 			expectedCount: 0,
 		},
 		{
@@ -114,13 +114,13 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*efs.FileSystemDescription{
+			input: []efstypes.FileSystemDescription{
 				{
 					FileSystemId:         nil,
 					Name:                 nil,
-					LifeCycleState:       nil,
+					LifeCycleState:       "",
 					SizeInBytes:          nil,
-					NumberOfMountTargets: nil,
+					NumberOfMountTargets: 0,
 					Encrypted:            nil,
 				},
 			},

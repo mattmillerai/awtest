@@ -3,23 +3,24 @@ package efs
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/efs"
+	efstypes "github.com/aws/aws-sdk-go-v2/service/efs/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/efs"
-	"time"
 )
 
 var EfsCalls = []types.AWSService{
 	{
 		Name: "efs:DescribeFileSystems",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allFileSystems []*efs.FileSystemDescription
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allFileSystems []efstypes.FileSystemDescription
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := efs.New(regionSess)
-				output, err := svc.DescribeFileSystemsWithContext(ctx, &efs.DescribeFileSystemsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, efs.NewFromConfig)
+				output, err := svc.DescribeFileSystems(ctx, &efs.DescribeFileSystemsInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -42,7 +43,7 @@ var EfsCalls = []types.AWSService{
 				}
 			}
 
-			fileSystems, ok := output.([]*efs.FileSystemDescription)
+			fileSystems, ok := output.([]efstypes.FileSystemDescription)
 			if !ok {
 				utils.HandleAWSError(debug, "efs:DescribeFileSystems", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -54,35 +55,17 @@ var EfsCalls = []types.AWSService{
 			}
 
 			for _, fs := range fileSystems {
-				fsId := ""
-				if fs.FileSystemId != nil {
-					fsId = *fs.FileSystemId
-				}
-
-				name := ""
-				if fs.Name != nil {
-					name = *fs.Name
-				}
-
-				lifecycleState := ""
-				if fs.LifeCycleState != nil {
-					lifecycleState = *fs.LifeCycleState
-				}
+				fsId := aws.ToString(fs.FileSystemId)
+				name := aws.ToString(fs.Name)
+				lifecycleState := string(fs.LifeCycleState)
 
 				var sizeValue int64
-				if fs.SizeInBytes != nil && fs.SizeInBytes.Value != nil {
-					sizeValue = *fs.SizeInBytes.Value
+				if fs.SizeInBytes != nil {
+					sizeValue = fs.SizeInBytes.Value
 				}
 
-				var mountTargets int64
-				if fs.NumberOfMountTargets != nil {
-					mountTargets = *fs.NumberOfMountTargets
-				}
-
-				encrypted := false
-				if fs.Encrypted != nil {
-					encrypted = *fs.Encrypted
-				}
+				mountTargets := int64(fs.NumberOfMountTargets)
+				encrypted := aws.ToBool(fs.Encrypted)
 
 				sizeStr := fmt.Sprintf("%d bytes", sizeValue)
 

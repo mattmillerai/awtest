@@ -2,9 +2,9 @@ package eks
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ekstypes "github.com/aws/aws-sdk-go-v2/service/eks/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/eks"
 	"testing"
 )
 
@@ -21,18 +21,18 @@ func TestProcess(t *testing.T) {
 	}{
 		{
 			name: "valid cluster with all fields",
-			input: []*eks.Cluster{
+			input: []*ekstypes.Cluster{
 				{
 					Name:     aws.String("my-cluster"),
 					Arn:      aws.String("arn:aws:eks:us-east-1:123456789012:cluster/my-cluster"),
-					Status:   aws.String("ACTIVE"),
+					Status:   ekstypes.ClusterStatusActive,
 					Version:  aws.String("1.28"),
 					Endpoint: aws.String("https://ABC123.gr7.us-east-1.eks.amazonaws.com"),
 					RoleArn:  aws.String("arn:aws:iam::123456789012:role/eks-role"),
-					ResourcesVpcConfig: &eks.VpcConfigResponse{
+					ResourcesVpcConfig: &ekstypes.VpcConfigResponse{
 						VpcId:            aws.String("vpc-12345"),
-						SubnetIds:        []*string{aws.String("subnet-1"), aws.String("subnet-2")},
-						SecurityGroupIds: []*string{aws.String("sg-1")},
+						SubnetIds:        []string{"subnet-1", "subnet-2"},
+						SecurityGroupIds: []string{"sg-1"},
 					},
 				},
 			},
@@ -79,17 +79,17 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "multiple clusters",
-			input: []*eks.Cluster{
+			input: []*ekstypes.Cluster{
 				{
 					Name:    aws.String("cluster-1"),
 					Arn:     aws.String("arn:aws:eks:us-east-1:123456789012:cluster/cluster-1"),
-					Status:  aws.String("ACTIVE"),
+					Status:  ekstypes.ClusterStatusActive,
 					Version: aws.String("1.28"),
 				},
 				{
 					Name:    aws.String("cluster-2"),
 					Arn:     aws.String("arn:aws:eks:us-west-2:123456789012:cluster/cluster-2"),
-					Status:  aws.String("CREATING"),
+					Status:  ekstypes.ClusterStatusCreating,
 					Version: aws.String("1.27"),
 				},
 			},
@@ -108,7 +108,7 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name:          "empty results",
-			input:         []*eks.Cluster{},
+			input:         []*ekstypes.Cluster{},
 			expectedCount: 0,
 		},
 		{
@@ -131,11 +131,11 @@ func TestProcess(t *testing.T) {
 		},
 		{
 			name: "nil field handling",
-			input: []*eks.Cluster{
+			input: []*ekstypes.Cluster{
 				{
 					Name:               nil,
 					Arn:                nil,
-					Status:             nil,
+					Status:             "",
 					Version:            nil,
 					Endpoint:           nil,
 					RoleArn:            nil,

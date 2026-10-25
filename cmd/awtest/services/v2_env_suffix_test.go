@@ -13,6 +13,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/service/efs"
+	"github.com/aws/aws-sdk-go-v2/service/eks"
+	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -71,6 +75,12 @@ var v2EnvSuffix = map[string][]string{
 	"states":      {"SFN"},
 	"ssm":         {"SSM"},
 	"cognito-idp": {"COGNITO_IDENTITY_PROVIDER"},
+
+	// ecs also covers the fargate service (ecs:ListFargateTasks).
+	"ecs":         {"ECS"},
+	"efs":         {"EFS"},
+	"eks":         {"EKS"},
+	"elasticache": {"ELASTICACHE"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -98,6 +108,11 @@ var v2ServiceIDs = map[string][]string{
 	"states":      {sfn.ServiceID},
 	"ssm":         {ssm.ServiceID},
 	"cognito-idp": {cognitoidentityprovider.ServiceID},
+
+	"ecs":         {ecs.ServiceID},
+	"efs":         {efs.ServiceID},
+	"eks":         {eks.ServiceID},
+	"elasticache": {elasticache.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

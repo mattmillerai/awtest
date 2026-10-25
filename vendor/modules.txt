@@ -211,6 +211,31 @@ github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types
 github.com/aws/aws-sdk-go-v2/service/ecr
 github.com/aws/aws-sdk-go-v2/service/ecr/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/ecr/types
+# github.com/aws/aws-sdk-go-v2/service/ecs v1.102.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/ecs
+github.com/aws/aws-sdk-go-v2/service/ecs/document
+github.com/aws/aws-sdk-go-v2/service/ecs/internal/document
+github.com/aws/aws-sdk-go-v2/service/ecs/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/ecs/schemas
+github.com/aws/aws-sdk-go-v2/service/ecs/types
+# github.com/aws/aws-sdk-go-v2/service/efs v1.51.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/efs
+github.com/aws/aws-sdk-go-v2/service/efs/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/efs/schemas
+github.com/aws/aws-sdk-go-v2/service/efs/types
+# github.com/aws/aws-sdk-go-v2/service/eks v1.104.3
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/eks
+github.com/aws/aws-sdk-go-v2/service/eks/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/eks/schemas
+github.com/aws/aws-sdk-go-v2/service/eks/types
+# github.com/aws/aws-sdk-go-v2/service/elasticache v1.64.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/elasticache
+github.com/aws/aws-sdk-go-v2/service/elasticache/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/elasticache/types
 # github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/eventbridge

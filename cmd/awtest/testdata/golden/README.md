@@ -77,6 +77,20 @@ swallowed per-region errors, error text and the visited regions.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk3`
 green without regenerating it.
 
+## Bulk 4 golden (ecs, fargate, efs, eks, elasticache)
+
+`replay-bulk4.json` is the v1 baseline for the fourth bulk migration batch:
+`ecs:ListClusters`, `ecs:ListFargateTasks` (fargate; matched by the `ecs` filter), `efs:DescribeFileSystems`, `eks:ListClusters` and
+`elasticache:DescribeCacheClusters`. It is produced from the fictional fixtures
+in `bulk4/` (fixture dir `testdata/golden/bulk4`) with
+`awtest -replay <abs>/testdata/golden/bulk4 -services ecs,efs,eks,elasticache -quiet -format json`.
+The functional tests in each service package (including fargate, which shares
+the ecs module) additionally cover pagination, swallowed per-region errors,
+populated and sparse `details`, error text and the visited regions.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk4`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

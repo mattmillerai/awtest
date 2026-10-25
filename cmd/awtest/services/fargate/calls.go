@@ -3,31 +3,32 @@ package fargate
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	ecstypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecs"
-	"time"
 )
 
 var FargateCalls = []types.AWSService{
 	{
 		Name: "ecs:ListFargateTasks",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allTasks []*ecs.Task
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allTasks []ecstypes.Task
 			var lastErr error
 			anyRegionSucceeded := false
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := ecs.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, ecs.NewFromConfig)
 
 				// Step 1: List all clusters in this region
-				var clusterArns []*string
+				var clusterArns []string
 				listClustersInput := &ecs.ListClustersInput{}
 				regionFailed := false
 				for {
-					clustersOutput, err := svc.ListClustersWithContext(ctx, listClustersInput)
+					clustersOutput, err := svc.ListClusters(ctx, listClustersInput)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -46,13 +47,13 @@ var FargateCalls = []types.AWSService{
 
 				// Step 2: For each cluster, list Fargate tasks
 				for _, clusterArn := range clusterArns {
-					var taskArns []*string
+					var taskArns []string
 					listTasksInput := &ecs.ListTasksInput{
-						Cluster:    clusterArn,
-						LaunchType: aws.String("FARGATE"),
+						Cluster:    aws.String(clusterArn),
+						LaunchType: ecstypes.LaunchTypeFargate,
 					}
 					for {
-						tasksOutput, err := svc.ListTasksWithContext(ctx, listTasksInput)
+						tasksOutput, err := svc.ListTasks(ctx, listTasksInput)
 						if err != nil {
 							break
 						}
@@ -69,8 +70,8 @@ var FargateCalls = []types.AWSService{
 						if end > len(taskArns) {
 							end = len(taskArns)
 						}
-						describeOutput, err := svc.DescribeTasksWithContext(ctx, &ecs.DescribeTasksInput{
-							Cluster: clusterArn,
+						describeOutput, err := svc.DescribeTasks(ctx, &ecs.DescribeTasksInput{
+							Cluster: aws.String(clusterArn),
 							Tasks:   taskArns[i:end],
 						})
 						if err != nil {
@@ -100,7 +101,7 @@ var FargateCalls = []types.AWSService{
 				}
 			}
 
-			tasks, ok := output.([]*ecs.Task)
+			tasks, ok := output.([]ecstypes.Task)
 			if !ok {
 				utils.HandleAWSError(debug, "ecs:ListFargateTasks", fmt.Errorf("unexpected output type %T", output))
 				return results
@@ -112,45 +113,14 @@ var FargateCalls = []types.AWSService{
 			}
 
 			for _, task := range tasks {
-				taskArn := ""
-				if task.TaskArn != nil {
-					taskArn = *task.TaskArn
-				}
-
-				clusterArn := ""
-				if task.ClusterArn != nil {
-					clusterArn = *task.ClusterArn
-				}
-
-				lastStatus := ""
-				if task.LastStatus != nil {
-					lastStatus = *task.LastStatus
-				}
-
-				desiredStatus := ""
-				if task.DesiredStatus != nil {
-					desiredStatus = *task.DesiredStatus
-				}
-
-				taskDefArn := ""
-				if task.TaskDefinitionArn != nil {
-					taskDefArn = *task.TaskDefinitionArn
-				}
-
-				cpu := ""
-				if task.Cpu != nil {
-					cpu = *task.Cpu
-				}
-
-				memory := ""
-				if task.Memory != nil {
-					memory = *task.Memory
-				}
-
-				launchType := ""
-				if task.LaunchType != nil {
-					launchType = *task.LaunchType
-				}
+				taskArn := aws.ToString(task.TaskArn)
+				clusterArn := aws.ToString(task.ClusterArn)
+				lastStatus := aws.ToString(task.LastStatus)
+				desiredStatus := aws.ToString(task.DesiredStatus)
+				taskDefArn := aws.ToString(task.TaskDefinitionArn)
+				cpu := aws.ToString(task.Cpu)
+				memory := aws.ToString(task.Memory)
+				launchType := string(task.LaunchType)
 
 				results = append(results, types.ScanResult{
 					ServiceName:  "Fargate",
