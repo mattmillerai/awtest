@@ -61,34 +61,45 @@ type guardTarget struct {
 	svc types.AWSService
 	// envSuffixes are the <SVC> parts of AWS_ENDPOINT_URL_<SVC> to point at an
 	// unreachable host for this service (v2 clients resolve it themselves).
-	// Empty derives it from the service name ("sts:GetCallerIdentity" -> STS).
+	// Set from v2EnvSuffix for CallV2 services; empty for v1 services.
 	envSuffixes []string
 }
 
-func (g guardTarget) ambientSuffixes() []string {
-	if len(g.envSuffixes) > 0 {
-		return g.envSuffixes
-	}
-	name := g.svc.Name
+// servicePrefix is the part of a service name before ':'
+// ("sts:GetCallerIdentity" -> "sts").
+func servicePrefix(name string) string {
 	if i := strings.IndexByte(name, ':'); i >= 0 {
-		name = name[:i]
+		return name[:i]
 	}
-	return []string{strings.ToUpper(strings.NewReplacer("-", "_", " ", "_").Replace(name))}
+	return name
+}
+
+// v2Target builds the guard target of a CallV2 service from the explicit
+// v2EnvSuffix table. A missing entry fails the test rather than being derived,
+// because a wrong suffix would make the ambient-endpoint guard pass vacuously.
+func v2Target(t *testing.T, svc types.AWSService) guardTarget {
+	t.Helper()
+	prefix := servicePrefix(svc.Name)
+	suffixes, ok := v2EnvSuffix[prefix]
+	if !ok || len(suffixes) == 0 {
+		t.Fatalf("v2 service %q (prefix %q) has no entry in v2EnvSuffix: add it (and its ServiceID in v2ServiceIDs) in v2_env_suffix_test.go", svc.Name, prefix)
+	}
+	return guardTarget{svc: svc, envSuffixes: suffixes}
 }
 
 // guardTargets returns every registered service plus the guarded synthetic v2
 // service.
-func guardTargets() []guardTarget {
+func guardTargets(t *testing.T) []guardTarget {
+	t.Helper()
 	var out []guardTarget
 	for _, svc := range AllServices() {
-		tg := guardTarget{svc: svc}
-		if svc.Name == "sts:GetCallerIdentity" {
-			// Process makes IAM follow-up calls with the same config.
-			tg.envSuffixes = []string{"STS", "IAM"}
+		if svc.CallV2 == nil {
+			out = append(out, guardTarget{svc: svc})
+			continue
 		}
-		out = append(out, tg)
+		out = append(out, v2Target(t, svc))
 	}
-	return append(out, guardTarget{svc: syntheticV2Service(), envSuffixes: []string{"STS"}})
+	return append(out, v2Target(t, syntheticV2Service()))
 }
 
 // setAmbientEndpoints points AWS_ENDPOINT_URL and AWS_ENDPOINT_URL_<SVC> of
@@ -102,7 +113,7 @@ func setAmbientEndpoints(t *testing.T, targets []guardTarget) {
 		if tg.svc.CallV2 == nil {
 			continue
 		}
-		for _, s := range tg.ambientSuffixes() {
+		for _, s := range tg.envSuffixes {
 			t.Setenv("AWS_ENDPOINT_URL_"+s, unreachable)
 		}
 	}

@@ -25,8 +25,16 @@ var v1TransportSuffix = regexp.MustCompile(`\n\tstatus code: \d+, request id: \S
 // a Go struct dump (with the request id) appended after "<code>: <message>".
 var v1StructDump = regexp.MustCompile(`(?s)\n\{\n  RespMetadata: \{.*\n\}$`)
 
+// noFixtureRegion matches the region text of the replay "no fixture" error.
+// v1 regional services leaked their region into the shared session, so this
+// text changes as services migrate. Only the pattern
+// `no fixture for <svc>:<Action> (region <name>)` is rewritten; <name> may be
+// empty. Region scoping itself is guarded by TestAllServicesHonorRegionScope.
+var noFixtureRegion = regexp.MustCompile(`(no fixture for [^\s:]+:\S+ \(region )[a-z0-9-]*\)`)
+
 // normalizeGolden drops volatile fields (timestamp), strips the v1 transport
-// suffix from errors and re-encodes deterministically. Result order is kept.
+// suffix from errors, makes the replay "no fixture" region text uniform and
+// re-encodes deterministically. Result order is kept.
 func normalizeGolden(data []byte) ([]byte, error) {
 	dec := json.NewDecoder(bytes.NewReader(data))
 	dec.UseNumber()
@@ -38,7 +46,8 @@ func normalizeGolden(data []byte) ([]byte, error) {
 		delete(r, "timestamp")
 		if s, ok := r["error"].(string); ok {
 			s = v1TransportSuffix.ReplaceAllString(s, "")
-			r["error"] = v1StructDump.ReplaceAllString(s, "")
+			s = v1StructDump.ReplaceAllString(s, "")
+			r["error"] = noFixtureRegion.ReplaceAllString(s, "${1}R)")
 		}
 	}
 	var buf bytes.Buffer
@@ -200,6 +209,44 @@ func TestGoldenReplaySample(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			runGoldenCase(t, tc.args, tc.goldenPath)
+		})
+	}
+}
+
+func TestNormalizeGolden(t *testing.T) {
+	const prefix = "AccessDeniedException: awtest replay: no fixture for "
+	cases := []struct {
+		name, in, want string
+	}{
+		{"region normalized", prefix + "ec2:DescribeX (region us-east-1); expected ec2/DescribeX.xml or .json", prefix + "ec2:DescribeX (region R); expected ec2/DescribeX.xml or .json"},
+		{"other region normalized", prefix + "amplify:GET_apps (region us-west-2); expected a", prefix + "amplify:GET_apps (region R); expected a"},
+		{"empty region normalized", prefix + "ec2:DescribeX (region ); expected a", prefix + "ec2:DescribeX (region R); expected a"},
+		{"other error text unchanged", "ThrottlingException: slow down (region us-east-1)", "ThrottlingException: slow down (region us-east-1)"},
+		{"other parenthesis unchanged", prefix + "ec2:DescribeX (zone us-east-1); expected a", prefix + "ec2:DescribeX (zone us-east-1); expected a"},
+		{"no pattern unchanged", "AccessDenied: denied", "AccessDenied: denied"},
+		{"v1 suffix still stripped", prefix + "ec2:DescribeX (region eu-west-1); e\n\tstatus code: 403, request id: replay-00000004", prefix + "ec2:DescribeX (region R); e"},
+		{"v1 struct dump still stripped", "AccessDeniedException: denied\n{\n  RespMetadata: {\n    StatusCode: 403\n  },\n  Message_: \"denied\"\n}", "AccessDeniedException: denied"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			in, err := json.Marshal([]map[string]any{{"serviceName": "X", "error": tc.in, "timestamp": "t"}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			out, err := normalizeGolden(in)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []map[string]any
+			if err := json.Unmarshal(out, &got); err != nil {
+				t.Fatal(err)
+			}
+			if got[0]["error"] != tc.want {
+				t.Errorf("error = %q, want %q", got[0]["error"], tc.want)
+			}
+			if _, ok := got[0]["timestamp"]; ok {
+				t.Error("timestamp not dropped")
+			}
 		})
 	}
 }

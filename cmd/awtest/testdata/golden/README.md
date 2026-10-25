@@ -48,6 +48,17 @@ migration. Review them per service; do not normalize them away:
    `"InvalidParameter: 1 validation error(s) found.\n- missing required field, ListStreamKeysInput.ChannelArn.\n"`
    (v2 validates differently).
 
+## Region text normalization
+
+`normalizeGolden` (applied to both the committed golden and the fresh output)
+rewrites, inside each result's `error`, only the pattern
+`no fixture for <svc>:<Action> (region <name>)` to `(region R)`; the rest of the
+text is kept exact. v1 regional services leaked their region into the shared
+session, so this region text changes as services migrate, even though nothing
+else does. Region scoping is guarded separately by
+`TestAllServicesHonorRegionScope`, so normalizing it here loses no coverage.
+`TestNormalizeGolden` covers the normalizer.
+
 ## Regenerating
 
 ```
@@ -70,4 +81,7 @@ session's own region (us-west-2). Only the region text inside 13 replay
 "no fixture for ... (region X)" errors changed (us-east-1 -> us-west-2);
 resource names, details and order are identical. `replay-sample.json` was
 regenerated for exactly these lines. Further regional v1 services migrated
-later may shift the same text for services that run after them.
+later may shift the same text for services that run after them; this no
+longer needs regeneration, because the region text is now normalized (see
+"Region text normalization"). The committed goldens keep their current
+region text unchanged.

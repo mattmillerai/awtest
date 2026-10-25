@@ -242,7 +242,7 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 	// uses whichever SDK the service implements.
 	sess := fakeStaticSession(t)
 	utils.ApplyEndpoint(sess, srv.URL)
-	targets := guardTargets()
+	targets := guardTargets(t)
 	setAmbientEndpoints(t, targets)
 	cfg := guardedV2Config(t, guard, srv.URL)
 

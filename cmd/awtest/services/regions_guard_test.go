@@ -144,7 +144,7 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 		allowed[r] = true
 	}
 
-	targets := guardTargets()
+	targets := guardTargets(t)
 	setAmbientEndpoints(t, targets)
 	cfg := guardedV2Config(t, guard, srv.URL)
 
