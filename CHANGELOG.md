@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.1](https://github.com/Miller-Media/awtest-private/compare/v1.5.0...v1.5.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* update module path and update-check URL to github.com/mattmillerai/awtest ([#14](https://github.com/Miller-Media/awtest-private/issues/14)) ([d336ad6](https://github.com/Miller-Media/awtest-private/commit/d336ad68d992897aa4ac2b08e4da092619d82a59))
+
+### Module path change
+
+* The Go module path is now `github.com/mattmillerai/awtest`. Anyone importing the module or running `go install` with `github.com/MillerMedia/awtest` must switch to the new path. CLI and Homebrew users are unaffected. The update check now uses the new repository.
+
 ## [1.5.0](https://github.com/Miller-Media/awtest-private/compare/v1.4.0...v1.5.0) (2026-10-24)
 
 
