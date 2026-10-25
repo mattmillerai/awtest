@@ -2,7 +2,7 @@ package redshift
 
 import (
 	"fmt"
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/redshift"
 	"testing"

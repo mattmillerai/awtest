@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 // FormatWithSummary formats CSV with summary info as header comment rows.

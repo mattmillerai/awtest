@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 // mockServices creates a set of test AWSService entries mimicking real service prefixes.

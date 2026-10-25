@@ -57,7 +57,7 @@ Edit `cmd/awtest/services/services.go`:
 
 1. Add the import (maintain alphabetical order):
    ```go
-   "github.com/MillerMedia/awtest/cmd/awtest/services/SERVICENAME"
+   "github.com/mattmillerai/awtest/cmd/awtest/services/SERVICENAME"
    ```
 
 2. Add the append call in `AllServices()` (maintain alphabetical order):

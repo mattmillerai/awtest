@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/olekukonko/tablewriter"
 )
 

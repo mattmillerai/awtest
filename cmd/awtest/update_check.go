@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,7 +12,10 @@ import (
 )
 
 // releaseURL is the GitHub Releases API endpoint. Package-level var so tests can override.
-var releaseURL = "https://api.github.com/repos/MillerMedia/awtest/releases/latest"
+var releaseURL = "https://api.github.com/repos/mattmillerai/awtest/releases/latest"
+
+// releasesPageURL is the human-facing download page shown in upgrade hints.
+const releasesPageURL = "https://github.com/mattmillerai/awtest/releases/latest"
 
 const updateWarning = "Warning: Unable to check for updates"
 
@@ -23,7 +27,17 @@ func checkForUpdate(currentVersion string) (message string, warning string) {
 		return "Development build — skipping update check", ""
 	}
 
-	client := &http.Client{Timeout: 5 * time.Second}
+	// Redirects are followed explicitly (the repo moved owners, so the old API
+	// URL may answer with a 301), capped at 5 hops.
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 5 {
+				return errors.New("stopped after 5 redirects")
+			}
+			return nil
+		},
+	}
 
 	req, err := http.NewRequest("GET", releaseURL, nil)
 	if err != nil {
@@ -69,7 +83,7 @@ func checkForUpdate(currentVersion string) (message string, warning string) {
 		sb.WriteString("  brew upgrade awtest\n")
 	} else {
 		sb.WriteString("\nDownload the latest release:\n")
-		sb.WriteString("  https://github.com/MillerMedia/awtest/releases/latest\n")
+		sb.WriteString("  " + releasesPageURL + "\n")
 	}
 
 	return sb.String(), ""

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -180,6 +181,59 @@ func TestCheckForUpdate_UserAgent(t *testing.T) {
 	checkForUpdate("1.0.0")
 	if !containsStr(gotUA, "awtest") {
 		t.Errorf("expected User-Agent to contain 'awtest', got: %s", gotUA)
+	}
+}
+
+func TestCheckForUpdate_FollowsRedirect(t *testing.T) {
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"tag_name": "v9.9.9"}`)
+	}))
+	defer target.Close()
+
+	redirector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL, http.StatusMovedPermanently)
+	}))
+	defer redirector.Close()
+
+	origURL := releaseURL
+	releaseURL = redirector.URL
+	defer func() { releaseURL = origURL }()
+
+	msg, warn := checkForUpdate("1.0.0")
+	if warn != "" {
+		t.Fatalf("unexpected warning: %s", warn)
+	}
+	if !strings.Contains(msg, "9.9.9") {
+		t.Errorf("expected message to report 9.9.9 after redirect, got: %s", msg)
+	}
+}
+
+func TestCheckForUpdate_RedirectLoopStops(t *testing.T) {
+	var server *httptest.Server
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, server.URL, http.StatusFound)
+	}))
+	defer server.Close()
+
+	origURL := releaseURL
+	releaseURL = server.URL
+	defer func() { releaseURL = origURL }()
+
+	if _, warn := checkForUpdate("1.0.0"); warn == "" {
+		t.Error("expected warning for endless redirect loop")
+	}
+}
+
+func TestUpdateURLsUseCurrentOwner(t *testing.T) {
+	urls := []string{releaseURL, releasesPageURL}
+	for _, u := range urls {
+		if !strings.Contains(u, "mattmillerai/awtest") {
+			t.Errorf("%q should contain mattmillerai/awtest", u)
+		}
+		if strings.Contains(u, "MillerMedia") {
+			t.Errorf("%q must not contain MillerMedia", u)
+		}
 	}
 }
 

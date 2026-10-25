@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/diff"
+	"github.com/mattmillerai/awtest/cmd/awtest/diff"
 )
 
 const diffUsage = `Usage:

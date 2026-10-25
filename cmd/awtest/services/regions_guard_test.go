@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
-	"github.com/MillerMedia/awtest/cmd/awtest/utils"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 // regionsAllowlist lists non-test files that may reference types.Regions

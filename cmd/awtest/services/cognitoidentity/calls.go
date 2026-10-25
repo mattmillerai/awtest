@@ -3,8 +3,8 @@ package cognitoidentity
 import (
 	"context"
 	"fmt"
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
-	"github.com/MillerMedia/awtest/cmd/awtest/utils"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentity"

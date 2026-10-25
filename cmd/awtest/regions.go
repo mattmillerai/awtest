@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"

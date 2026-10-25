@@ -1,4 +1,4 @@
-module github.com/MillerMedia/awtest
+module github.com/mattmillerai/awtest
 
 go 1.26.0
 

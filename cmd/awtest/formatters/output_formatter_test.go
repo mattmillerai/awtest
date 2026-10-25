@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 // mockFormatter is a test implementation of the OutputFormatter interface.

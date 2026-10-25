@@ -1,6 +1,6 @@
 package formatters
 
-import "github.com/MillerMedia/awtest/cmd/awtest/types"
+import "github.com/mattmillerai/awtest/cmd/awtest/types"
 
 // OutputFormatter defines the interface for all output formatters.
 // Implementations of this interface can format scan results into various output formats

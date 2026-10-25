@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 // signingRegions collects the region of each SigV4 Credential scope seen for

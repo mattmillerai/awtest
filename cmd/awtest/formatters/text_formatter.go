@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
-	"github.com/MillerMedia/awtest/cmd/awtest/utils"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 // TextFormatter formats scan results as colorized text output,

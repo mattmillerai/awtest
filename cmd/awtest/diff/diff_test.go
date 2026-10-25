@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/formatters"
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/formatters"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 func TestParse(t *testing.T) {

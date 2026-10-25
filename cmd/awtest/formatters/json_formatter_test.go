@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MillerMedia/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 func TestJSONFormatter_Format(t *testing.T) {
