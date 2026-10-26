@@ -307,7 +307,10 @@ func writeNoFixture(w http.ResponseWriter, op operation) {
 	case protoQuery:
 		body = `<?xml version="1.0" encoding="UTF-8"?><ErrorResponse><Error><Type>Sender</Type><Code>AccessDenied</Code><Message>` + x + `</Message></Error><RequestId>` + reqID + `</RequestId></ErrorResponse>`
 	default:
-		ct, body = "application/json", string(jsonBody)
+		// REST-JSON: IVS and IVS Realtime put the AccessDeniedException text in
+		// "exceptionMessage", so carry it there as well as in "message".
+		restBody, _ := json.Marshal(map[string]string{"__type": "AccessDeniedException", "message": msg, "exceptionMessage": msg})
+		ct, body = "application/json", string(restBody)
 		w.Header().Set("x-amzn-ErrorType", "AccessDeniedException")
 	}
 	w.Header().Set("Content-Type", ct)

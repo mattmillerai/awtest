@@ -44,6 +44,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.101.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 	github.com/aws/aws-sdk-go-v2/service/iot v1.84.6
+	github.com/aws/aws-sdk-go-v2/service/ivs v1.61.6
+	github.com/aws/aws-sdk-go-v2/service/ivschat v1.31.0
+	github.com/aws/aws-sdk-go-v2/service/ivsrealtime v1.45.0
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.56.5
 	github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
@@ -63,9 +66,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ses v1.42.5
 	github.com/aws/aws-sdk-go-v2/service/sfn v1.52.1
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.6
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.5
 	github.com/aws/aws-sdk-go-v2/service/transcribe v1.66.6
+	github.com/aws/aws-sdk-go-v2/service/waf v1.40.0
 	github.com/aws/smithy-go v1.28.6
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/olekukonko/tablewriter v0.0.5

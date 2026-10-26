@@ -1,6 +1,8 @@
 package awsv2
 
 import (
+	"reflect"
+
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/smithy-go"
@@ -23,9 +25,37 @@ func ErrorMessage(err error) string {
 		return ""
 	}
 	if ae := apiError(err); ae != nil {
-		return ae.ErrorMessage()
+		return apiMessage(ae)
 	}
 	return innermost(err).Error()
+}
+
+// apiMessage returns ae.ErrorMessage(), falling back to an ExceptionMessage
+// *string field when that is empty. Some services (IVS, IVS Realtime) put the
+// text of AccessDeniedException in "exceptionMessage", which the v2 types
+// store in ExceptionMessage while ErrorMessage() only returns Message.
+func apiMessage(ae smithy.APIError) string {
+	v := reflect.ValueOf(ae)
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return "" // typed nil: calling its methods may panic
+	}
+	if m := ae.ErrorMessage(); m != "" {
+		return m
+	}
+	for v.IsValid() && (v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface) {
+		if v.IsNil() {
+			return ""
+		}
+		v = v.Elem()
+	}
+	if !v.IsValid() || v.Kind() != reflect.Struct {
+		return ""
+	}
+	f := v.FieldByName("ExceptionMessage")
+	if !f.IsValid() || f.Kind() != reflect.Ptr || f.IsNil() || f.Type().Elem().Kind() != reflect.String || !f.CanInterface() {
+		return ""
+	}
+	return f.Elem().String()
 }
 
 // NormalizeError renders err as "<code>: <message>" for API errors, matching
@@ -38,7 +68,7 @@ func NormalizeError(err error) string {
 		return ""
 	}
 	if ae := apiError(err); ae != nil {
-		return ae.ErrorCode() + ": " + ae.ErrorMessage()
+		return ae.ErrorCode() + ": " + apiMessage(ae)
 	}
 	return innermost(err).Error()
 }

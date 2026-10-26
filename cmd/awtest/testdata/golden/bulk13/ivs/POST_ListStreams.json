@@ -1,0 +1,1 @@
+{"streams":[{"channelArn":"arn:aws:ivs:us-west-2:123456789012:channel/AbCdEf123456","streamId":"st-0123456789abcdef","state":"LIVE","health":"HEALTHY","viewerCount":42},{"channelArn":"arn:aws:ivs:us-west-2:123456789012:channel/GhIjKl654321","streamId":"st-fedcba9876543210"}]}

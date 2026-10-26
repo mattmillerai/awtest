@@ -1,0 +1,1 @@
+{"channels":[{"arn":"arn:aws:ivs:us-west-2:123456789012:channel/AbCdEf123456","name":"launch-stream","latencyMode":"LOW","type":"STANDARD","authorized":false,"recordingConfigurationArn":"arn:aws:ivs:us-west-2:123456789012:recording-configuration/RcAbCd987654"},{"arn":"arn:aws:ivs:us-west-2:123456789012:channel/GhIjKl654321"}]}

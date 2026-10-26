@@ -256,6 +256,44 @@ did not occur.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk12`
 green without regenerating it.
 
+## Bulk 13 golden (sqs, waf, ivs, ivschat, ivsrealtime)
+
+`replay-bulk13.json` is the v1 baseline for the thirteenth bulk migration
+batch: `sqs:ListQueues` (with its receive/attribute/dead-letter/EventBridge
+follow-ups), `waf:ListWebACLs` (WAF Classic), `ivs:ListChannels`,
+`ivs:ListStreams`, `ivs:ListStreamKeys` and the ivschat / ivsrealtime list
+calls. It is produced from the fictional fixtures in `bulk13/` (fixture dir
+`testdata/golden/bulk13`) with
+`awtest -replay <abs>/testdata/golden/bulk13 -services sqs,waf,ivs -quiet -format json`.
+The functional tests in each service package additionally cover sparse
+resources, error text and (sqs) the region loop and follow-up regions.
+
+Fixture change (not a golden change): the v2 `sqs` module speaks the AWS JSON
+1.0 protocol (releases before v1.27.0 speak the query protocol but do not work
+with the current core module), so the two sqs fixtures were converted from
+`ListQueues.xml` to `ListQueues.json` with the same content. `replay-bulk13.json`
+itself was not edited.
+
+Accepted golden changes (error text only; accepted as minimal and unavoidable
+with the typed v2 API). Exactly these `error` lines were edited by hand; the
+files were not regenerated:
+
+1. `ivs:ListStreamKeys` is rejected client-side (it needs a channel ARN). The v1
+   error was `"InvalidParameter: 1 validation error(s) found..."`; v2 reports the
+   same text without the `InvalidParameter: ` code prefix (the v2 validation
+   error has no code). Changed in `replay-bulk13.json` and `replay-sample.json`.
+2. `sqs:ListQueues` (no fixture, `replay-sample.json`): the code changed from
+   `AccessDenied` to `AccessDeniedException` because the v2 sqs client speaks
+   the JSON protocol, so the replay's JSON error type is reported as is.
+
+Not a golden change: the v2 `ivs` and `ivsrealtime` modules store the text of
+their modeled `AccessDeniedException` (real IVS sends it as `exceptionMessage`)
+in `ExceptionMessage`, while `ErrorMessage()` returns `Message`. `awsv2`
+therefore falls back to `ExceptionMessage` when the message is empty, and the
+replay REST-JSON "no fixture" body carries `exceptionMessage` as well as
+`message`, so the `ivs:ListChannels`, `ivs:ListStreams` and
+`ivsRealtime:ListStages` goldens are unchanged.
+
 ## Sample golden: accepted error-text change (restxml)
 
 accepted: v2 normalized error text for missing replay fixture on restxml

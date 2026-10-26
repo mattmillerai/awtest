@@ -39,6 +39,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/guardduty"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iot"
+	"github.com/aws/aws-sdk-go-v2/service/ivs"
+	"github.com/aws/aws-sdk-go-v2/service/ivschat"
+	"github.com/aws/aws-sdk-go-v2/service/ivsrealtime"
 	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
@@ -58,9 +61,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe"
+	"github.com/aws/aws-sdk-go-v2/service/waf"
 )
 
 // How to add a migrated (CallV2) service to the endpoint guards:
@@ -162,6 +167,13 @@ var v2EnvSuffix = map[string][]string{
 	// ec2 covers both ec2:DescribeInstances (ec2 service) and ec2:DescribeVpcs
 	// (vpc service), which share the ec2 module.
 	"ec2": {"EC2"},
+
+	// sqs:ListQueues also builds an EventBridge client (DescribeRule follow-up).
+	"sqs":         {"SQS", "EVENTBRIDGE"},
+	"waf":         {"WAF"},
+	"ivs":         {"IVS"},
+	"ivsChat":     {"IVSCHAT"},
+	"ivsRealtime": {"IVS_REALTIME"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -236,6 +248,12 @@ var v2ServiceIDs = map[string][]string{
 	"cloudwatchlogs": {cloudwatchlogs.ServiceID, cloudwatch.ServiceID},
 
 	"ec2": {ec2.ServiceID},
+
+	"sqs":         {sqs.ServiceID, eventbridge.ServiceID},
+	"waf":         {waf.ServiceID},
+	"ivs":         {ivs.ServiceID},
+	"ivsChat":     {ivschat.ServiceID},
+	"ivsRealtime": {ivsrealtime.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

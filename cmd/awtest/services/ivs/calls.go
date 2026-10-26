@@ -3,20 +3,22 @@ package ivs
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ivs"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ivs"
-	"time"
 )
 
 var IvsCalls = []types.AWSService{
 	{
 		Name: "ivs:ListChannels",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := ivs.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", ivs.NewFromConfig)
 			input := &ivs.ListChannelsInput{}
-			return svc.ListChannelsWithContext(ctx, input)
+			return svc.ListChannels(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -34,13 +36,14 @@ var IvsCalls = []types.AWSService{
 			}
 			if channels, ok := output.(*ivs.ListChannelsOutput); ok {
 				for _, channel := range channels.Channels {
-					utils.PrintResult(debug, "", "ivs:ListChannels", fmt.Sprintf("Channel: %s", *channel.Arn), nil)
+					arn := aws.ToString(channel.Arn)
+					utils.PrintResult(debug, "", "ivs:ListChannels", fmt.Sprintf("Channel: %s", arn), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IVS",
 						MethodName:   "ivs:ListChannels",
 						ResourceType: "channel",
-						ResourceName: *channel.Arn,
+						ResourceName: arn,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -52,10 +55,10 @@ var IvsCalls = []types.AWSService{
 	},
 	{
 		Name: "ivs:ListStreams",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := ivs.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", ivs.NewFromConfig)
 			input := &ivs.ListStreamsInput{}
-			return svc.ListStreamsWithContext(ctx, input)
+			return svc.ListStreams(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -73,13 +76,14 @@ var IvsCalls = []types.AWSService{
 			}
 			if streamsOutput, ok := output.(*ivs.ListStreamsOutput); ok {
 				for _, stream := range streamsOutput.Streams {
-					utils.PrintResult(debug, "", "ivs:ListStreams", fmt.Sprintf("Stream: %s", *stream.StreamId), nil)
+					id := aws.ToString(stream.StreamId)
+					utils.PrintResult(debug, "", "ivs:ListStreams", fmt.Sprintf("Stream: %s", id), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IVS",
 						MethodName:   "ivs:ListStreams",
 						ResourceType: "stream",
-						ResourceName: *stream.StreamId,
+						ResourceName: id,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -91,10 +95,10 @@ var IvsCalls = []types.AWSService{
 	},
 	{
 		Name: "ivs:ListStreamKeys",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := ivs.New(sess)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", ivs.NewFromConfig)
 			input := &ivs.ListStreamKeysInput{}
-			return svc.ListStreamKeysWithContext(ctx, input)
+			return svc.ListStreamKeys(ctx, input)
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
@@ -112,13 +116,14 @@ var IvsCalls = []types.AWSService{
 			}
 			if streamKeysOutput, ok := output.(*ivs.ListStreamKeysOutput); ok {
 				for _, streamKey := range streamKeysOutput.StreamKeys {
-					utils.PrintResult(debug, "", "ivs:ListStreamKeys", fmt.Sprintf("StreamKey: %s", *streamKey.Arn), nil)
+					arn := aws.ToString(streamKey.Arn)
+					utils.PrintResult(debug, "", "ivs:ListStreamKeys", fmt.Sprintf("StreamKey: %s", arn), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "IVS",
 						MethodName:   "ivs:ListStreamKeys",
 						ResourceType: "stream-key",
-						ResourceName: *streamKey.Arn,
+						ResourceName: arn,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

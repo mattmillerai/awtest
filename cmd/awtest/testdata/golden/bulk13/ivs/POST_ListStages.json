@@ -1,0 +1,1 @@
+{"stages":[{"arn":"arn:aws:ivs:us-west-2:123456789012:stage/StgAbc123","name":"town-hall-stage","activeSessionId":"sess-0001"},{"arn":"arn:aws:ivs:us-west-2:123456789012:stage/StgDef456","name":"standup-stage"}]}

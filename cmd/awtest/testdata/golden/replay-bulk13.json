@@ -1,0 +1,94 @@
+[
+  {
+    "details": {},
+    "methodName": "ivs:ListChannels",
+    "resourceName": "arn:aws:ivs:us-west-2:123456789012:channel/AbCdEf123456",
+    "resourceType": "channel",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "methodName": "ivs:ListChannels",
+    "resourceName": "arn:aws:ivs:us-west-2:123456789012:channel/GhIjKl654321",
+    "resourceType": "channel",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "methodName": "ivs:ListStreams",
+    "resourceName": "st-0123456789abcdef",
+    "resourceType": "stream",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "methodName": "ivs:ListStreams",
+    "resourceName": "st-fedcba9876543210",
+    "resourceType": "stream",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "error": "1 validation error(s) found.\n- missing required field, ListStreamKeysInput.ChannelArn.\n",
+    "methodName": "ivs:ListStreamKeys",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "IVS"
+  },
+  {
+    "details": {},
+    "methodName": "ivsChat:ListRooms",
+    "resourceName": "lobby-chat",
+    "resourceType": "room",
+    "serviceName": "IVSChat"
+  },
+  {
+    "details": {},
+    "methodName": "ivsChat:ListRooms",
+    "resourceName": "support-chat",
+    "resourceType": "room",
+    "serviceName": "IVSChat"
+  },
+  {
+    "details": {},
+    "methodName": "ivsRealtime:ListStages",
+    "resourceName": "town-hall-stage",
+    "resourceType": "stage",
+    "serviceName": "IVSRealtime"
+  },
+  {
+    "details": {},
+    "methodName": "ivsRealtime:ListStages",
+    "resourceName": "standup-stage",
+    "resourceType": "stage",
+    "serviceName": "IVSRealtime"
+  },
+  {
+    "details": {},
+    "methodName": "sqs:ListQueues",
+    "resourceName": "https://sqs.us-west-2.amazonaws.com/123456789012/orders-queue",
+    "resourceType": "queue",
+    "serviceName": "SQS"
+  },
+  {
+    "details": {},
+    "methodName": "sqs:ListQueues",
+    "resourceName": "https://sqs.us-west-2.amazonaws.com/123456789012/orders-dlq",
+    "resourceType": "queue",
+    "serviceName": "SQS"
+  },
+  {
+    "details": {},
+    "methodName": "waf:ListWebACLs",
+    "resourceName": "edge-protection-acl",
+    "resourceType": "web-acl",
+    "serviceName": "WAF"
+  },
+  {
+    "details": {},
+    "methodName": "waf:ListWebACLs",
+    "resourceName": "api-rate-limit-acl",
+    "resourceType": "web-acl",
+    "serviceName": "WAF"
+  }
+]

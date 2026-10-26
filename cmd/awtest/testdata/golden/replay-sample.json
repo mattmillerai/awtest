@@ -685,7 +685,7 @@
   },
   {
     "details": {},
-    "error": "InvalidParameter: 1 validation error(s) found.\n- missing required field, ListStreamKeysInput.ChannelArn.\n",
+    "error": "1 validation error(s) found.\n- missing required field, ListStreamKeysInput.ChannelArn.\n",
     "methodName": "ivs:ListStreamKeys",
     "resourceName": "",
     "resourceType": "",
@@ -1155,7 +1155,7 @@
   },
   {
     "details": {},
-    "error": "AccessDenied: awtest replay: no fixture for sqs:ListQueues (region us-east-1); expected sqs/ListQueues.xml or .json",
+    "error": "AccessDeniedException: awtest replay: no fixture for sqs:ListQueues (region us-east-1); expected sqs/ListQueues.xml or .json",
     "methodName": "sqs:ListQueues",
     "resourceName": "",
     "resourceType": "",

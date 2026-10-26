@@ -138,6 +138,12 @@
 //     manual NextToken pagination, failing regions skipped), regional loops
 //     that share the ec2 module (pinned to v1.341.0) and no longer mutate a
 //     shared region.
+//     Bulk 13 is migrated too: sqs (ListQueues, a regional loop whose Process
+//     makes ReceiveMessage / GetQueueAttributes / ListDeadLetterSourceQueues
+//     follow-ups pinned to us-east-1 and an EventBridge DescribeRule in
+//     us-west-2), waf (WAF Classic ListWebACLs), ivs (ListChannels,
+//     ListStreams, ListStreamKeys), ivschat (ListRooms) and ivsrealtime
+//     (ListStages), single non-paginated calls.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

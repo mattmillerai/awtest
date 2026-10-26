@@ -1,0 +1,1 @@
+{"rooms":[{"arn":"arn:aws:ivschat:us-west-2:123456789012:room/RoomAbc123","id":"RoomAbc123","name":"lobby-chat","maximumMessageLength":500,"loggingConfigurationIdentifiers":["arn:aws:ivschat:us-west-2:123456789012:logging-configuration/LogCfg1"]},{"arn":"arn:aws:ivschat:us-west-2:123456789012:room/RoomDef456","id":"RoomDef456","name":"support-chat"}]}
