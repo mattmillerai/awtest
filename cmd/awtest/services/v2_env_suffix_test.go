@@ -19,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
+	"github.com/aws/aws-sdk-go-v2/service/directconnect"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
@@ -26,13 +27,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
+	"github.com/aws/aws-sdk-go-v2/service/emr"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
 	"github.com/aws/aws-sdk-go-v2/service/glue"
+	"github.com/aws/aws-sdk-go-v2/service/guardduty"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iot"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/macie2"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/redshift"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition"
@@ -116,6 +121,12 @@ var v2EnvSuffix = map[string][]string{
 	"codebuild":  {"CODEBUILD"},
 	"codecommit": {"CODECOMMIT"},
 	"codedeploy": {"CODEDEPLOY"},
+
+	"directconnect": {"DIRECT_CONNECT"},
+	"emr":           {"EMR"},
+	"kinesis":       {"KINESIS"},
+	"guardduty":     {"GUARDDUTY"},
+	"macie2":        {"MACIE2"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -166,6 +177,12 @@ var v2ServiceIDs = map[string][]string{
 	"codebuild":  {codebuild.ServiceID},
 	"codecommit": {codecommit.ServiceID},
 	"codedeploy": {codedeploy.ServiceID},
+
+	"directconnect": {directconnect.ServiceID},
+	"emr":           {emr.ServiceID},
+	"kinesis":       {kinesis.ServiceID},
+	"guardduty":     {guardduty.ServiceID},
+	"macie2":        {macie2.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

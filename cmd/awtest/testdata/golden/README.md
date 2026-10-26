@@ -146,6 +146,29 @@ be told apart from `false` through the typed API. That single line of
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk7`
 green without regenerating it.
 
+## Bulk 8 golden (directconnect, emr, kinesis, guardduty, macie2)
+
+`replay-bulk8.json` is the v1 baseline for the eighth bulk migration batch:
+the directconnect, emr, kinesis, guardduty and macie2 list calls and their
+describe/get follow-ups. It is produced from the fictional fixtures in `bulk8/`
+(fixture dir `testdata/golden/bulk8`) with
+`awtest -replay <abs>/testdata/golden/bulk8 -services directconnect,emr,kinesis,guardduty,macie2 -quiet -format json`.
+The functional tests in each service package additionally cover populated and
+sparse `details`, error text, pagination and the region loop.
+
+Intentional v1 -> v2 difference (accepted as minimal and unavoidable with the
+typed v2 API): for the sparse directconnect virtual interface `demo-bare-vif`,
+`Vlan` and `Asn` were `""` in v1 (the `*int64` fields were absent) and are
+`"0"` after the migration, because the v2 `VirtualInterface.Vlan` and `.Asn`
+are plain `int32` values and an absent field cannot be told apart from zero
+through the typed API. Those two lines of `replay-bulk8.json` were edited by
+hand (`""` -> `"0"`); nothing else in the golden changed. (The gateway
+`AmazonSideAsn` and the macie2 counts remain pointers in v2, so their absent
+values still print `""`.)
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk8`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

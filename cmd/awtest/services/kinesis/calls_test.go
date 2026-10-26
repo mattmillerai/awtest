@@ -5,45 +5,45 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	kinesistypes "github.com/aws/aws-sdk-go-v2/service/kinesis/types"
 )
 
 func TestListStreamsProcess(t *testing.T) {
 	process := KinesisCalls[0].Process
 
 	tests := []struct {
-		name              string
-		output            interface{}
-		err               error
-		wantLen           int
-		wantError         bool
-		wantResourceName  string
-		wantStreamName    string
-		wantStreamARN     string
-		wantStreamStatus  string
-		wantStreamMode    string
-		wantCreated       string
-		wantRegion        string
+		name             string
+		output           interface{}
+		err              error
+		wantLen          int
+		wantError        bool
+		wantResourceName string
+		wantStreamName   string
+		wantStreamARN    string
+		wantStreamStatus string
+		wantStreamMode   string
+		wantCreated      string
+		wantRegion       string
 	}{
 		{
 			name: "valid streams with full details",
 			output: []kinesisStream{
 				{
-					StreamName:       "my-data-stream",
-					StreamARN:        "arn:aws:kinesis:us-east-1:123456789012:stream/my-data-stream",
-					StreamStatus:     "ACTIVE",
-					StreamMode:       "ON_DEMAND",
+					StreamName:        "my-data-stream",
+					StreamARN:         "arn:aws:kinesis:us-east-1:123456789012:stream/my-data-stream",
+					StreamStatus:      "ACTIVE",
+					StreamMode:        "ON_DEMAND",
 					CreationTimestamp: "2026-01-15T10:00:00Z",
-					Region:           "us-east-1",
+					Region:            "us-east-1",
 				},
 				{
-					StreamName:       "event-stream",
-					StreamARN:        "arn:aws:kinesis:us-west-2:123456789012:stream/event-stream",
-					StreamStatus:     "CREATING",
-					StreamMode:       "PROVISIONED",
+					StreamName:        "event-stream",
+					StreamARN:         "arn:aws:kinesis:us-west-2:123456789012:stream/event-stream",
+					StreamStatus:      "CREATING",
+					StreamMode:        "PROVISIONED",
 					CreationTimestamp: "2026-02-20T14:00:00Z",
-					Region:           "us-west-2",
+					Region:            "us-west-2",
 				},
 			},
 			wantLen:          2,
@@ -71,12 +71,12 @@ func TestListStreamsProcess(t *testing.T) {
 			name: "nil-safe fields (empty strings)",
 			output: []kinesisStream{
 				{
-					StreamName:       "",
-					StreamARN:        "",
-					StreamStatus:     "",
-					StreamMode:       "",
+					StreamName:        "",
+					StreamARN:         "",
+					StreamStatus:      "",
+					StreamMode:        "",
 					CreationTimestamp: "",
-					Region:           "",
+					Region:            "",
 				},
 			},
 			wantLen:          1,
@@ -373,37 +373,37 @@ func TestListStreamConsumersProcess(t *testing.T) {
 	process := KinesisCalls[2].Process
 
 	tests := []struct {
-		name              string
-		output            interface{}
-		err               error
-		wantLen           int
-		wantError         bool
-		wantResourceName  string
-		wantConsumerName  string
-		wantConsumerARN   string
+		name               string
+		output             interface{}
+		err                error
+		wantLen            int
+		wantError          bool
+		wantResourceName   string
+		wantConsumerName   string
+		wantConsumerARN    string
 		wantConsumerStatus string
-		wantStreamName    string
-		wantCreated       string
-		wantRegion        string
+		wantStreamName     string
+		wantCreated        string
+		wantRegion         string
 	}{
 		{
 			name: "valid consumers with full details",
 			output: []kinesisConsumer{
 				{
-					ConsumerName:     "my-consumer-app",
-					ConsumerARN:      "arn:aws:kinesis:us-east-1:123456789012:stream/my-data-stream/consumer/my-consumer-app:1234567890",
-					ConsumerStatus:   "ACTIVE",
-					StreamName:       "my-data-stream",
+					ConsumerName:      "my-consumer-app",
+					ConsumerARN:       "arn:aws:kinesis:us-east-1:123456789012:stream/my-data-stream/consumer/my-consumer-app:1234567890",
+					ConsumerStatus:    "ACTIVE",
+					StreamName:        "my-data-stream",
 					CreationTimestamp: "2026-01-15T10:00:00Z",
-					Region:           "us-east-1",
+					Region:            "us-east-1",
 				},
 				{
-					ConsumerName:     "analytics-consumer",
-					ConsumerARN:      "arn:aws:kinesis:us-west-2:123456789012:stream/event-stream/consumer/analytics-consumer:9876543210",
-					ConsumerStatus:   "CREATING",
-					StreamName:       "event-stream",
+					ConsumerName:      "analytics-consumer",
+					ConsumerARN:       "arn:aws:kinesis:us-west-2:123456789012:stream/event-stream/consumer/analytics-consumer:9876543210",
+					ConsumerStatus:    "CREATING",
+					StreamName:        "event-stream",
 					CreationTimestamp: "2026-02-20T14:00:00Z",
-					Region:           "us-west-2",
+					Region:            "us-west-2",
 				},
 			},
 			wantLen:            2,
@@ -431,12 +431,12 @@ func TestListStreamConsumersProcess(t *testing.T) {
 			name: "nil-safe fields (empty strings)",
 			output: []kinesisConsumer{
 				{
-					ConsumerName:     "",
-					ConsumerARN:      "",
-					ConsumerStatus:   "",
-					StreamName:       "",
+					ConsumerName:      "",
+					ConsumerARN:       "",
+					ConsumerStatus:    "",
+					StreamName:        "",
 					CreationTimestamp: "",
-					Region:           "",
+					Region:            "",
 				},
 			},
 			wantLen:            1,
@@ -540,24 +540,24 @@ func TestExtractStream(t *testing.T) {
 	ts := time.Date(2026, 1, 15, 10, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name       string
-		input      *kinesis.StreamSummary
-		region     string
-		wantName   string
-		wantARN    string
-		wantStatus string
-		wantMode   string
+		name        string
+		input       kinesistypes.StreamSummary
+		region      string
+		wantName    string
+		wantARN     string
+		wantStatus  string
+		wantMode    string
 		wantCreated string
-		wantRegion string
+		wantRegion  string
 	}{
 		{
 			name: "all fields populated",
-			input: &kinesis.StreamSummary{
+			input: kinesistypes.StreamSummary{
 				StreamName:   aws.String("my-stream"),
 				StreamARN:    aws.String("arn:aws:kinesis:us-east-1:123456789012:stream/my-stream"),
-				StreamStatus: aws.String("ACTIVE"),
-				StreamModeDetails: &kinesis.StreamModeDetails{
-					StreamMode: aws.String("ON_DEMAND"),
+				StreamStatus: "ACTIVE",
+				StreamModeDetails: &kinesistypes.StreamModeDetails{
+					StreamMode: "ON_DEMAND",
 				},
 				StreamCreationTimestamp: &ts,
 			},
@@ -571,7 +571,7 @@ func TestExtractStream(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &kinesis.StreamSummary{},
+			input:       kinesistypes.StreamSummary{},
 			region:      "eu-west-1",
 			wantName:    "",
 			wantARN:     "",
@@ -582,9 +582,9 @@ func TestExtractStream(t *testing.T) {
 		},
 		{
 			name: "stream mode details present but stream mode nil",
-			input: &kinesis.StreamSummary{
+			input: kinesistypes.StreamSummary{
 				StreamName:        aws.String("partial-stream"),
-				StreamModeDetails: &kinesis.StreamModeDetails{},
+				StreamModeDetails: &kinesistypes.StreamModeDetails{},
 			},
 			region:      "us-west-2",
 			wantName:    "partial-stream",
@@ -623,28 +623,28 @@ func TestExtractStream(t *testing.T) {
 
 func TestExtractShard(t *testing.T) {
 	tests := []struct {
-		name           string
-		input          *kinesis.Shard
-		streamName     string
-		region         string
-		wantShardId    string
-		wantParent     string
-		wantStartHash  string
-		wantEndHash    string
-		wantStartSeq   string
-		wantEndSeq     string
-		wantRegion     string
+		name          string
+		input         kinesistypes.Shard
+		streamName    string
+		region        string
+		wantShardId   string
+		wantParent    string
+		wantStartHash string
+		wantEndHash   string
+		wantStartSeq  string
+		wantEndSeq    string
+		wantRegion    string
 	}{
 		{
 			name: "all fields populated",
-			input: &kinesis.Shard{
+			input: kinesistypes.Shard{
 				ShardId:       aws.String("shardId-000000000000"),
 				ParentShardId: aws.String("shardId-parent"),
-				HashKeyRange: &kinesis.HashKeyRange{
+				HashKeyRange: &kinesistypes.HashKeyRange{
 					StartingHashKey: aws.String("0"),
 					EndingHashKey:   aws.String("340282366920938463463374607431768211455"),
 				},
-				SequenceNumberRange: &kinesis.SequenceNumberRange{
+				SequenceNumberRange: &kinesistypes.SequenceNumberRange{
 					StartingSequenceNumber: aws.String("49590338271490256608559692538361571095921575989136588802"),
 					EndingSequenceNumber:   aws.String("49590338271534858098956753784644642541764696821608284162"),
 				},
@@ -661,7 +661,7 @@ func TestExtractShard(t *testing.T) {
 		},
 		{
 			name:          "all fields nil",
-			input:         &kinesis.Shard{},
+			input:         kinesistypes.Shard{},
 			streamName:    "empty-stream",
 			region:        "eu-west-1",
 			wantShardId:   "",
@@ -674,10 +674,10 @@ func TestExtractShard(t *testing.T) {
 		},
 		{
 			name: "hash key range present but keys nil",
-			input: &kinesis.Shard{
+			input: kinesistypes.Shard{
 				ShardId:      aws.String("shardId-000000000001"),
-				HashKeyRange: &kinesis.HashKeyRange{},
-				SequenceNumberRange: &kinesis.SequenceNumberRange{
+				HashKeyRange: &kinesistypes.HashKeyRange{},
+				SequenceNumberRange: &kinesistypes.SequenceNumberRange{
 					StartingSequenceNumber: aws.String("12345"),
 				},
 			},
@@ -693,12 +693,12 @@ func TestExtractShard(t *testing.T) {
 		},
 		{
 			name: "sequence number range present but numbers nil",
-			input: &kinesis.Shard{
+			input: kinesistypes.Shard{
 				ShardId: aws.String("shardId-000000000002"),
-				HashKeyRange: &kinesis.HashKeyRange{
+				HashKeyRange: &kinesistypes.HashKeyRange{
 					StartingHashKey: aws.String("100"),
 				},
-				SequenceNumberRange: &kinesis.SequenceNumberRange{},
+				SequenceNumberRange: &kinesistypes.SequenceNumberRange{},
 			},
 			streamName:    "another-stream",
 			region:        "ap-southeast-1",
@@ -748,7 +748,7 @@ func TestExtractConsumer(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		input       *kinesis.Consumer
+		input       kinesistypes.Consumer
 		streamName  string
 		region      string
 		wantName    string
@@ -759,10 +759,10 @@ func TestExtractConsumer(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &kinesis.Consumer{
+			input: kinesistypes.Consumer{
 				ConsumerName:              aws.String("my-consumer"),
 				ConsumerARN:               aws.String("arn:aws:kinesis:us-east-1:123456789012:stream/my-stream/consumer/my-consumer:1234567890"),
-				ConsumerStatus:            aws.String("ACTIVE"),
+				ConsumerStatus:            "ACTIVE",
 				ConsumerCreationTimestamp: &ts,
 			},
 			streamName:  "my-stream",
@@ -775,7 +775,7 @@ func TestExtractConsumer(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &kinesis.Consumer{},
+			input:       kinesistypes.Consumer{},
 			streamName:  "empty-stream",
 			region:      "eu-west-1",
 			wantName:    "",

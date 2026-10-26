@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/emr"
+	emrtypes "github.com/aws/aws-sdk-go-v2/service/emr/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/emr"
 )
 
 type emrCluster struct {
@@ -40,7 +41,7 @@ type emrSecurityConfig struct {
 	Region           string
 }
 
-func extractCluster(cluster *emr.Cluster, region string) emrCluster {
+func extractCluster(cluster emrtypes.Cluster, region string) emrCluster {
 	id := ""
 	if cluster.Id != nil {
 		id = *cluster.Id
@@ -50,8 +51,8 @@ func extractCluster(cluster *emr.Cluster, region string) emrCluster {
 		name = *cluster.Name
 	}
 	state := ""
-	if cluster.Status != nil && cluster.Status.State != nil {
-		state = *cluster.Status.State
+	if cluster.Status != nil {
+		state = string(cluster.Status.State)
 	}
 	releaseLabel := ""
 	if cluster.ReleaseLabel != nil {
@@ -66,7 +67,7 @@ func extractCluster(cluster *emr.Cluster, region string) emrCluster {
 	}
 }
 
-func extractInstanceGroup(ig *emr.InstanceGroup, clusterId, clusterName, region string) emrInstanceGroup {
+func extractInstanceGroup(ig emrtypes.InstanceGroup, clusterId, clusterName, region string) emrInstanceGroup {
 	id := ""
 	if ig.Id != nil {
 		id = *ig.Id
@@ -75,10 +76,7 @@ func extractInstanceGroup(ig *emr.InstanceGroup, clusterId, clusterName, region 
 	if ig.Name != nil {
 		name = *ig.Name
 	}
-	igType := ""
-	if ig.InstanceGroupType != nil {
-		igType = *ig.InstanceGroupType
-	}
+	igType := string(ig.InstanceGroupType)
 	instanceType := ""
 	if ig.InstanceType != nil {
 		instanceType = *ig.InstanceType
@@ -91,13 +89,10 @@ func extractInstanceGroup(ig *emr.InstanceGroup, clusterId, clusterName, region 
 	if ig.RunningInstanceCount != nil {
 		runningCount = fmt.Sprintf("%d", *ig.RunningInstanceCount)
 	}
-	market := ""
-	if ig.Market != nil {
-		market = *ig.Market
-	}
+	market := string(ig.Market)
 	state := ""
-	if ig.Status != nil && ig.Status.State != nil {
-		state = *ig.Status.State
+	if ig.Status != nil {
+		state = string(ig.Status.State)
 	}
 	return emrInstanceGroup{
 		Id:                     id,
@@ -114,7 +109,7 @@ func extractInstanceGroup(ig *emr.InstanceGroup, clusterId, clusterName, region 
 	}
 }
 
-func extractSecurityConfig(cfg *emr.SecurityConfigurationSummary, region string) emrSecurityConfig {
+func extractSecurityConfig(cfg emrtypes.SecurityConfigurationSummary, region string) emrSecurityConfig {
 	name := ""
 	if cfg.Name != nil {
 		name = *cfg.Name
@@ -133,29 +128,29 @@ func extractSecurityConfig(cfg *emr.SecurityConfigurationSummary, region string)
 var EMRCalls = []types.AWSService{
 	{
 		Name: "emr:ListClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allClusters []emrCluster
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, emr.NewFromConfig)
 				var marker *string
 				for {
 					input := &emr.ListClustersInput{}
 					if marker != nil {
 						input.Marker = marker
 					}
-					output, err := svc.ListClustersWithContext(ctx, input)
+					output, err := svc.ListClusters(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "emr:ListClusters", err)
 						break
 					}
 					for _, summary := range output.Clusters {
-						if summary == nil || summary.Id == nil {
+						if summary.Id == nil {
 							continue
 						}
-						descOutput, err := svc.DescribeClusterWithContext(ctx, &emr.DescribeClusterInput{
+						descOutput, err := svc.DescribeCluster(ctx, &emr.DescribeClusterInput{
 							ClusterId: summary.Id,
 						})
 						if err != nil {
@@ -163,7 +158,7 @@ var EMRCalls = []types.AWSService{
 							continue
 						}
 						if descOutput.Cluster != nil {
-							allClusters = append(allClusters, extractCluster(descOutput.Cluster, region))
+							allClusters = append(allClusters, extractCluster(*descOutput.Cluster, region))
 						}
 					}
 					if output.Marker == nil {
@@ -224,12 +219,12 @@ var EMRCalls = []types.AWSService{
 	},
 	{
 		Name: "emr:ListInstanceGroups",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allInstanceGroups []emrInstanceGroup
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, emr.NewFromConfig)
 
 				// Step 1: List all cluster IDs and names
 				var clusterIds []struct{ Id, Name string }
@@ -239,14 +234,14 @@ var EMRCalls = []types.AWSService{
 					if clusterMarker != nil {
 						input.Marker = clusterMarker
 					}
-					output, err := svc.ListClustersWithContext(ctx, input)
+					output, err := svc.ListClusters(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "emr:ListInstanceGroups", err)
 						break
 					}
 					for _, c := range output.Clusters {
-						if c != nil && c.Id != nil {
+						if c.Id != nil {
 							name := ""
 							if c.Name != nil {
 								name = *c.Name
@@ -270,15 +265,13 @@ var EMRCalls = []types.AWSService{
 						if igMarker != nil {
 							igInput.Marker = igMarker
 						}
-						igOutput, err := svc.ListInstanceGroupsWithContext(ctx, igInput)
+						igOutput, err := svc.ListInstanceGroups(ctx, igInput)
 						if err != nil {
 							utils.HandleAWSError(false, "emr:ListInstanceGroups", err)
 							break
 						}
 						for _, ig := range igOutput.InstanceGroups {
-							if ig != nil {
-								allInstanceGroups = append(allInstanceGroups, extractInstanceGroup(ig, cluster.Id, cluster.Name, region))
-							}
+							allInstanceGroups = append(allInstanceGroups, extractInstanceGroup(ig, cluster.Id, cluster.Name, region))
 						}
 						if igOutput.Marker == nil {
 							break
@@ -345,28 +338,26 @@ var EMRCalls = []types.AWSService{
 	},
 	{
 		Name: "emr:ListSecurityConfigurations",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allConfigs []emrSecurityConfig
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := emr.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, emr.NewFromConfig)
 				var marker *string
 				for {
 					input := &emr.ListSecurityConfigurationsInput{}
 					if marker != nil {
 						input.Marker = marker
 					}
-					output, err := svc.ListSecurityConfigurationsWithContext(ctx, input)
+					output, err := svc.ListSecurityConfigurations(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "emr:ListSecurityConfigurations", err)
 						break
 					}
-					for _, cfg := range output.SecurityConfigurations {
-						if cfg != nil {
-							allConfigs = append(allConfigs, extractSecurityConfig(cfg, region))
-						}
+					for _, sc := range output.SecurityConfigurations {
+						allConfigs = append(allConfigs, extractSecurityConfig(sc, region))
 					}
 					if output.Marker == nil {
 						break

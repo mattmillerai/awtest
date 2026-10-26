@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/macie2"
+	macie2types "github.com/aws/aws-sdk-go-v2/service/macie2/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/macie2"
 )
 
 type mcClassificationJob struct {
@@ -44,16 +45,16 @@ type mcMonitoredBucket struct {
 }
 
 // batchGetFindings fetches full finding details for a batch of IDs with a single retry on failure.
-func batchGetFindings(ctx context.Context, svc *macie2.Macie2, ids []*string, region string) ([]mcFinding, error) {
+func batchGetFindings(ctx context.Context, svc *macie2.Client, ids []string, region string) ([]mcFinding, error) {
 	var results []mcFinding
 
-	batchOutput, err := svc.GetFindingsWithContext(ctx, &macie2.GetFindingsInput{
+	batchOutput, err := svc.GetFindings(ctx, &macie2.GetFindingsInput{
 		FindingIds: ids,
 	})
 	if err != nil {
 		utils.HandleAWSError(false, "macie2:GetFindings", err)
 		// Single retry for transient errors
-		retryOutput, retryErr := svc.GetFindingsWithContext(ctx, &macie2.GetFindingsInput{
+		retryOutput, retryErr := svc.GetFindings(ctx, &macie2.GetFindingsInput{
 			FindingIds: ids,
 		})
 		if retryErr != nil {
@@ -73,27 +74,15 @@ func batchGetFindings(ctx context.Context, svc *macie2.Macie2, ids []*string, re
 	return results, nil
 }
 
-func extractFinding(f *macie2.Finding, region string) mcFinding {
-	id := ""
-	if f.Id != nil {
-		id = *f.Id
-	}
-	findingType := ""
-	if f.Type != nil {
-		findingType = *f.Type
-	}
-	title := ""
-	if f.Title != nil {
-		title = *f.Title
-	}
+func extractFinding(f macie2types.Finding, region string) mcFinding {
+	id := aws.ToString(f.Id)
+	findingType := string(f.Type)
+	title := aws.ToString(f.Title)
 	severity := ""
-	if f.Severity != nil && f.Severity.Description != nil {
-		severity = *f.Severity.Description
+	if f.Severity != nil {
+		severity = string(f.Severity.Description)
 	}
-	category := ""
-	if f.Category != nil {
-		category = *f.Category
-	}
+	category := string(f.Category)
 	count := ""
 	if f.Count != nil {
 		count = fmt.Sprintf("%d", *f.Count)
@@ -117,21 +106,21 @@ func extractFinding(f *macie2.Finding, region string) mcFinding {
 var Macie2Calls = []types.AWSService{
 	{
 		Name: "macie2:ListClassificationJobs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allJobs []mcClassificationJob
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, macie2.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &macie2.ListClassificationJobsInput{
-						MaxResults: aws.Int64(25),
+						MaxResults: aws.Int32(25),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListClassificationJobsWithContext(ctx, input)
+					output, err := svc.ListClassificationJobs(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "macie2:ListClassificationJobs", err)
@@ -139,22 +128,10 @@ var Macie2Calls = []types.AWSService{
 					}
 
 					for _, job := range output.Items {
-						jobId := ""
-						if job.JobId != nil {
-							jobId = *job.JobId
-						}
-						name := ""
-						if job.Name != nil {
-							name = *job.Name
-						}
-						jobType := ""
-						if job.JobType != nil {
-							jobType = *job.JobType
-						}
-						jobStatus := ""
-						if job.JobStatus != nil {
-							jobStatus = *job.JobStatus
-						}
+						jobId := aws.ToString(job.JobId)
+						name := aws.ToString(job.Name)
+						jobType := string(job.JobType)
+						jobStatus := string(job.JobStatus)
 						createdAt := ""
 						if job.CreatedAt != nil {
 							createdAt = job.CreatedAt.Format(time.RFC3339)
@@ -234,21 +211,21 @@ var Macie2Calls = []types.AWSService{
 	},
 	{
 		Name: "macie2:ListFindings",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allFindings []mcFinding
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, macie2.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &macie2.ListFindingsInput{
-						MaxResults: aws.Int64(50),
+						MaxResults: aws.Int32(50),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListFindingsWithContext(ctx, input)
+					output, err := svc.ListFindings(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "macie2:ListFindings", err)
@@ -326,21 +303,21 @@ var Macie2Calls = []types.AWSService{
 	},
 	{
 		Name: "macie2:DescribeBuckets",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allBuckets []mcMonitoredBucket
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := macie2.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, macie2.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &macie2.DescribeBucketsInput{
-						MaxResults: aws.Int64(50),
+						MaxResults: aws.Int32(50),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.DescribeBucketsWithContext(ctx, input)
+					output, err := svc.DescribeBuckets(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "macie2:DescribeBuckets", err)

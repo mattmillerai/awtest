@@ -1,0 +1,1 @@
+{"findings":[{"id":"a1b2c3d4e5f60718293a4b5c6d7e8f90","type":"SensitiveData:S3Object/Personal","title":"The S3 object contains personal information.","severity":{"description":"High","score":3},"category":"CLASSIFICATION","count":2,"createdAt":"2023-11-14T22:13:20.000Z"},{"id":"b2c3d4e5f60718293a4b5c6d7e8f90a1"}]}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/directconnect"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	dctypes "github.com/aws/aws-sdk-go-v2/service/directconnect/types"
 )
 
 func TestDescribeConnectionsProcess(t *testing.T) {
@@ -577,7 +577,7 @@ func TestDescribeDirectConnectGatewaysProcess(t *testing.T) {
 func TestExtractConnection(t *testing.T) {
 	tests := []struct {
 		name        string
-		input       *directconnect.Connection
+		input       dctypes.Connection
 		region      string
 		wantConnId  string
 		wantName    string
@@ -590,10 +590,10 @@ func TestExtractConnection(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &directconnect.Connection{
+			input: dctypes.Connection{
 				ConnectionId:    aws.String("dxcon-abc12345"),
 				ConnectionName:  aws.String("my-connection"),
-				ConnectionState: aws.String("available"),
+				ConnectionState: "available",
 				Bandwidth:       aws.String("1Gbps"),
 				Location:        aws.String("EqDC2"),
 				OwnerAccount:    aws.String("111111111111"),
@@ -611,7 +611,7 @@ func TestExtractConnection(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &directconnect.Connection{},
+			input:       dctypes.Connection{},
 			region:      "eu-west-1",
 			wantConnId:  "",
 			wantName:    "",
@@ -624,7 +624,7 @@ func TestExtractConnection(t *testing.T) {
 		},
 		{
 			name: "partial fields populated",
-			input: &directconnect.Connection{
+			input: dctypes.Connection{
 				ConnectionId:   aws.String("dxcon-partial"),
 				ConnectionName: aws.String("partial-conn"),
 			},
@@ -674,7 +674,7 @@ func TestExtractConnection(t *testing.T) {
 func TestExtractVirtualInterface(t *testing.T) {
 	tests := []struct {
 		name       string
-		input      *directconnect.VirtualInterface
+		input      dctypes.VirtualInterface
 		region     string
 		wantVIId   string
 		wantName   string
@@ -689,14 +689,14 @@ func TestExtractVirtualInterface(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &directconnect.VirtualInterface{
+			input: dctypes.VirtualInterface{
 				VirtualInterfaceId:    aws.String("dxvif-abc12345"),
 				VirtualInterfaceName:  aws.String("my-vif"),
-				VirtualInterfaceState: aws.String("available"),
+				VirtualInterfaceState: "available",
 				VirtualInterfaceType:  aws.String("private"),
 				ConnectionId:          aws.String("dxcon-abc12345"),
-				Vlan:                  aws.Int64(100),
-				Asn:                   aws.Int64(65000),
+				Vlan:                  100,
+				Asn:                   65000,
 				AmazonAddress:         aws.String("175.45.176.1/30"),
 				CustomerAddress:       aws.String("175.45.176.2/30"),
 			},
@@ -714,26 +714,27 @@ func TestExtractVirtualInterface(t *testing.T) {
 		},
 		{
 			name:       "all fields nil",
-			input:      &directconnect.VirtualInterface{},
+			input:      dctypes.VirtualInterface{},
 			region:     "eu-west-1",
 			wantVIId:   "",
 			wantName:   "",
 			wantState:  "",
 			wantType:   "",
 			wantConnId: "",
-			wantVlan:   "",
-			wantAsn:    "",
+			// v2 models Vlan and Asn as plain integers: absent reads "0" (v1 printed "").
+			wantVlan:   "0",
+			wantAsn:    "0",
 			wantAmzn:   "",
 			wantCust:   "",
 			wantRegion: "eu-west-1",
 		},
 		{
 			name: "zero-value integers",
-			input: &directconnect.VirtualInterface{
+			input: dctypes.VirtualInterface{
 				VirtualInterfaceId:   aws.String("dxvif-zero"),
 				VirtualInterfaceName: aws.String("zero-vif"),
-				Vlan:                 aws.Int64(0),
-				Asn:                  aws.Int64(0),
+				Vlan:                 0,
+				Asn:                  0,
 			},
 			region:     "us-west-2",
 			wantVIId:   "dxvif-zero",
@@ -784,7 +785,7 @@ func TestExtractVirtualInterface(t *testing.T) {
 func TestExtractGateway(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     *directconnect.Gateway
+		input     dctypes.DirectConnectGateway
 		wantGwId  string
 		wantName  string
 		wantState string
@@ -793,10 +794,10 @@ func TestExtractGateway(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &directconnect.Gateway{
+			input: dctypes.DirectConnectGateway{
 				DirectConnectGatewayId:    aws.String("dgw-abc12345"),
 				DirectConnectGatewayName:  aws.String("my-gateway"),
-				DirectConnectGatewayState: aws.String("available"),
+				DirectConnectGatewayState: "available",
 				AmazonSideAsn:             aws.Int64(64512),
 				OwnerAccount:              aws.String("111111111111"),
 			},
@@ -808,7 +809,7 @@ func TestExtractGateway(t *testing.T) {
 		},
 		{
 			name:      "all fields nil",
-			input:     &directconnect.Gateway{},
+			input:     dctypes.DirectConnectGateway{},
 			wantGwId:  "",
 			wantName:  "",
 			wantState: "",
@@ -817,7 +818,7 @@ func TestExtractGateway(t *testing.T) {
 		},
 		{
 			name: "zero-value ASN",
-			input: &directconnect.Gateway{
+			input: dctypes.DirectConnectGateway{
 				DirectConnectGatewayId:   aws.String("dgw-zero"),
 				DirectConnectGatewayName: aws.String("zero-gw"),
 				AmazonSideAsn:            aws.Int64(0),

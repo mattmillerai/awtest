@@ -51,19 +51,14 @@ github.com/aws/aws-sdk-go/service/apigateway
 github.com/aws/aws-sdk-go/service/cloudfront
 github.com/aws/aws-sdk-go/service/cloudwatch
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
-github.com/aws/aws-sdk-go/service/directconnect
 github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/ec2
-github.com/aws/aws-sdk-go/service/emr
 github.com/aws/aws-sdk-go/service/eventbridge
-github.com/aws/aws-sdk-go/service/guardduty
 github.com/aws/aws-sdk-go/service/iam
 github.com/aws/aws-sdk-go/service/ivs
 github.com/aws/aws-sdk-go/service/ivschat
 github.com/aws/aws-sdk-go/service/ivsrealtime
-github.com/aws/aws-sdk-go/service/kinesis
 github.com/aws/aws-sdk-go/service/lambda
-github.com/aws/aws-sdk-go/service/macie2
 github.com/aws/aws-sdk-go/service/mediaconvert
 github.com/aws/aws-sdk-go/service/neptune
 github.com/aws/aws-sdk-go/service/opensearchservice
@@ -232,6 +227,12 @@ github.com/aws/aws-sdk-go-v2/service/configservice
 github.com/aws/aws-sdk-go-v2/service/configservice/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/configservice/schemas
 github.com/aws/aws-sdk-go-v2/service/configservice/types
+# github.com/aws/aws-sdk-go-v2/service/directconnect v1.55.3
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/directconnect
+github.com/aws/aws-sdk-go-v2/service/directconnect/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/directconnect/schemas
+github.com/aws/aws-sdk-go-v2/service/directconnect/types
 # github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/dynamodb
@@ -274,6 +275,12 @@ github.com/aws/aws-sdk-go-v2/service/elasticache/types
 github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk
 github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk/types
+# github.com/aws/aws-sdk-go-v2/service/emr v1.70.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/emr
+github.com/aws/aws-sdk-go-v2/service/emr/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/emr/schemas
+github.com/aws/aws-sdk-go-v2/service/emr/types
 # github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/eventbridge
@@ -296,6 +303,12 @@ github.com/aws/aws-sdk-go-v2/service/glue/internal/document
 github.com/aws/aws-sdk-go-v2/service/glue/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/glue/schemas
 github.com/aws/aws-sdk-go-v2/service/glue/types
+# github.com/aws/aws-sdk-go-v2/service/guardduty v1.101.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/guardduty
+github.com/aws/aws-sdk-go-v2/service/guardduty/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/guardduty/schemas
+github.com/aws/aws-sdk-go-v2/service/guardduty/types
 # github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/iam
@@ -324,6 +337,12 @@ github.com/aws/aws-sdk-go-v2/service/iot
 github.com/aws/aws-sdk-go-v2/service/iot/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/iot/schemas
 github.com/aws/aws-sdk-go-v2/service/iot/types
+# github.com/aws/aws-sdk-go-v2/service/kinesis v1.56.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/kinesis
+github.com/aws/aws-sdk-go-v2/service/kinesis/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/kinesis/schemas
+github.com/aws/aws-sdk-go-v2/service/kinesis/types
 # github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/kms
@@ -335,6 +354,11 @@ github.com/aws/aws-sdk-go-v2/service/lambda
 github.com/aws/aws-sdk-go-v2/service/lambda/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/lambda/schemas
 github.com/aws/aws-sdk-go-v2/service/lambda/types
+# github.com/aws/aws-sdk-go-v2/service/macie2 v1.59.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/macie2
+github.com/aws/aws-sdk-go-v2/service/macie2/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/macie2/types
 # github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/rds

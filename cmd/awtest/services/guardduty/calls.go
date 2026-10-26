@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/guardduty"
+	guarddutytypes "github.com/aws/aws-sdk-go-v2/service/guardduty/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/guardduty"
 )
 
 type guarddutyDetector struct {
@@ -43,16 +44,16 @@ type guarddutyFilter struct {
 var GuardDutyCalls = []types.AWSService{
 	{
 		Name: "guardduty:ListDetectors",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allDetectors []guarddutyDetector
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, guardduty.NewFromConfig)
 
 				input := &guardduty.ListDetectorsInput{}
 				for {
-					output, err := svc.ListDetectorsWithContext(ctx, input)
+					output, err := svc.ListDetectors(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "guardduty:ListDetectors", err)
@@ -60,44 +61,27 @@ var GuardDutyCalls = []types.AWSService{
 					}
 
 					for _, detectorId := range output.DetectorIds {
-						if detectorId == nil {
-							continue
-						}
-
-						detectorOutput, err := svc.GetDetectorWithContext(ctx, &guardduty.GetDetectorInput{
-							DetectorId: detectorId,
+						detectorOutput, err := svc.GetDetector(ctx, &guardduty.GetDetectorInput{
+							DetectorId: aws.String(detectorId),
 						})
 						if err != nil {
 							utils.HandleAWSError(false, "guardduty:ListDetectors", err)
 							continue
 						}
 
-						status := ""
-						if detectorOutput.Status != nil {
-							status = *detectorOutput.Status
-						}
-
-						serviceRole := ""
-						if detectorOutput.ServiceRole != nil {
-							serviceRole = *detectorOutput.ServiceRole
-						}
-
-						createdAt := ""
-						if detectorOutput.CreatedAt != nil {
-							createdAt = *detectorOutput.CreatedAt
-						}
+						status := string(detectorOutput.Status)
+						serviceRole := aws.ToString(detectorOutput.ServiceRole)
+						createdAt := aws.ToString(detectorOutput.CreatedAt)
 
 						var enabledFeatures []string
-						if detectorOutput.Features != nil {
-							for _, feature := range detectorOutput.Features {
-								if feature.Name != nil && feature.Status != nil && *feature.Status == "ENABLED" {
-									enabledFeatures = append(enabledFeatures, *feature.Name)
-								}
+						for _, feature := range detectorOutput.Features {
+							if feature.Name != "" && feature.Status == guarddutytypes.FeatureStatusEnabled {
+								enabledFeatures = append(enabledFeatures, string(feature.Name))
 							}
 						}
 
 						allDetectors = append(allDetectors, guarddutyDetector{
-							DetectorId:  *detectorId,
+							DetectorId:  detectorId,
 							Status:      status,
 							ServiceRole: serviceRole,
 							CreatedAt:   createdAt,
@@ -167,17 +151,17 @@ var GuardDutyCalls = []types.AWSService{
 	},
 	{
 		Name: "guardduty:GetFindings",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allFindings []guarddutyFinding
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, guardduty.NewFromConfig)
 
 				// Discover detectors in this region
 				listDetectorsInput := &guardduty.ListDetectorsInput{}
 				for {
-					detectorsOutput, err := svc.ListDetectorsWithContext(ctx, listDetectorsInput)
+					detectorsOutput, err := svc.ListDetectors(ctx, listDetectorsInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "guardduty:GetFindings", err)
@@ -185,21 +169,17 @@ var GuardDutyCalls = []types.AWSService{
 					}
 
 					for _, detectorId := range detectorsOutput.DetectorIds {
-						if detectorId == nil {
-							continue
-						}
-
 						// List findings for this detector (first 50, sorted by severity DESC)
 						listFindingsInput := &guardduty.ListFindingsInput{
-							DetectorId: detectorId,
-							MaxResults: aws.Int64(50),
-							SortCriteria: &guardduty.SortCriteria{
+							DetectorId: aws.String(detectorId),
+							MaxResults: aws.Int32(50),
+							SortCriteria: &guarddutytypes.SortCriteria{
 								AttributeName: aws.String("severity"),
-								OrderBy:       aws.String("DESC"),
+								OrderBy:       guarddutytypes.OrderByDesc,
 							},
 						}
 
-						findingsOutput, err := svc.ListFindingsWithContext(ctx, listFindingsInput)
+						findingsOutput, err := svc.ListFindings(ctx, listFindingsInput)
 						if err != nil {
 							utils.HandleAWSError(false, "guardduty:GetFindings", err)
 							continue
@@ -210,8 +190,8 @@ var GuardDutyCalls = []types.AWSService{
 						}
 
 						// Hydrate findings via GetFindings
-						getFindingsOutput, err := svc.GetFindingsWithContext(ctx, &guardduty.GetFindingsInput{
-							DetectorId: detectorId,
+						getFindingsOutput, err := svc.GetFindings(ctx, &guardduty.GetFindingsInput{
+							DetectorId: aws.String(detectorId),
 							FindingIds: findingsOutput.FindingIds,
 						})
 						if err != nil {
@@ -220,44 +200,19 @@ var GuardDutyCalls = []types.AWSService{
 						}
 
 						for _, finding := range getFindingsOutput.Findings {
-							findingId := ""
-							if finding.Id != nil {
-								findingId = *finding.Id
-							}
-
-							findingType := ""
-							if finding.Type != nil {
-								findingType = *finding.Type
-							}
-
-							title := ""
-							if finding.Title != nil {
-								title = *finding.Title
-							}
-
-							severity := float64(0)
-							if finding.Severity != nil {
-								severity = *finding.Severity
-							}
-
-							description := ""
-							if finding.Description != nil {
-								description = *finding.Description
-							}
-
 							findingRegion := region
 							if finding.Region != nil {
 								findingRegion = *finding.Region
 							}
 
 							allFindings = append(allFindings, guarddutyFinding{
-								FindingId:   findingId,
-								Type:        findingType,
-								Title:       title,
-								Severity:    severity,
-								Description: description,
+								FindingId:   aws.ToString(finding.Id),
+								Type:        aws.ToString(finding.Type),
+								Title:       aws.ToString(finding.Title),
+								Severity:    aws.ToFloat64(finding.Severity),
+								Description: aws.ToString(finding.Description),
 								Region:      findingRegion,
-								DetectorId:  *detectorId,
+								DetectorId:  detectorId,
 							})
 						}
 					}
@@ -327,17 +282,17 @@ var GuardDutyCalls = []types.AWSService{
 	},
 	{
 		Name: "guardduty:ListFilters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allFilters []guarddutyFilter
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := guardduty.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, guardduty.NewFromConfig)
 
 				// Discover detectors in this region
 				listDetectorsInput := &guardduty.ListDetectorsInput{}
 				for {
-					detectorsOutput, err := svc.ListDetectorsWithContext(ctx, listDetectorsInput)
+					detectorsOutput, err := svc.ListDetectors(ctx, listDetectorsInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "guardduty:ListFilters", err)
@@ -345,51 +300,33 @@ var GuardDutyCalls = []types.AWSService{
 					}
 
 					for _, detectorId := range detectorsOutput.DetectorIds {
-						if detectorId == nil {
-							continue
-						}
-
 						// List filters for this detector (paginated)
 						listFiltersInput := &guardduty.ListFiltersInput{
-							DetectorId: detectorId,
+							DetectorId: aws.String(detectorId),
 						}
 						for {
-							filtersOutput, err := svc.ListFiltersWithContext(ctx, listFiltersInput)
+							filtersOutput, err := svc.ListFilters(ctx, listFiltersInput)
 							if err != nil {
 								utils.HandleAWSError(false, "guardduty:ListFilters", err)
 								break
 							}
 
 							for _, filterName := range filtersOutput.FilterNames {
-								if filterName == nil {
-									continue
-								}
-
 								// Hydrate filter details
-								filterOutput, err := svc.GetFilterWithContext(ctx, &guardduty.GetFilterInput{
-									DetectorId: detectorId,
-									FilterName: filterName,
+								filterOutput, err := svc.GetFilter(ctx, &guardduty.GetFilterInput{
+									DetectorId: aws.String(detectorId),
+									FilterName: aws.String(filterName),
 								})
 								if err != nil {
 									utils.HandleAWSError(false, "guardduty:ListFilters", err)
 									continue
 								}
 
-								action := ""
-								if filterOutput.Action != nil {
-									action = *filterOutput.Action
-								}
-
-								description := ""
-								if filterOutput.Description != nil {
-									description = *filterOutput.Description
-								}
-
 								allFilters = append(allFilters, guarddutyFilter{
-									FilterName:  *filterName,
-									Action:      action,
-									Description: description,
-									DetectorId:  *detectorId,
+									FilterName:  filterName,
+									Action:      string(filterOutput.Action),
+									Description: aws.ToString(filterOutput.Description),
+									DetectorId:  detectorId,
 									Region:      region,
 								})
 							}

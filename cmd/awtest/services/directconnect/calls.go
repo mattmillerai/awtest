@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/directconnect"
+	dctypes "github.com/aws/aws-sdk-go-v2/service/directconnect/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/directconnect"
 )
 
 type dcConnection struct {
@@ -44,7 +45,7 @@ type dcGateway struct {
 	OwnerAccount              string
 }
 
-func extractConnection(conn *directconnect.Connection, region string) dcConnection {
+func extractConnection(conn dctypes.Connection, region string) dcConnection {
 	connId := ""
 	if conn.ConnectionId != nil {
 		connId = *conn.ConnectionId
@@ -53,10 +54,7 @@ func extractConnection(conn *directconnect.Connection, region string) dcConnecti
 	if conn.ConnectionName != nil {
 		name = *conn.ConnectionName
 	}
-	state := ""
-	if conn.ConnectionState != nil {
-		state = *conn.ConnectionState
-	}
+	state := string(conn.ConnectionState)
 	bandwidth := ""
 	if conn.Bandwidth != nil {
 		bandwidth = *conn.Bandwidth
@@ -85,7 +83,7 @@ func extractConnection(conn *directconnect.Connection, region string) dcConnecti
 	}
 }
 
-func extractVirtualInterface(vi *directconnect.VirtualInterface, region string) dcVirtualInterface {
+func extractVirtualInterface(vi dctypes.VirtualInterface, region string) dcVirtualInterface {
 	viId := ""
 	if vi.VirtualInterfaceId != nil {
 		viId = *vi.VirtualInterfaceId
@@ -94,26 +92,13 @@ func extractVirtualInterface(vi *directconnect.VirtualInterface, region string) 
 	if vi.VirtualInterfaceName != nil {
 		name = *vi.VirtualInterfaceName
 	}
-	state := ""
-	if vi.VirtualInterfaceState != nil {
-		state = *vi.VirtualInterfaceState
-	}
-	viType := ""
-	if vi.VirtualInterfaceType != nil {
-		viType = *vi.VirtualInterfaceType
-	}
-	connId := ""
-	if vi.ConnectionId != nil {
-		connId = *vi.ConnectionId
-	}
-	vlan := ""
-	if vi.Vlan != nil {
-		vlan = fmt.Sprintf("%d", *vi.Vlan)
-	}
-	asn := ""
-	if vi.Asn != nil {
-		asn = fmt.Sprintf("%d", *vi.Asn)
-	}
+	state := string(vi.VirtualInterfaceState)
+	viType := aws.ToString(vi.VirtualInterfaceType)
+	connId := aws.ToString(vi.ConnectionId)
+	// v2 models Vlan and Asn as plain integers, so an absent field reads as "0"
+	// where v1 left it empty.
+	vlan := fmt.Sprintf("%d", vi.Vlan)
+	asn := fmt.Sprintf("%d", vi.Asn)
 	amazonAddr := ""
 	if vi.AmazonAddress != nil {
 		amazonAddr = *vi.AmazonAddress
@@ -136,7 +121,7 @@ func extractVirtualInterface(vi *directconnect.VirtualInterface, region string) 
 	}
 }
 
-func extractGateway(gw *directconnect.Gateway) dcGateway {
+func extractGateway(gw dctypes.DirectConnectGateway) dcGateway {
 	gwId := ""
 	if gw.DirectConnectGatewayId != nil {
 		gwId = *gw.DirectConnectGatewayId
@@ -145,10 +130,7 @@ func extractGateway(gw *directconnect.Gateway) dcGateway {
 	if gw.DirectConnectGatewayName != nil {
 		name = *gw.DirectConnectGatewayName
 	}
-	state := ""
-	if gw.DirectConnectGatewayState != nil {
-		state = *gw.DirectConnectGatewayState
-	}
+	state := string(gw.DirectConnectGatewayState)
 	asn := ""
 	if gw.AmazonSideAsn != nil {
 		asn = fmt.Sprintf("%d", *gw.AmazonSideAsn)
@@ -169,22 +151,20 @@ func extractGateway(gw *directconnect.Gateway) dcGateway {
 var DirectConnectCalls = []types.AWSService{
 	{
 		Name: "directconnect:DescribeConnections",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allConnections []dcConnection
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := directconnect.New(sess, &aws.Config{Region: aws.String(region)})
-				output, err := svc.DescribeConnectionsWithContext(ctx, &directconnect.DescribeConnectionsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, directconnect.NewFromConfig)
+				output, err := svc.DescribeConnections(ctx, &directconnect.DescribeConnectionsInput{})
 				if err != nil {
 					lastErr = err
 					utils.HandleAWSError(false, "directconnect:DescribeConnections", err)
 					continue
 				}
 				for _, conn := range output.Connections {
-					if conn != nil {
-						allConnections = append(allConnections, extractConnection(conn, region))
-					}
+					allConnections = append(allConnections, extractConnection(conn, region))
 				}
 			}
 
@@ -242,22 +222,20 @@ var DirectConnectCalls = []types.AWSService{
 	},
 	{
 		Name: "directconnect:DescribeVirtualInterfaces",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allVIs []dcVirtualInterface
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := directconnect.New(sess, &aws.Config{Region: aws.String(region)})
-				output, err := svc.DescribeVirtualInterfacesWithContext(ctx, &directconnect.DescribeVirtualInterfacesInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, directconnect.NewFromConfig)
+				output, err := svc.DescribeVirtualInterfaces(ctx, &directconnect.DescribeVirtualInterfacesInput{})
 				if err != nil {
 					lastErr = err
 					utils.HandleAWSError(false, "directconnect:DescribeVirtualInterfaces", err)
 					continue
 				}
 				for _, vi := range output.VirtualInterfaces {
-					if vi != nil {
-						allVIs = append(allVIs, extractVirtualInterface(vi, region))
-					}
+					allVIs = append(allVIs, extractVirtualInterface(vi, region))
 				}
 			}
 
@@ -317,29 +295,27 @@ var DirectConnectCalls = []types.AWSService{
 	},
 	{
 		Name: "directconnect:DescribeDirectConnectGateways",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allGateways []dcGateway
 			var lastErr error
 
 			// Intentionally not scoped by types.RegionsFor: Direct Connect gateways are
 			// a single global-ish resource listed through one regional endpoint.
-			svc := directconnect.New(sess, &aws.Config{Region: aws.String(types.Regions[0])})
+			svc := awsv2.NewRegionalClient(cfg, types.Regions[0], directconnect.NewFromConfig)
 			var nextToken *string
 			for {
 				input := &directconnect.DescribeDirectConnectGatewaysInput{}
 				if nextToken != nil {
 					input.NextToken = nextToken
 				}
-				output, err := svc.DescribeDirectConnectGatewaysWithContext(ctx, input)
+				output, err := svc.DescribeDirectConnectGateways(ctx, input)
 				if err != nil {
 					lastErr = err
 					utils.HandleAWSError(false, "directconnect:DescribeDirectConnectGateways", err)
 					break
 				}
 				for _, gw := range output.DirectConnectGateways {
-					if gw != nil {
-						allGateways = append(allGateways, extractGateway(gw))
-					}
+					allGateways = append(allGateways, extractGateway(gw))
 				}
 				if output.NextToken == nil {
 					break

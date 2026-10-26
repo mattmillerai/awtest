@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/emr"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	emrtypes "github.com/aws/aws-sdk-go-v2/service/emr/types"
 )
 
 func TestListClustersProcess(t *testing.T) {
@@ -525,21 +525,21 @@ func TestListSecurityConfigurationsProcess(t *testing.T) {
 
 func TestExtractCluster(t *testing.T) {
 	tests := []struct {
-		name         string
-		input        *emr.Cluster
-		region       string
-		wantId       string
-		wantName     string
-		wantState    string
-		wantRelease  string
-		wantRegion   string
+		name        string
+		input       emrtypes.Cluster
+		region      string
+		wantId      string
+		wantName    string
+		wantState   string
+		wantRelease string
+		wantRegion  string
 	}{
 		{
 			name: "all fields populated",
-			input: &emr.Cluster{
+			input: emrtypes.Cluster{
 				Id:           aws.String("j-ABC123"),
 				Name:         aws.String("my-cluster"),
-				Status:       &emr.ClusterStatus{State: aws.String("RUNNING")},
+				Status:       &emrtypes.ClusterStatus{State: "RUNNING"},
 				ReleaseLabel: aws.String("emr-6.10.0"),
 			},
 			region:      "us-east-1",
@@ -551,7 +551,7 @@ func TestExtractCluster(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &emr.Cluster{},
+			input:       emrtypes.Cluster{},
 			region:      "eu-west-1",
 			wantId:      "",
 			wantName:    "",
@@ -561,10 +561,10 @@ func TestExtractCluster(t *testing.T) {
 		},
 		{
 			name: "status present but state nil",
-			input: &emr.Cluster{
+			input: emrtypes.Cluster{
 				Id:     aws.String("j-DEF456"),
 				Name:   aws.String("partial-cluster"),
-				Status: &emr.ClusterStatus{},
+				Status: &emrtypes.ClusterStatus{},
 			},
 			region:      "us-west-2",
 			wantId:      "j-DEF456",
@@ -600,7 +600,7 @@ func TestExtractCluster(t *testing.T) {
 func TestExtractInstanceGroup(t *testing.T) {
 	tests := []struct {
 		name        string
-		input       *emr.InstanceGroup
+		input       emrtypes.InstanceGroup
 		clusterId   string
 		clusterName string
 		region      string
@@ -615,15 +615,15 @@ func TestExtractInstanceGroup(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &emr.InstanceGroup{
+			input: emrtypes.InstanceGroup{
 				Id:                     aws.String("ig-ABC123"),
 				Name:                   aws.String("Master"),
-				InstanceGroupType:      aws.String("MASTER"),
+				InstanceGroupType:      "MASTER",
 				InstanceType:           aws.String("m5.xlarge"),
-				RequestedInstanceCount: aws.Int64(1),
-				RunningInstanceCount:   aws.Int64(1),
-				Market:                 aws.String("ON_DEMAND"),
-				Status:                 &emr.InstanceGroupStatus{State: aws.String("RUNNING")},
+				RequestedInstanceCount: aws.Int32(1),
+				RunningInstanceCount:   aws.Int32(1),
+				Market:                 "ON_DEMAND",
+				Status:                 &emrtypes.InstanceGroupStatus{State: "RUNNING"},
 			},
 			clusterId:   "j-ABC123",
 			clusterName: "my-cluster",
@@ -639,7 +639,7 @@ func TestExtractInstanceGroup(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &emr.InstanceGroup{},
+			input:       emrtypes.InstanceGroup{},
 			clusterId:   "j-DEF456",
 			clusterName: "empty-cluster",
 			region:      "eu-west-1",
@@ -654,10 +654,10 @@ func TestExtractInstanceGroup(t *testing.T) {
 		},
 		{
 			name: "status present but state nil",
-			input: &emr.InstanceGroup{
+			input: emrtypes.InstanceGroup{
 				Id:     aws.String("ig-GHI789"),
 				Name:   aws.String("Core"),
-				Status: &emr.InstanceGroupStatus{},
+				Status: &emrtypes.InstanceGroupStatus{},
 			},
 			clusterId:   "j-GHI789",
 			clusterName: "partial",
@@ -673,10 +673,10 @@ func TestExtractInstanceGroup(t *testing.T) {
 		},
 		{
 			name: "zero counts",
-			input: &emr.InstanceGroup{
+			input: emrtypes.InstanceGroup{
 				Id:                     aws.String("ig-ZERO"),
-				RequestedInstanceCount: aws.Int64(0),
-				RunningInstanceCount:   aws.Int64(0),
+				RequestedInstanceCount: aws.Int32(0),
+				RunningInstanceCount:   aws.Int32(0),
 			},
 			clusterId:   "j-ZERO",
 			clusterName: "zero-cluster",
@@ -732,7 +732,7 @@ func TestExtractSecurityConfig(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		input       *emr.SecurityConfigurationSummary
+		input       emrtypes.SecurityConfigurationSummary
 		region      string
 		wantName    string
 		wantCreated string
@@ -740,7 +740,7 @@ func TestExtractSecurityConfig(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &emr.SecurityConfigurationSummary{
+			input: emrtypes.SecurityConfigurationSummary{
 				Name:             aws.String("my-config"),
 				CreationDateTime: &ts,
 			},
@@ -751,7 +751,7 @@ func TestExtractSecurityConfig(t *testing.T) {
 		},
 		{
 			name:        "all fields nil",
-			input:       &emr.SecurityConfigurationSummary{},
+			input:       emrtypes.SecurityConfigurationSummary{},
 			region:      "eu-west-1",
 			wantName:    "",
 			wantCreated: "",

@@ -105,6 +105,13 @@
 //     Bulk 7 is migrated too: athena, backup, codebuild, codecommit and
 //     codedeploy (list calls, several with batch-get follow-ups), regional
 //     loops that skip failing regions and fail only when nothing was found.
+//     Bulk 8 is migrated too: directconnect (DescribeConnections,
+//     DescribeVirtualInterfaces, DescribeDirectConnectGateways), emr
+//     (ListClusters with DescribeCluster, ListInstanceGroups,
+//     ListSecurityConfigurations), kinesis (ListStreams, ListShards,
+//     ListStreamConsumers), guardduty (ListDetectors, GetFindings, ListFilters)
+//     and macie2 (ListClassificationJobs, ListFindings, DescribeBuckets),
+//     regional loops with manual token pagination that skip failing regions.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

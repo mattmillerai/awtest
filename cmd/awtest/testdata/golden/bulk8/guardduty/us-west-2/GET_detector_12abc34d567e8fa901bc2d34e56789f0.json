@@ -1,0 +1,1 @@
+{"status":"ENABLED","serviceRole":"arn:aws:iam::123456789012:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty","createdAt":"2023-11-14T22:13:20.000Z","features":[{"name":"S3_DATA_EVENTS","status":"ENABLED"},{"name":"EKS_AUDIT_LOGS","status":"DISABLED"},{"name":"EBS_MALWARE_PROTECTION","status":"ENABLED"}]}

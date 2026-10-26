@@ -24,6 +24,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.42.6
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.5
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.6
+	github.com/aws/aws-sdk-go-v2/service/directconnect v1.55.3
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.102.1
@@ -31,13 +32,17 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.104.3
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk v1.43.5
+	github.com/aws/aws-sdk-go-v2/service/emr v1.70.6
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/glue v1.172.0
+	github.com/aws/aws-sdk-go-v2/service/guardduty v1.101.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.5
 	github.com/aws/aws-sdk-go-v2/service/iot v1.84.6
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.56.5
 	github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
+	github.com/aws/aws-sdk-go-v2/service/macie2 v1.59.5
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 	github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0

@@ -1,0 +1,547 @@
+[
+  {
+    "details": {
+      "Bandwidth": "1Gbps",
+      "ConnectionId": "dxcon-fg5example",
+      "ConnectionName": "demo-dx-connection",
+      "ConnectionState": "available",
+      "Location": "EqSE2",
+      "OwnerAccount": "123456789012",
+      "PartnerName": "Example Partner",
+      "Region": "us-west-2"
+    },
+    "methodName": "directconnect:DescribeConnections",
+    "resourceName": "demo-dx-connection",
+    "resourceType": "connection",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "Bandwidth": "",
+      "ConnectionId": "dxcon-fg6example",
+      "ConnectionName": "",
+      "ConnectionState": "",
+      "Location": "",
+      "OwnerAccount": "",
+      "PartnerName": "",
+      "Region": "us-west-2"
+    },
+    "methodName": "directconnect:DescribeConnections",
+    "resourceName": "",
+    "resourceType": "connection",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "AmazonAddress": "169.254.10.1/30",
+      "Asn": "65001",
+      "ConnectionId": "dxcon-fg5example",
+      "CustomerAddress": "169.254.10.2/30",
+      "Region": "us-west-2",
+      "VirtualInterfaceId": "dxvif-ffexample1",
+      "VirtualInterfaceName": "demo-private-vif",
+      "VirtualInterfaceState": "available",
+      "VirtualInterfaceType": "private",
+      "Vlan": "101"
+    },
+    "methodName": "directconnect:DescribeVirtualInterfaces",
+    "resourceName": "demo-private-vif",
+    "resourceType": "virtual-interface",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "AmazonAddress": "",
+      "Asn": "0",
+      "ConnectionId": "",
+      "CustomerAddress": "",
+      "Region": "us-west-2",
+      "VirtualInterfaceId": "dxvif-ffexample2",
+      "VirtualInterfaceName": "demo-bare-vif",
+      "VirtualInterfaceState": "",
+      "VirtualInterfaceType": "",
+      "Vlan": "0"
+    },
+    "methodName": "directconnect:DescribeVirtualInterfaces",
+    "resourceName": "demo-bare-vif",
+    "resourceType": "virtual-interface",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "AmazonSideAsn": "64512",
+      "DirectConnectGatewayId": "11111111-2222-3333-4444-555555555555",
+      "DirectConnectGatewayName": "demo-dx-gateway",
+      "DirectConnectGatewayState": "available",
+      "OwnerAccount": "123456789012"
+    },
+    "methodName": "directconnect:DescribeDirectConnectGateways",
+    "resourceName": "demo-dx-gateway",
+    "resourceType": "gateway",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "AmazonSideAsn": "",
+      "DirectConnectGatewayId": "66666666-7777-8888-9999-000000000000",
+      "DirectConnectGatewayName": "",
+      "DirectConnectGatewayState": "",
+      "OwnerAccount": ""
+    },
+    "methodName": "directconnect:DescribeDirectConnectGateways",
+    "resourceName": "",
+    "resourceType": "gateway",
+    "serviceName": "DirectConnect"
+  },
+  {
+    "details": {
+      "ClusterId": "j-1EXAMPLE2ABC",
+      "Name": "demo-cluster",
+      "Region": "us-west-2",
+      "ReleaseLabel": "emr-6.15.0",
+      "State": "WAITING"
+    },
+    "methodName": "emr:ListClusters",
+    "resourceName": "demo-cluster",
+    "resourceType": "cluster",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "ClusterId": "j-1EXAMPLE2ABC",
+      "Name": "demo-cluster",
+      "Region": "us-west-2",
+      "ReleaseLabel": "emr-6.15.0",
+      "State": "WAITING"
+    },
+    "methodName": "emr:ListClusters",
+    "resourceName": "demo-cluster",
+    "resourceType": "cluster",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "ClusterId": "j-1EXAMPLE2ABC",
+      "ClusterName": "demo-cluster",
+      "Id": "ig-1EXAMPLE",
+      "InstanceGroupType": "CORE",
+      "InstanceType": "m5.xlarge",
+      "Market": "ON_DEMAND",
+      "Name": "Core",
+      "Region": "us-west-2",
+      "RequestedInstanceCount": "2",
+      "RunningInstanceCount": "2",
+      "State": "RUNNING"
+    },
+    "methodName": "emr:ListInstanceGroups",
+    "resourceName": "Core",
+    "resourceType": "instance-group",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "ClusterId": "j-1EXAMPLE2ABC",
+      "ClusterName": "demo-cluster",
+      "Id": "ig-2EXAMPLE",
+      "InstanceGroupType": "",
+      "InstanceType": "",
+      "Market": "",
+      "Name": "",
+      "Region": "us-west-2",
+      "RequestedInstanceCount": "",
+      "RunningInstanceCount": "",
+      "State": ""
+    },
+    "methodName": "emr:ListInstanceGroups",
+    "resourceName": "",
+    "resourceType": "instance-group",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "ClusterId": "j-3EXAMPLE4DEF",
+      "ClusterName": "",
+      "Id": "ig-1EXAMPLE",
+      "InstanceGroupType": "CORE",
+      "InstanceType": "m5.xlarge",
+      "Market": "ON_DEMAND",
+      "Name": "Core",
+      "Region": "us-west-2",
+      "RequestedInstanceCount": "2",
+      "RunningInstanceCount": "2",
+      "State": "RUNNING"
+    },
+    "methodName": "emr:ListInstanceGroups",
+    "resourceName": "Core",
+    "resourceType": "instance-group",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "ClusterId": "j-3EXAMPLE4DEF",
+      "ClusterName": "",
+      "Id": "ig-2EXAMPLE",
+      "InstanceGroupType": "",
+      "InstanceType": "",
+      "Market": "",
+      "Name": "",
+      "Region": "us-west-2",
+      "RequestedInstanceCount": "",
+      "RunningInstanceCount": "",
+      "State": ""
+    },
+    "methodName": "emr:ListInstanceGroups",
+    "resourceName": "",
+    "resourceType": "instance-group",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "CreationDateTime": "2023-11-14T22:13:20Z",
+      "Name": "demo-security-config",
+      "Region": "us-west-2"
+    },
+    "methodName": "emr:ListSecurityConfigurations",
+    "resourceName": "demo-security-config",
+    "resourceType": "security-configuration",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "CreationDateTime": "",
+      "Name": "",
+      "Region": "us-west-2"
+    },
+    "methodName": "emr:ListSecurityConfigurations",
+    "resourceName": "",
+    "resourceType": "security-configuration",
+    "serviceName": "EMR"
+  },
+  {
+    "details": {
+      "CreatedAt": "2023-11-14T22:13:20.000Z",
+      "DetectorId": "12abc34d567e8fa901bc2d34e56789f0",
+      "Features": [
+        "S3_DATA_EVENTS",
+        "EBS_MALWARE_PROTECTION"
+      ],
+      "Region": "us-west-2",
+      "ServiceRole": "arn:aws:iam::123456789012:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty",
+      "Status": "ENABLED"
+    },
+    "methodName": "guardduty:ListDetectors",
+    "resourceName": "12abc34d567e8fa901bc2d34e56789f0",
+    "resourceType": "detector",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "CreatedAt": "",
+      "DetectorId": "99zzz99d999e9fa999bc9d99e99999f9",
+      "Features": null,
+      "Region": "us-west-2",
+      "ServiceRole": "",
+      "Status": ""
+    },
+    "methodName": "guardduty:ListDetectors",
+    "resourceName": "99zzz99d999e9fa999bc9d99e99999f9",
+    "resourceType": "detector",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "Description": "EC2 instance has an unprotected port which is being probed by a known malicious host.",
+      "DetectorId": "12abc34d567e8fa901bc2d34e56789f0",
+      "FindingId": "f1e2d3c4b5a69788796a5b4c3d2e1f00",
+      "Region": "us-west-2",
+      "Severity": 2,
+      "Title": "Unprotected port on EC2 instance i-0123456789abcdef0 is being probed.",
+      "Type": "Recon:EC2/PortProbeUnprotectedPort"
+    },
+    "methodName": "guardduty:GetFindings",
+    "resourceName": "Unprotected port on EC2 instance i-0123456789abcdef0 is being probed.",
+    "resourceType": "finding",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "Description": "",
+      "DetectorId": "12abc34d567e8fa901bc2d34e56789f0",
+      "FindingId": "0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+      "Region": "us-west-2",
+      "Severity": 0,
+      "Title": "",
+      "Type": "UnauthorizedAccess:IAMUser/ConsoleLogin"
+    },
+    "methodName": "guardduty:GetFindings",
+    "resourceName": "UnauthorizedAccess:IAMUser/ConsoleLogin",
+    "resourceType": "finding",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "Action": "ARCHIVE",
+      "Description": "Archive low severity noise",
+      "DetectorId": "12abc34d567e8fa901bc2d34e56789f0",
+      "FilterName": "demo-filter",
+      "Region": "us-west-2"
+    },
+    "methodName": "guardduty:ListFilters",
+    "resourceName": "demo-filter",
+    "resourceType": "filter",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "Action": "",
+      "Description": "",
+      "DetectorId": "12abc34d567e8fa901bc2d34e56789f0",
+      "FilterName": "bare-filter",
+      "Region": "us-west-2"
+    },
+    "methodName": "guardduty:ListFilters",
+    "resourceName": "bare-filter",
+    "resourceType": "filter",
+    "serviceName": "GuardDuty"
+  },
+  {
+    "details": {
+      "CreationTimestamp": "2023-11-14T22:13:20Z",
+      "Region": "us-west-2",
+      "StreamARN": "arn:aws:kinesis:us-west-2:123456789012:stream/demo-stream",
+      "StreamMode": "ON_DEMAND",
+      "StreamName": "demo-stream",
+      "StreamStatus": "ACTIVE"
+    },
+    "methodName": "kinesis:ListStreams",
+    "resourceName": "demo-stream",
+    "resourceType": "stream",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "CreationTimestamp": "",
+      "Region": "us-west-2",
+      "StreamARN": "arn:aws:kinesis:us-west-2:123456789012:stream/bare-stream",
+      "StreamMode": "",
+      "StreamName": "bare-stream",
+      "StreamStatus": ""
+    },
+    "methodName": "kinesis:ListStreams",
+    "resourceName": "bare-stream",
+    "resourceType": "stream",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "EndingHashKey": "170141183460469231731687303715884105727",
+      "EndingSequenceNumber": "49600000000000000000000000000000000000000000000000009999",
+      "ParentShardId": "shardId-000000000099",
+      "Region": "us-west-2",
+      "ShardId": "shardId-000000000000",
+      "StartingHashKey": "0",
+      "StartingSequenceNumber": "49600000000000000000000000000000000000000000000000000001",
+      "StreamName": "demo-stream"
+    },
+    "methodName": "kinesis:ListShards",
+    "resourceName": "shardId-000000000000",
+    "resourceType": "shard",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "EndingHashKey": "",
+      "EndingSequenceNumber": "",
+      "ParentShardId": "",
+      "Region": "us-west-2",
+      "ShardId": "shardId-000000000001",
+      "StartingHashKey": "",
+      "StartingSequenceNumber": "",
+      "StreamName": "demo-stream"
+    },
+    "methodName": "kinesis:ListShards",
+    "resourceName": "shardId-000000000001",
+    "resourceType": "shard",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "EndingHashKey": "170141183460469231731687303715884105727",
+      "EndingSequenceNumber": "49600000000000000000000000000000000000000000000000009999",
+      "ParentShardId": "shardId-000000000099",
+      "Region": "us-west-2",
+      "ShardId": "shardId-000000000000",
+      "StartingHashKey": "0",
+      "StartingSequenceNumber": "49600000000000000000000000000000000000000000000000000001",
+      "StreamName": "bare-stream"
+    },
+    "methodName": "kinesis:ListShards",
+    "resourceName": "shardId-000000000000",
+    "resourceType": "shard",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "EndingHashKey": "",
+      "EndingSequenceNumber": "",
+      "ParentShardId": "",
+      "Region": "us-west-2",
+      "ShardId": "shardId-000000000001",
+      "StartingHashKey": "",
+      "StartingSequenceNumber": "",
+      "StreamName": "bare-stream"
+    },
+    "methodName": "kinesis:ListShards",
+    "resourceName": "shardId-000000000001",
+    "resourceType": "shard",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "ConsumerARN": "arn:aws:kinesis:us-west-2:123456789012:stream/demo-stream/consumer/demo-consumer:1700000000",
+      "ConsumerName": "demo-consumer",
+      "ConsumerStatus": "ACTIVE",
+      "CreationTimestamp": "2023-11-14T22:13:20Z",
+      "Region": "us-west-2",
+      "StreamName": "demo-stream"
+    },
+    "methodName": "kinesis:ListStreamConsumers",
+    "resourceName": "demo-consumer",
+    "resourceType": "consumer",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "ConsumerARN": "",
+      "ConsumerName": "bare-consumer",
+      "ConsumerStatus": "",
+      "CreationTimestamp": "",
+      "Region": "us-west-2",
+      "StreamName": "demo-stream"
+    },
+    "methodName": "kinesis:ListStreamConsumers",
+    "resourceName": "bare-consumer",
+    "resourceType": "consumer",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "ConsumerARN": "arn:aws:kinesis:us-west-2:123456789012:stream/demo-stream/consumer/demo-consumer:1700000000",
+      "ConsumerName": "demo-consumer",
+      "ConsumerStatus": "ACTIVE",
+      "CreationTimestamp": "2023-11-14T22:13:20Z",
+      "Region": "us-west-2",
+      "StreamName": "bare-stream"
+    },
+    "methodName": "kinesis:ListStreamConsumers",
+    "resourceName": "demo-consumer",
+    "resourceType": "consumer",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "ConsumerARN": "",
+      "ConsumerName": "bare-consumer",
+      "ConsumerStatus": "",
+      "CreationTimestamp": "",
+      "Region": "us-west-2",
+      "StreamName": "bare-stream"
+    },
+    "methodName": "kinesis:ListStreamConsumers",
+    "resourceName": "bare-consumer",
+    "resourceType": "consumer",
+    "serviceName": "Kinesis"
+  },
+  {
+    "details": {
+      "CreatedAt": "2023-11-14T22:13:20Z",
+      "JobId": "job1example0123456789abcdef01234",
+      "JobStatus": "COMPLETE",
+      "JobType": "ONE_TIME",
+      "Name": "demo-sensitive-data-job",
+      "Region": "us-west-2"
+    },
+    "methodName": "macie2:ListClassificationJobs",
+    "resourceName": "demo-sensitive-data-job",
+    "resourceType": "classification-job",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {
+      "CreatedAt": "",
+      "JobId": "job2example0123456789abcdef56789",
+      "JobStatus": "",
+      "JobType": "",
+      "Name": "",
+      "Region": "us-west-2"
+    },
+    "methodName": "macie2:ListClassificationJobs",
+    "resourceName": "job2example0123456789abcdef56789",
+    "resourceType": "classification-job",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {
+      "Category": "CLASSIFICATION",
+      "Count": "2",
+      "CreatedAt": "2023-11-14T22:13:20Z",
+      "Id": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "Region": "us-west-2",
+      "Severity": "High",
+      "Title": "The S3 object contains personal information.",
+      "Type": "SensitiveData:S3Object/Personal"
+    },
+    "methodName": "macie2:ListFindings",
+    "resourceName": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "resourceType": "finding",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {
+      "Category": "",
+      "Count": "",
+      "CreatedAt": "",
+      "Id": "b2c3d4e5f60718293a4b5c6d7e8f90a1",
+      "Region": "us-west-2",
+      "Severity": "",
+      "Title": "",
+      "Type": ""
+    },
+    "methodName": "macie2:ListFindings",
+    "resourceName": "b2c3d4e5f60718293a4b5c6d7e8f90a1",
+    "resourceType": "finding",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {
+      "AccountId": "123456789012",
+      "BucketArn": "arn:aws:s3:::demo-macie-bucket",
+      "BucketName": "demo-macie-bucket",
+      "ClassifiableObjectCount": "40",
+      "ObjectCount": "42",
+      "Region": "us-west-2",
+      "SensitivityScore": "55",
+      "SizeInBytes": "1048576"
+    },
+    "methodName": "macie2:DescribeBuckets",
+    "resourceName": "demo-macie-bucket",
+    "resourceType": "monitored-bucket",
+    "serviceName": "Macie"
+  },
+  {
+    "details": {
+      "AccountId": "",
+      "BucketArn": "",
+      "BucketName": "bare-macie-bucket",
+      "ClassifiableObjectCount": "",
+      "ObjectCount": "",
+      "Region": "us-west-2",
+      "SensitivityScore": "",
+      "SizeInBytes": ""
+    },
+    "methodName": "macie2:DescribeBuckets",
+    "resourceName": "bare-macie-bucket",
+    "resourceType": "monitored-bucket",
+    "serviceName": "Macie"
+  }
+]

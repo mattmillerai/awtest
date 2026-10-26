@@ -1,0 +1,1 @@
+{"buckets":[{"bucketName":"demo-macie-bucket","accountId":"123456789012","bucketArn":"arn:aws:s3:::demo-macie-bucket","objectCount":42,"sizeInBytes":1048576,"classifiableObjectCount":40,"sensitivityScore":55},{"bucketName":"bare-macie-bucket"}]}

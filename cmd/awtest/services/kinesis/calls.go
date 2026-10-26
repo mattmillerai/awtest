@@ -5,20 +5,21 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis"
+	kinesistypes "github.com/aws/aws-sdk-go-v2/service/kinesis/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kinesis"
 )
 
 type kinesisStream struct {
-	StreamName       string
-	StreamARN        string
-	StreamStatus     string
-	StreamMode       string
+	StreamName        string
+	StreamARN         string
+	StreamStatus      string
+	StreamMode        string
 	CreationTimestamp string
-	Region           string
+	Region            string
 }
 
 type kinesisShard struct {
@@ -33,15 +34,15 @@ type kinesisShard struct {
 }
 
 type kinesisConsumer struct {
-	ConsumerName     string
-	ConsumerARN      string
-	ConsumerStatus   string
-	StreamName       string
+	ConsumerName      string
+	ConsumerARN       string
+	ConsumerStatus    string
+	StreamName        string
 	CreationTimestamp string
-	Region           string
+	Region            string
 }
 
-func extractStream(summary *kinesis.StreamSummary, region string) kinesisStream {
+func extractStream(summary kinesistypes.StreamSummary, region string) kinesisStream {
 	name := ""
 	if summary.StreamName != nil {
 		name = *summary.StreamName
@@ -50,29 +51,26 @@ func extractStream(summary *kinesis.StreamSummary, region string) kinesisStream 
 	if summary.StreamARN != nil {
 		arn = *summary.StreamARN
 	}
-	status := ""
-	if summary.StreamStatus != nil {
-		status = *summary.StreamStatus
-	}
+	status := string(summary.StreamStatus)
 	mode := ""
-	if summary.StreamModeDetails != nil && summary.StreamModeDetails.StreamMode != nil {
-		mode = *summary.StreamModeDetails.StreamMode
+	if summary.StreamModeDetails != nil {
+		mode = string(summary.StreamModeDetails.StreamMode)
 	}
 	creationTimestamp := ""
 	if summary.StreamCreationTimestamp != nil {
 		creationTimestamp = summary.StreamCreationTimestamp.Format(time.RFC3339)
 	}
 	return kinesisStream{
-		StreamName:       name,
-		StreamARN:        arn,
-		StreamStatus:     status,
-		StreamMode:       mode,
+		StreamName:        name,
+		StreamARN:         arn,
+		StreamStatus:      status,
+		StreamMode:        mode,
 		CreationTimestamp: creationTimestamp,
-		Region:           region,
+		Region:            region,
 	}
 }
 
-func extractShard(shard *kinesis.Shard, streamName, region string) kinesisShard {
+func extractShard(shard kinesistypes.Shard, streamName, region string) kinesisShard {
 	shardId := ""
 	if shard.ShardId != nil {
 		shardId = *shard.ShardId
@@ -113,7 +111,7 @@ func extractShard(shard *kinesis.Shard, streamName, region string) kinesisShard 
 	}
 }
 
-func extractConsumer(consumer *kinesis.Consumer, streamName, region string) kinesisConsumer {
+func extractConsumer(consumer kinesistypes.Consumer, streamName, region string) kinesisConsumer {
 	name := ""
 	if consumer.ConsumerName != nil {
 		name = *consumer.ConsumerName
@@ -122,49 +120,44 @@ func extractConsumer(consumer *kinesis.Consumer, streamName, region string) kine
 	if consumer.ConsumerARN != nil {
 		arn = *consumer.ConsumerARN
 	}
-	status := ""
-	if consumer.ConsumerStatus != nil {
-		status = *consumer.ConsumerStatus
-	}
+	status := string(consumer.ConsumerStatus)
 	creationTimestamp := ""
 	if consumer.ConsumerCreationTimestamp != nil {
 		creationTimestamp = consumer.ConsumerCreationTimestamp.Format(time.RFC3339)
 	}
 	return kinesisConsumer{
-		ConsumerName:     name,
-		ConsumerARN:      arn,
-		ConsumerStatus:   status,
-		StreamName:       streamName,
+		ConsumerName:      name,
+		ConsumerARN:       arn,
+		ConsumerStatus:    status,
+		StreamName:        streamName,
 		CreationTimestamp: creationTimestamp,
-		Region:           region,
+		Region:            region,
 	}
 }
 
 var KinesisCalls = []types.AWSService{
 	{
 		Name: "kinesis:ListStreams",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allStreams []kinesisStream
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, kinesis.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &kinesis.ListStreamsInput{}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListStreamsWithContext(ctx, input)
+					output, err := svc.ListStreams(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "kinesis:ListStreams", err)
 						break
 					}
 					for _, summary := range output.StreamSummaries {
-						if summary != nil {
-							allStreams = append(allStreams, extractStream(summary, region))
-						}
+						allStreams = append(allStreams, extractStream(summary, region))
 					}
 					if output.NextToken == nil {
 						break
@@ -206,12 +199,12 @@ var KinesisCalls = []types.AWSService{
 					ResourceType: "stream",
 					ResourceName: s.StreamName,
 					Details: map[string]interface{}{
-						"StreamName":       s.StreamName,
-						"StreamARN":        s.StreamARN,
-						"StreamStatus":     s.StreamStatus,
-						"StreamMode":       s.StreamMode,
+						"StreamName":        s.StreamName,
+						"StreamARN":         s.StreamARN,
+						"StreamStatus":      s.StreamStatus,
+						"StreamMode":        s.StreamMode,
 						"CreationTimestamp": s.CreationTimestamp,
-						"Region":           s.Region,
+						"Region":            s.Region,
 					},
 					Timestamp: time.Now(),
 				})
@@ -225,12 +218,12 @@ var KinesisCalls = []types.AWSService{
 	},
 	{
 		Name: "kinesis:ListShards",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allShards []kinesisShard
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, kinesis.NewFromConfig)
 
 				// Step 1: List all stream names
 				var streamNames []string
@@ -240,14 +233,14 @@ var KinesisCalls = []types.AWSService{
 					if streamToken != nil {
 						input.NextToken = streamToken
 					}
-					output, err := svc.ListStreamsWithContext(ctx, input)
+					output, err := svc.ListStreams(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "kinesis:ListShards", err)
 						break
 					}
 					for _, summary := range output.StreamSummaries {
-						if summary != nil && summary.StreamName != nil {
+						if summary.StreamName != nil {
 							streamNames = append(streamNames, *summary.StreamName)
 						}
 					}
@@ -269,16 +262,14 @@ var KinesisCalls = []types.AWSService{
 						} else {
 							input.NextToken = shardToken
 						}
-						output, err := svc.ListShardsWithContext(ctx, input)
+						output, err := svc.ListShards(ctx, input)
 						if err != nil {
 							lastErr = err
 							utils.HandleAWSError(false, "kinesis:ListShards", err)
 							break
 						}
 						for _, shard := range output.Shards {
-							if shard != nil {
-								allShards = append(allShards, extractShard(shard, streamName, region))
-							}
+							allShards = append(allShards, extractShard(shard, streamName, region))
 						}
 						if output.NextToken == nil {
 							break
@@ -342,12 +333,12 @@ var KinesisCalls = []types.AWSService{
 	},
 	{
 		Name: "kinesis:ListStreamConsumers",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allConsumers []kinesisConsumer
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := kinesis.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, kinesis.NewFromConfig)
 
 				// Step 1: List all stream names and ARNs
 				var streams []struct{ Name, ARN string }
@@ -357,14 +348,14 @@ var KinesisCalls = []types.AWSService{
 					if streamToken != nil {
 						input.NextToken = streamToken
 					}
-					output, err := svc.ListStreamsWithContext(ctx, input)
+					output, err := svc.ListStreams(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "kinesis:ListStreamConsumers", err)
 						break
 					}
 					for _, summary := range output.StreamSummaries {
-						if summary != nil && summary.StreamARN != nil {
+						if summary.StreamARN != nil {
 							name := ""
 							if summary.StreamName != nil {
 								name = *summary.StreamName
@@ -388,16 +379,14 @@ var KinesisCalls = []types.AWSService{
 						if consumerToken != nil {
 							input.NextToken = consumerToken
 						}
-						output, err := svc.ListStreamConsumersWithContext(ctx, input)
+						output, err := svc.ListStreamConsumers(ctx, input)
 						if err != nil {
 							lastErr = err
 							utils.HandleAWSError(false, "kinesis:ListStreamConsumers", err)
 							break
 						}
 						for _, consumer := range output.Consumers {
-							if consumer != nil {
-								allConsumers = append(allConsumers, extractConsumer(consumer, stream.Name, region))
-							}
+							allConsumers = append(allConsumers, extractConsumer(consumer, stream.Name, region))
 						}
 						if output.NextToken == nil {
 							break
@@ -440,12 +429,12 @@ var KinesisCalls = []types.AWSService{
 					ResourceType: "consumer",
 					ResourceName: c.ConsumerName,
 					Details: map[string]interface{}{
-						"ConsumerName":     c.ConsumerName,
-						"ConsumerARN":      c.ConsumerARN,
-						"ConsumerStatus":   c.ConsumerStatus,
-						"StreamName":       c.StreamName,
+						"ConsumerName":      c.ConsumerName,
+						"ConsumerARN":       c.ConsumerARN,
+						"ConsumerStatus":    c.ConsumerStatus,
+						"StreamName":        c.StreamName,
 						"CreationTimestamp": c.CreationTimestamp,
-						"Region":           c.Region,
+						"Region":            c.Region,
 					},
 					Timestamp: time.Now(),
 				})

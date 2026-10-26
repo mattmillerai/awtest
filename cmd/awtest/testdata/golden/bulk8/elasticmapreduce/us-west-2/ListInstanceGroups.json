@@ -1,0 +1,1 @@
+{"InstanceGroups":[{"Id":"ig-1EXAMPLE","Name":"Core","InstanceGroupType":"CORE","InstanceType":"m5.xlarge","RequestedInstanceCount":2,"RunningInstanceCount":2,"Market":"ON_DEMAND","Status":{"State":"RUNNING"}},{"Id":"ig-2EXAMPLE"}]}
