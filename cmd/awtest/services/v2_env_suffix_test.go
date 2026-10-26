@@ -7,9 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/acm"
 	"github.com/aws/aws-sdk-go-v2/service/amplify"
 	"github.com/aws/aws-sdk-go-v2/service/appsync"
+	"github.com/aws/aws-sdk-go-v2/service/athena"
+	"github.com/aws/aws-sdk-go-v2/service/backup"
 	"github.com/aws/aws-sdk-go-v2/service/batch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/codebuild"
+	"github.com/aws/aws-sdk-go-v2/service/codecommit"
+	"github.com/aws/aws-sdk-go-v2/service/codedeploy"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
@@ -105,6 +110,12 @@ var v2EnvSuffix = map[string][]string{
 	"iot":         {"IOT"},
 	"rekognition": {"REKOGNITION"},
 	"transcribe":  {"TRANSCRIBE"},
+
+	"athena":     {"ATHENA"},
+	"backup":     {"BACKUP"},
+	"codebuild":  {"CODEBUILD"},
+	"codecommit": {"CODECOMMIT"},
+	"codedeploy": {"CODEDEPLOY"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -149,6 +160,12 @@ var v2ServiceIDs = map[string][]string{
 	"iot":         {iot.ServiceID},
 	"rekognition": {rekognition.ServiceID},
 	"transcribe":  {transcribe.ServiceID},
+
+	"athena":     {athena.ServiceID},
+	"backup":     {backup.ServiceID},
+	"codebuild":  {codebuild.ServiceID},
+	"codecommit": {codecommit.ServiceID},
+	"codedeploy": {codedeploy.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

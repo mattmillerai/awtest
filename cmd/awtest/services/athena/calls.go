@@ -6,11 +6,12 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/athena"
+	athenatypes "github.com/aws/aws-sdk-go-v2/service/athena/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/athena"
 )
 
 type atWorkGroup struct {
@@ -56,10 +57,10 @@ func truncateRuneSafe(s string, maxRunes int) string {
 }
 
 // batchGetNamedQueries fetches details for a batch of IDs with a single retry for unprocessed IDs.
-func batchGetNamedQueries(ctx context.Context, svc *athena.Athena, ids []*string, region string) []atNamedQuery {
+func batchGetNamedQueries(ctx context.Context, svc *athena.Client, ids []string, region string) []atNamedQuery {
 	var results []atNamedQuery
 
-	batchOutput, err := svc.BatchGetNamedQueryWithContext(ctx, &athena.BatchGetNamedQueryInput{
+	batchOutput, err := svc.BatchGetNamedQuery(ctx, &athena.BatchGetNamedQueryInput{
 		NamedQueryIds: ids,
 	})
 	if err != nil {
@@ -73,14 +74,14 @@ func batchGetNamedQueries(ctx context.Context, svc *athena.Athena, ids []*string
 
 	// Single retry for unprocessed IDs
 	if len(batchOutput.UnprocessedNamedQueryIds) > 0 {
-		var retryIds []*string
+		var retryIds []string
 		for _, u := range batchOutput.UnprocessedNamedQueryIds {
 			if u.NamedQueryId != nil {
-				retryIds = append(retryIds, u.NamedQueryId)
+				retryIds = append(retryIds, *u.NamedQueryId)
 			}
 		}
 		if len(retryIds) > 0 {
-			retryOutput, retryErr := svc.BatchGetNamedQueryWithContext(ctx, &athena.BatchGetNamedQueryInput{
+			retryOutput, retryErr := svc.BatchGetNamedQuery(ctx, &athena.BatchGetNamedQueryInput{
 				NamedQueryIds: retryIds,
 			})
 			if retryErr != nil {
@@ -100,7 +101,7 @@ func batchGetNamedQueries(ctx context.Context, svc *athena.Athena, ids []*string
 	return results
 }
 
-func extractNamedQuery(nq *athena.NamedQuery, region string) atNamedQuery {
+func extractNamedQuery(nq athenatypes.NamedQuery, region string) atNamedQuery {
 	name := ""
 	if nq.Name != nil {
 		name = *nq.Name
@@ -137,10 +138,10 @@ func extractNamedQuery(nq *athena.NamedQuery, region string) atNamedQuery {
 }
 
 // batchGetQueryExecutions fetches details for a batch of IDs with a single retry for unprocessed IDs.
-func batchGetQueryExecutions(ctx context.Context, svc *athena.Athena, ids []*string, region string) []atQueryExecution {
+func batchGetQueryExecutions(ctx context.Context, svc *athena.Client, ids []string, region string) []atQueryExecution {
 	var results []atQueryExecution
 
-	batchOutput, err := svc.BatchGetQueryExecutionWithContext(ctx, &athena.BatchGetQueryExecutionInput{
+	batchOutput, err := svc.BatchGetQueryExecution(ctx, &athena.BatchGetQueryExecutionInput{
 		QueryExecutionIds: ids,
 	})
 	if err != nil {
@@ -154,14 +155,14 @@ func batchGetQueryExecutions(ctx context.Context, svc *athena.Athena, ids []*str
 
 	// Single retry for unprocessed IDs
 	if len(batchOutput.UnprocessedQueryExecutionIds) > 0 {
-		var retryIds []*string
+		var retryIds []string
 		for _, u := range batchOutput.UnprocessedQueryExecutionIds {
 			if u.QueryExecutionId != nil {
-				retryIds = append(retryIds, u.QueryExecutionId)
+				retryIds = append(retryIds, *u.QueryExecutionId)
 			}
 		}
 		if len(retryIds) > 0 {
-			retryOutput, retryErr := svc.BatchGetQueryExecutionWithContext(ctx, &athena.BatchGetQueryExecutionInput{
+			retryOutput, retryErr := svc.BatchGetQueryExecution(ctx, &athena.BatchGetQueryExecutionInput{
 				QueryExecutionIds: retryIds,
 			})
 			if retryErr != nil {
@@ -181,7 +182,7 @@ func batchGetQueryExecutions(ctx context.Context, svc *athena.Athena, ids []*str
 	return results
 }
 
-func extractQueryExecution(qe *athena.QueryExecution, region string) atQueryExecution {
+func extractQueryExecution(qe athenatypes.QueryExecution, region string) atQueryExecution {
 	queryExecutionId := ""
 	if qe.QueryExecutionId != nil {
 		queryExecutionId = *qe.QueryExecutionId
@@ -190,17 +191,12 @@ func extractQueryExecution(qe *athena.QueryExecution, region string) atQueryExec
 	if qe.Query != nil {
 		query = truncateRuneSafe(*qe.Query, 200)
 	}
-	statementType := ""
-	if qe.StatementType != nil {
-		statementType = *qe.StatementType
-	}
+	statementType := string(qe.StatementType)
 	status := ""
 	submissionDateTime := ""
 	stateChangeReason := ""
 	if qe.Status != nil {
-		if qe.Status.State != nil {
-			status = *qe.Status.State
-		}
+		status = string(qe.Status.State)
 		if qe.Status.SubmissionDateTime != nil {
 			submissionDateTime = qe.Status.SubmissionDateTime.Format(time.RFC3339)
 		}
@@ -237,21 +233,21 @@ func extractQueryExecution(qe *athena.QueryExecution, region string) atQueryExec
 var AthenaCalls = []types.AWSService{
 	{
 		Name: "athena:ListWorkGroups",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allWorkGroups []atWorkGroup
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, athena.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &athena.ListWorkGroupsInput{
-						MaxResults: aws.Int64(50),
+						MaxResults: aws.Int32(50),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListWorkGroupsWithContext(ctx, input)
+					output, err := svc.ListWorkGroups(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "athena:ListWorkGroups", err)
@@ -264,10 +260,7 @@ var AthenaCalls = []types.AWSService{
 							name = *wg.Name
 						}
 
-						state := ""
-						if wg.State != nil {
-							state = *wg.State
-						}
+						state := string(wg.State)
 
 						description := ""
 						if wg.Description != nil {
@@ -353,24 +346,24 @@ var AthenaCalls = []types.AWSService{
 	},
 	{
 		Name: "athena:ListNamedQueries",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allNamedQueries []atNamedQuery
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, athena.NewFromConfig)
 
 				// Step 1: List all workgroups in this region
 				var workGroupNames []string
 				var wgNextToken *string
 				for {
 					wgInput := &athena.ListWorkGroupsInput{
-						MaxResults: aws.Int64(50),
+						MaxResults: aws.Int32(50),
 					}
 					if wgNextToken != nil {
 						wgInput.NextToken = wgNextToken
 					}
-					wgOutput, err := svc.ListWorkGroupsWithContext(ctx, wgInput)
+					wgOutput, err := svc.ListWorkGroups(ctx, wgInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "athena:ListNamedQueries", err)
@@ -392,13 +385,13 @@ var AthenaCalls = []types.AWSService{
 					var nextToken *string
 					for {
 						input := &athena.ListNamedQueriesInput{
-							MaxResults: aws.Int64(50),
+							MaxResults: aws.Int32(50),
 							WorkGroup:  aws.String(wgName),
 						}
 						if nextToken != nil {
 							input.NextToken = nextToken
 						}
-						output, err := svc.ListNamedQueriesWithContext(ctx, input)
+						output, err := svc.ListNamedQueries(ctx, input)
 						if err != nil {
 							utils.HandleAWSError(false, "athena:ListNamedQueries", err)
 							break
@@ -471,24 +464,24 @@ var AthenaCalls = []types.AWSService{
 	},
 	{
 		Name: "athena:ListQueryExecutions",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allQueryExecutions []atQueryExecution
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := athena.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, athena.NewFromConfig)
 
 				// Step 1: List all workgroups in this region
 				var workGroupNames []string
 				var wgNextToken *string
 				for {
 					wgInput := &athena.ListWorkGroupsInput{
-						MaxResults: aws.Int64(50),
+						MaxResults: aws.Int32(50),
 					}
 					if wgNextToken != nil {
 						wgInput.NextToken = wgNextToken
 					}
-					wgOutput, err := svc.ListWorkGroupsWithContext(ctx, wgInput)
+					wgOutput, err := svc.ListWorkGroups(ctx, wgInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "athena:ListQueryExecutions", err)
@@ -510,13 +503,13 @@ var AthenaCalls = []types.AWSService{
 					var nextToken *string
 					for {
 						input := &athena.ListQueryExecutionsInput{
-							MaxResults: aws.Int64(50),
+							MaxResults: aws.Int32(50),
 							WorkGroup:  aws.String(wgName),
 						}
 						if nextToken != nil {
 							input.NextToken = nextToken
 						}
-						output, err := svc.ListQueryExecutionsWithContext(ctx, input)
+						output, err := svc.ListQueryExecutions(ctx, input)
 						if err != nil {
 							utils.HandleAWSError(false, "athena:ListQueryExecutions", err)
 							break

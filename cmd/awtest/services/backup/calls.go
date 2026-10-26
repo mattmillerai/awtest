@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/backup"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/backup"
 )
 
 type bkVault struct {
@@ -34,14 +33,14 @@ type bkPlan struct {
 }
 
 type bkRecoveryPoint struct {
-	RecoveryPointArn string
-	VaultName        string
-	ResourceArn      string
-	ResourceType     string
-	Status           string
-	CreationDate     string
+	RecoveryPointArn  string
+	VaultName         string
+	ResourceArn       string
+	ResourceType      string
+	Status            string
+	CreationDate      string
 	BackupSizeInBytes int64
-	Region           string
+	Region            string
 }
 
 type bkVaultPolicy struct {
@@ -52,30 +51,27 @@ type bkVaultPolicy struct {
 }
 
 func isResourceNotFound(err error) bool {
-	if aerr, ok := err.(awserr.Error); ok {
-		return aerr.Code() == "ResourceNotFoundException"
-	}
-	return false
+	return awsv2.HasErrorCode(err, "ResourceNotFoundException")
 }
 
 var BackupCalls = []types.AWSService{
 	{
 		Name: "backup:ListBackupVaults",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allVaults []bkVault
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, backup.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &backup.ListBackupVaultsInput{
-						MaxResults: aws.Int64(1000),
+						MaxResults: aws.Int32(1000),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListBackupVaultsWithContext(ctx, input)
+					output, err := svc.ListBackupVaults(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "backup:ListBackupVaults", err)
@@ -93,10 +89,7 @@ var BackupCalls = []types.AWSService{
 							arn = *v.BackupVaultArn
 						}
 
-						var recoveryPointCount int64
-						if v.NumberOfRecoveryPoints != nil {
-							recoveryPointCount = *v.NumberOfRecoveryPoints
-						}
+						recoveryPointCount := v.NumberOfRecoveryPoints
 
 						encryptionKeyArn := ""
 						if v.EncryptionKeyArn != nil {
@@ -184,21 +177,21 @@ var BackupCalls = []types.AWSService{
 	},
 	{
 		Name: "backup:ListBackupPlans",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allPlans []bkPlan
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, backup.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &backup.ListBackupPlansInput{
-						MaxResults: aws.Int64(1000),
+						MaxResults: aws.Int32(1000),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListBackupPlansWithContext(ctx, input)
+					output, err := svc.ListBackupPlans(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "backup:ListBackupPlans", err)
@@ -307,24 +300,24 @@ var BackupCalls = []types.AWSService{
 	},
 	{
 		Name: "backup:ListRecoveryPointsByBackupVault",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allRecoveryPoints []bkRecoveryPoint
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, backup.NewFromConfig)
 
 				// Step 1: List all vaults in this region
 				var vaultNames []string
 				var vaultNextToken *string
 				for {
 					vaultInput := &backup.ListBackupVaultsInput{
-						MaxResults: aws.Int64(1000),
+						MaxResults: aws.Int32(1000),
 					}
 					if vaultNextToken != nil {
 						vaultInput.NextToken = vaultNextToken
 					}
-					vaultOutput, err := svc.ListBackupVaultsWithContext(ctx, vaultInput)
+					vaultOutput, err := svc.ListBackupVaults(ctx, vaultInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "backup:ListRecoveryPointsByBackupVault", err)
@@ -347,12 +340,12 @@ var BackupCalls = []types.AWSService{
 					for {
 						input := &backup.ListRecoveryPointsByBackupVaultInput{
 							BackupVaultName: aws.String(vaultName),
-							MaxResults:      aws.Int64(1000),
+							MaxResults:      aws.Int32(1000),
 						}
 						if nextToken != nil {
 							input.NextToken = nextToken
 						}
-						output, err := svc.ListRecoveryPointsByBackupVaultWithContext(ctx, input)
+						output, err := svc.ListRecoveryPointsByBackupVault(ctx, input)
 						if err != nil {
 							utils.HandleAWSError(false, "backup:ListRecoveryPointsByBackupVault", err)
 							break
@@ -379,10 +372,7 @@ var BackupCalls = []types.AWSService{
 								resourceType = *rp.ResourceType
 							}
 
-							status := ""
-							if rp.Status != nil {
-								status = *rp.Status
-							}
+							status := string(rp.Status)
 
 							creationDate := ""
 							if rp.CreationDate != nil {
@@ -468,24 +458,24 @@ var BackupCalls = []types.AWSService{
 	},
 	{
 		Name: "backup:GetBackupVaultAccessPolicy",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allPolicies []bkVaultPolicy
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := backup.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, backup.NewFromConfig)
 
 				// Step 1: List all vaults in this region
 				var vaultNames []string
 				var vaultNextToken *string
 				for {
 					vaultInput := &backup.ListBackupVaultsInput{
-						MaxResults: aws.Int64(1000),
+						MaxResults: aws.Int32(1000),
 					}
 					if vaultNextToken != nil {
 						vaultInput.NextToken = vaultNextToken
 					}
-					vaultOutput, err := svc.ListBackupVaultsWithContext(ctx, vaultInput)
+					vaultOutput, err := svc.ListBackupVaults(ctx, vaultInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "backup:GetBackupVaultAccessPolicy", err)
@@ -504,7 +494,7 @@ var BackupCalls = []types.AWSService{
 
 				// Step 2: For each vault, get access policy
 				for _, vaultName := range vaultNames {
-					output, err := svc.GetBackupVaultAccessPolicyWithContext(ctx, &backup.GetBackupVaultAccessPolicyInput{
+					output, err := svc.GetBackupVaultAccessPolicy(ctx, &backup.GetBackupVaultAccessPolicyInput{
 						BackupVaultName: aws.String(vaultName),
 					})
 					if err != nil {

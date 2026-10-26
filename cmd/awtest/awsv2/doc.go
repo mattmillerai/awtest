@@ -102,6 +102,9 @@
 //     (ListTranscriptionJobs, ListVocabularies, ListLanguageModels), single
 //     non-paginated calls, plus dynamodb (ListTables, ListExports,
 //     ListBackups), non-paginated regional loops that abort on the first error.
+//     Bulk 7 is migrated too: athena, backup, codebuild, codecommit and
+//     codedeploy (list calls, several with batch-get follow-ups), regional
+//     loops that skip failing regions and fail only when nothing was found.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

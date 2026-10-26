@@ -1,0 +1,1 @@
+{"NamedQueries":[{"Name":"daily-active-users","NamedQueryId":"11111111-2222-3333-4444-555555555555","Database":"analytics_db","QueryString":"SELECT dt, count(*) FROM events GROUP BY dt","WorkGroup":"analytics-wg","Description":"DAU rollup"},{"NamedQueryId":"66666666-7777-8888-9999-000000000000","QueryString":"SELECT 1"}],"UnprocessedNamedQueryIds":[]}

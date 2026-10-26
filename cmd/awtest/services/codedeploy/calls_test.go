@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/codedeploy"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	codedeploytypes "github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
 )
 
 func TestListApplicationsProcess(t *testing.T) {
@@ -521,7 +521,7 @@ func TestExtractApplication(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		input      *codedeploy.ApplicationInfo
+		input      codedeploytypes.ApplicationInfo
 		region     string
 		wantName   string
 		wantAppId  string
@@ -532,12 +532,12 @@ func TestExtractApplication(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &codedeploy.ApplicationInfo{
+			input: codedeploytypes.ApplicationInfo{
 				ApplicationName: aws.String("my-app"),
 				ApplicationId:   aws.String("app-123"),
-				ComputePlatform: aws.String("Server"),
+				ComputePlatform: codedeploytypes.ComputePlatformServer,
 				CreateTime:      &ts,
-				LinkedToGitHub:  aws.Bool(true),
+				LinkedToGitHub:  true,
 			},
 			region:     "us-east-1",
 			wantName:   "my-app",
@@ -549,20 +549,22 @@ func TestExtractApplication(t *testing.T) {
 		},
 		{
 			name:       "all fields nil",
-			input:      &codedeploy.ApplicationInfo{},
+			input:      codedeploytypes.ApplicationInfo{},
 			region:     "eu-west-1",
 			wantName:   "",
 			wantAppId:  "",
 			wantPlatf:  "",
 			wantCreate: "",
-			wantGH:     "",
+			// v2 models LinkedToGitHub as a plain bool: absent reads as false
+			// (v1 printed "" for a nil pointer).
+			wantGH:     "false",
 			wantRegion: "eu-west-1",
 		},
 		{
 			name: "LinkedToGitHub false",
-			input: &codedeploy.ApplicationInfo{
+			input: codedeploytypes.ApplicationInfo{
 				ApplicationName: aws.String("no-gh"),
-				LinkedToGitHub:  aws.Bool(false),
+				LinkedToGitHub:  false,
 			},
 			region:     "us-west-2",
 			wantName:   "no-gh",
@@ -599,7 +601,7 @@ func TestExtractApplication(t *testing.T) {
 func TestExtractDeploymentGroup(t *testing.T) {
 	tests := []struct {
 		name          string
-		input         *codedeploy.DeploymentGroupInfo
+		input         codedeploytypes.DeploymentGroupInfo
 		region        string
 		wantAppName   string
 		wantGroupName string
@@ -610,12 +612,12 @@ func TestExtractDeploymentGroup(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &codedeploy.DeploymentGroupInfo{
+			input: codedeploytypes.DeploymentGroupInfo{
 				ApplicationName:      aws.String("my-app"),
 				DeploymentGroupName:  aws.String("prod"),
 				DeploymentGroupId:    aws.String("dg-123"),
 				DeploymentConfigName: aws.String("CodeDeployDefault.OneAtATime"),
-				ComputePlatform:      aws.String("Server"),
+				ComputePlatform:      codedeploytypes.ComputePlatformServer,
 				ServiceRoleArn:       aws.String("arn:aws:iam::111:role/CDRole"),
 			},
 			region:        "us-east-1",
@@ -628,7 +630,7 @@ func TestExtractDeploymentGroup(t *testing.T) {
 		},
 		{
 			name:          "all fields nil",
-			input:         &codedeploy.DeploymentGroupInfo{},
+			input:         codedeploytypes.DeploymentGroupInfo{},
 			region:        "eu-west-1",
 			wantAppName:   "",
 			wantGroupName: "",
@@ -672,7 +674,7 @@ func TestExtractDeploymentConfig(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		input      *codedeploy.DeploymentConfigInfo
+		input      codedeploytypes.DeploymentConfigInfo
 		region     string
 		wantName   string
 		wantId     string
@@ -681,10 +683,10 @@ func TestExtractDeploymentConfig(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &codedeploy.DeploymentConfigInfo{
+			input: codedeploytypes.DeploymentConfigInfo{
 				DeploymentConfigName: aws.String("custom-config"),
 				DeploymentConfigId:   aws.String("cfg-456"),
-				ComputePlatform:      aws.String("Lambda"),
+				ComputePlatform:      codedeploytypes.ComputePlatformLambda,
 				CreateTime:           &ts,
 			},
 			region:     "us-west-2",
@@ -695,7 +697,7 @@ func TestExtractDeploymentConfig(t *testing.T) {
 		},
 		{
 			name:       "all fields nil",
-			input:      &codedeploy.DeploymentConfigInfo{},
+			input:      codedeploytypes.DeploymentConfigInfo{},
 			region:     "ap-southeast-1",
 			wantName:   "",
 			wantId:     "",

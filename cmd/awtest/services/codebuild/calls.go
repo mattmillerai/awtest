@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/codebuild"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/codebuild"
 )
 
 type cbProject struct {
@@ -39,17 +39,17 @@ type cbBuild struct {
 var CodeBuildCalls = []types.AWSService{
 	{
 		Name: "codebuild:ListProjects",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allProjects []cbProject
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codebuild.NewFromConfig)
 
-				var projectNames []*string
+				var projectNames []string
 				input := &codebuild.ListProjectsInput{}
 				for {
-					output, err := svc.ListProjectsWithContext(ctx, input)
+					output, err := svc.ListProjects(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codebuild:ListProjects", err)
@@ -75,7 +75,7 @@ var CodeBuildCalls = []types.AWSService{
 					batchInput := &codebuild.BatchGetProjectsInput{
 						Names: batch,
 					}
-					batchOutput, err := svc.BatchGetProjectsWithContext(ctx, batchInput)
+					batchOutput, err := svc.BatchGetProjects(ctx, batchInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codebuild:ListProjects", err)
@@ -99,13 +99,13 @@ var CodeBuildCalls = []types.AWSService{
 						}
 
 						sourceType := ""
-						if project.Source != nil && project.Source.Type != nil {
-							sourceType = *project.Source.Type
+						if project.Source != nil {
+							sourceType = string(project.Source.Type)
 						}
 
 						environmentType := ""
-						if project.Environment != nil && project.Environment.Type != nil {
-							environmentType = *project.Environment.Type
+						if project.Environment != nil {
+							environmentType = string(project.Environment.Type)
 						}
 
 						allProjects = append(allProjects, cbProject{
@@ -172,17 +172,17 @@ var CodeBuildCalls = []types.AWSService{
 	},
 	{
 		Name: "codebuild:ListProjectEnvironmentVariables",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allEnvVars []cbEnvVar
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codebuild.NewFromConfig)
 
-				var projectNames []*string
+				var projectNames []string
 				input := &codebuild.ListProjectsInput{}
 				for {
-					output, err := svc.ListProjectsWithContext(ctx, input)
+					output, err := svc.ListProjects(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codebuild:ListProjectEnvironmentVariables", err)
@@ -208,7 +208,7 @@ var CodeBuildCalls = []types.AWSService{
 					batchInput := &codebuild.BatchGetProjectsInput{
 						Names: batch,
 					}
-					batchOutput, err := svc.BatchGetProjectsWithContext(ctx, batchInput)
+					batchOutput, err := svc.BatchGetProjects(ctx, batchInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codebuild:ListProjectEnvironmentVariables", err)
@@ -228,10 +228,7 @@ var CodeBuildCalls = []types.AWSService{
 									varName = *envVar.Name
 								}
 
-								varType := ""
-								if envVar.Type != nil {
-									varType = *envVar.Type
-								}
+								varType := string(envVar.Type)
 
 								allEnvVars = append(allEnvVars, cbEnvVar{
 									ProjectName:  projectName,
@@ -295,15 +292,15 @@ var CodeBuildCalls = []types.AWSService{
 	},
 	{
 		Name: "codebuild:ListBuilds",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allBuilds []cbBuild
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codebuild.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codebuild.NewFromConfig)
 
 				// First page only — no pagination, cap at 100 build IDs per region
-				listBuildsOutput, err := svc.ListBuildsWithContext(ctx, &codebuild.ListBuildsInput{})
+				listBuildsOutput, err := svc.ListBuilds(ctx, &codebuild.ListBuildsInput{})
 				if err != nil {
 					lastErr = err
 					utils.HandleAWSError(false, "codebuild:ListBuilds", err)
@@ -325,7 +322,7 @@ var CodeBuildCalls = []types.AWSService{
 					batchInput := &codebuild.BatchGetBuildsInput{
 						Ids: batch,
 					}
-					batchOutput, err := svc.BatchGetBuildsWithContext(ctx, batchInput)
+					batchOutput, err := svc.BatchGetBuilds(ctx, batchInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codebuild:ListBuilds", err)
@@ -343,10 +340,7 @@ var CodeBuildCalls = []types.AWSService{
 							projectName = *build.ProjectName
 						}
 
-						buildStatus := ""
-						if build.BuildStatus != nil {
-							buildStatus = *build.BuildStatus
-						}
+						buildStatus := string(build.BuildStatus)
 
 						startTime := ""
 						if build.StartTime != nil {

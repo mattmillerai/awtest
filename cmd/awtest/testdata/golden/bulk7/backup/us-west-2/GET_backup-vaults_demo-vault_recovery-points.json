@@ -1,0 +1,1 @@
+{"RecoveryPoints":[{"RecoveryPointArn":"arn:aws:ec2:us-west-2::snapshot/snap-0123456789abcdef0","BackupVaultName":"demo-vault","ResourceArn":"arn:aws:ec2:us-west-2:123456789012:volume/vol-0123456789abcdef0","ResourceType":"EBS","Status":"COMPLETED","BackupSizeInBytes":1073741824},{"RecoveryPointArn":"arn:aws:ec2:us-west-2::snapshot/snap-0fedcba9876543210"}]}

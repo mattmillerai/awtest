@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/codedeploy"
+	codedeploytypes "github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/codedeploy"
 )
 
 const maxBatchSize = 25
@@ -41,7 +42,7 @@ type cdDeploymentConfig struct {
 	Region             string
 }
 
-func batchGetApplications(ctx context.Context, svc *codedeploy.CodeDeploy, names []*string, region string) []cdApplication {
+func batchGetApplications(ctx context.Context, svc *codedeploy.Client, names []string, region string) []cdApplication {
 	var results []cdApplication
 	for i := 0; i < len(names); i += maxBatchSize {
 		end := i + maxBatchSize
@@ -49,7 +50,7 @@ func batchGetApplications(ctx context.Context, svc *codedeploy.CodeDeploy, names
 			end = len(names)
 		}
 		batch := names[i:end]
-		output, err := svc.BatchGetApplicationsWithContext(ctx, &codedeploy.BatchGetApplicationsInput{
+		output, err := svc.BatchGetApplications(ctx, &codedeploy.BatchGetApplicationsInput{
 			ApplicationNames: batch,
 		})
 		if err != nil {
@@ -57,15 +58,13 @@ func batchGetApplications(ctx context.Context, svc *codedeploy.CodeDeploy, names
 			continue
 		}
 		for _, app := range output.ApplicationsInfo {
-			if app != nil {
-				results = append(results, extractApplication(app, region))
-			}
+			results = append(results, extractApplication(app, region))
 		}
 	}
 	return results
 }
 
-func extractApplication(app *codedeploy.ApplicationInfo, region string) cdApplication {
+func extractApplication(app codedeploytypes.ApplicationInfo, region string) cdApplication {
 	name := ""
 	if app.ApplicationName != nil {
 		name = *app.ApplicationName
@@ -74,18 +73,14 @@ func extractApplication(app *codedeploy.ApplicationInfo, region string) cdApplic
 	if app.ApplicationId != nil {
 		appId = *app.ApplicationId
 	}
-	platform := ""
-	if app.ComputePlatform != nil {
-		platform = *app.ComputePlatform
-	}
+	platform := string(app.ComputePlatform)
 	createTime := ""
 	if app.CreateTime != nil {
 		createTime = app.CreateTime.Format(time.RFC3339)
 	}
-	linkedToGitHub := ""
-	if app.LinkedToGitHub != nil {
-		linkedToGitHub = fmt.Sprintf("%t", *app.LinkedToGitHub)
-	}
+	// v2 models LinkedToGitHub as a plain bool, so an absent field reads as
+	// "false" where v1 left it empty.
+	linkedToGitHub := fmt.Sprintf("%t", app.LinkedToGitHub)
 	return cdApplication{
 		Name:            name,
 		ApplicationId:   appId,
@@ -96,7 +91,7 @@ func extractApplication(app *codedeploy.ApplicationInfo, region string) cdApplic
 	}
 }
 
-func batchGetDeploymentGroups(ctx context.Context, svc *codedeploy.CodeDeploy, appName string, names []*string, region string) []cdDeploymentGroup {
+func batchGetDeploymentGroups(ctx context.Context, svc *codedeploy.Client, appName string, names []string, region string) []cdDeploymentGroup {
 	var results []cdDeploymentGroup
 	for i := 0; i < len(names); i += maxBatchSize {
 		end := i + maxBatchSize
@@ -104,7 +99,7 @@ func batchGetDeploymentGroups(ctx context.Context, svc *codedeploy.CodeDeploy, a
 			end = len(names)
 		}
 		batch := names[i:end]
-		output, err := svc.BatchGetDeploymentGroupsWithContext(ctx, &codedeploy.BatchGetDeploymentGroupsInput{
+		output, err := svc.BatchGetDeploymentGroups(ctx, &codedeploy.BatchGetDeploymentGroupsInput{
 			ApplicationName:      aws.String(appName),
 			DeploymentGroupNames: batch,
 		})
@@ -117,15 +112,13 @@ func batchGetDeploymentGroups(ctx context.Context, svc *codedeploy.CodeDeploy, a
 				fmt.Errorf("partial error: %s", *output.ErrorMessage))
 		}
 		for _, dg := range output.DeploymentGroupsInfo {
-			if dg != nil {
-				results = append(results, extractDeploymentGroup(dg, region))
-			}
+			results = append(results, extractDeploymentGroup(dg, region))
 		}
 	}
 	return results
 }
 
-func extractDeploymentGroup(dg *codedeploy.DeploymentGroupInfo, region string) cdDeploymentGroup {
+func extractDeploymentGroup(dg codedeploytypes.DeploymentGroupInfo, region string) cdDeploymentGroup {
 	appName := ""
 	if dg.ApplicationName != nil {
 		appName = *dg.ApplicationName
@@ -142,10 +135,7 @@ func extractDeploymentGroup(dg *codedeploy.DeploymentGroupInfo, region string) c
 	if dg.DeploymentConfigName != nil {
 		configName = *dg.DeploymentConfigName
 	}
-	platform := ""
-	if dg.ComputePlatform != nil {
-		platform = *dg.ComputePlatform
-	}
+	platform := string(dg.ComputePlatform)
 	roleArn := ""
 	if dg.ServiceRoleArn != nil {
 		roleArn = *dg.ServiceRoleArn
@@ -161,7 +151,7 @@ func extractDeploymentGroup(dg *codedeploy.DeploymentGroupInfo, region string) c
 	}
 }
 
-func extractDeploymentConfig(cfg *codedeploy.DeploymentConfigInfo, region string) cdDeploymentConfig {
+func extractDeploymentConfig(cfg codedeploytypes.DeploymentConfigInfo, region string) cdDeploymentConfig {
 	name := ""
 	if cfg.DeploymentConfigName != nil {
 		name = *cfg.DeploymentConfigName
@@ -170,10 +160,7 @@ func extractDeploymentConfig(cfg *codedeploy.DeploymentConfigInfo, region string
 	if cfg.DeploymentConfigId != nil {
 		configId = *cfg.DeploymentConfigId
 	}
-	platform := ""
-	if cfg.ComputePlatform != nil {
-		platform = *cfg.ComputePlatform
-	}
+	platform := string(cfg.ComputePlatform)
 	createTime := ""
 	if cfg.CreateTime != nil {
 		createTime = cfg.CreateTime.Format(time.RFC3339)
@@ -190,20 +177,20 @@ func extractDeploymentConfig(cfg *codedeploy.DeploymentConfigInfo, region string
 var CodeDeployCalls = []types.AWSService{
 	{
 		Name: "codedeploy:ListApplications",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allApps []cdApplication
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
-				var allAppNames []*string
+				svc := awsv2.NewRegionalClient(cfg, region, codedeploy.NewFromConfig)
+				var allAppNames []string
 				var nextToken *string
 				for {
 					input := &codedeploy.ListApplicationsInput{}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListApplicationsWithContext(ctx, input)
+					output, err := svc.ListApplications(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codedeploy:ListApplications", err)
@@ -272,22 +259,22 @@ var CodeDeployCalls = []types.AWSService{
 	},
 	{
 		Name: "codedeploy:ListDeploymentGroups",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allGroups []cdDeploymentGroup
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codedeploy.NewFromConfig)
 
 				// Step 1: List all application names
-				var appNames []*string
+				var appNames []string
 				var nextToken *string
 				for {
 					input := &codedeploy.ListApplicationsInput{}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListApplicationsWithContext(ctx, input)
+					output, err := svc.ListApplications(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codedeploy:ListDeploymentGroups", err)
@@ -301,12 +288,8 @@ var CodeDeployCalls = []types.AWSService{
 				}
 
 				// Step 2: For each application, list and batch-get deployment groups
-				for _, appNamePtr := range appNames {
-					if appNamePtr == nil {
-						continue
-					}
-					appName := *appNamePtr
-					var groupNames []*string
+				for _, appName := range appNames {
+					var groupNames []string
 					var dgNextToken *string
 					for {
 						dgInput := &codedeploy.ListDeploymentGroupsInput{
@@ -315,7 +298,7 @@ var CodeDeployCalls = []types.AWSService{
 						if dgNextToken != nil {
 							dgInput.NextToken = dgNextToken
 						}
-						dgOutput, err := svc.ListDeploymentGroupsWithContext(ctx, dgInput)
+						dgOutput, err := svc.ListDeploymentGroups(ctx, dgInput)
 						if err != nil {
 							utils.HandleAWSError(false, "codedeploy:ListDeploymentGroups", err)
 							break
@@ -390,20 +373,20 @@ var CodeDeployCalls = []types.AWSService{
 	},
 	{
 		Name: "codedeploy:ListDeploymentConfigs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allConfigs []cdDeploymentConfig
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codedeploy.New(sess, &aws.Config{Region: aws.String(region)})
-				var configNames []*string
+				svc := awsv2.NewRegionalClient(cfg, region, codedeploy.NewFromConfig)
+				var configNames []string
 				var nextToken *string
 				for {
 					input := &codedeploy.ListDeploymentConfigsInput{}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListDeploymentConfigsWithContext(ctx, input)
+					output, err := svc.ListDeploymentConfigs(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codedeploy:ListDeploymentConfigs", err)
@@ -416,12 +399,8 @@ var CodeDeployCalls = []types.AWSService{
 					nextToken = output.NextToken
 				}
 
-				for _, namePtr := range configNames {
-					if namePtr == nil {
-						continue
-					}
-					configName := *namePtr
-					output, err := svc.GetDeploymentConfigWithContext(ctx, &codedeploy.GetDeploymentConfigInput{
+				for _, configName := range configNames {
+					output, err := svc.GetDeploymentConfig(ctx, &codedeploy.GetDeploymentConfigInput{
 						DeploymentConfigName: aws.String(configName),
 					})
 					if err != nil {
@@ -429,7 +408,7 @@ var CodeDeployCalls = []types.AWSService{
 						continue
 					}
 					if output.DeploymentConfigInfo != nil {
-						allConfigs = append(allConfigs, extractDeploymentConfig(output.DeploymentConfigInfo, region))
+						allConfigs = append(allConfigs, extractDeploymentConfig(*output.DeploymentConfigInfo, region))
 					}
 				}
 			}

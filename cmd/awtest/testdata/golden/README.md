@@ -126,6 +126,26 @@ abort on the first error) and rekognition's `MaxResults=4096` request.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk6`
 green without regenerating it.
 
+## Bulk 7 golden (athena, backup, codebuild, codecommit, codedeploy)
+
+`replay-bulk7.json` is the v1 baseline for the seventh bulk migration batch:
+the athena, backup, codebuild, codecommit and codedeploy list calls and their
+batch-get follow-ups. It is produced from the fictional fixtures in `bulk7/`
+(fixture dir `testdata/golden/bulk7`) with
+`awtest -replay <abs>/testdata/golden/bulk7 -services athena,backup,codebuild,codecommit,codedeploy -quiet -format json`.
+The functional tests in each service package additionally cover populated and
+sparse `details`, error text, pagination, batching and the region loop.
+
+Intentional v1 -> v2 difference (accepted as minimal and unavoidable with the typed v2 API): for the sparse
+codedeploy application `bare-app`, `LinkedToGitHub` was `""` in v1 (the
+`*bool` was absent) and is `"false"` after the migration, because the v2
+`ApplicationInfo.LinkedToGitHub` is a plain `bool` and an absent field cannot
+be told apart from `false` through the typed API. That single line of
+`replay-bulk7.json` was edited by hand; nothing else in the golden changed.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk7`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

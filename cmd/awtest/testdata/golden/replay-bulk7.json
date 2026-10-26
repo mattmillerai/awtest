@@ -1,0 +1,413 @@
+[
+  {
+    "details": {
+      "CreationTime": "",
+      "Description": "Analytics team workgroup",
+      "EngineVersion": "Athena engine version 3",
+      "Name": "analytics-wg",
+      "Region": "us-west-2",
+      "State": "ENABLED"
+    },
+    "methodName": "athena:ListWorkGroups",
+    "resourceName": "analytics-wg",
+    "resourceType": "workgroup",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "CreationTime": "",
+      "Description": "",
+      "EngineVersion": "",
+      "Name": "",
+      "Region": "us-west-2",
+      "State": "DISABLED"
+    },
+    "methodName": "athena:ListWorkGroups",
+    "resourceName": "",
+    "resourceType": "workgroup",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "Database": "analytics_db",
+      "Description": "DAU rollup",
+      "Name": "daily-active-users",
+      "NamedQueryId": "11111111-2222-3333-4444-555555555555",
+      "QueryString": "SELECT dt, count(*) FROM events GROUP BY dt",
+      "Region": "us-west-2",
+      "WorkGroup": "analytics-wg"
+    },
+    "methodName": "athena:ListNamedQueries",
+    "resourceName": "daily-active-users",
+    "resourceType": "named-query",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "Database": "",
+      "Description": "",
+      "Name": "",
+      "NamedQueryId": "66666666-7777-8888-9999-000000000000",
+      "QueryString": "SELECT 1",
+      "Region": "us-west-2",
+      "WorkGroup": ""
+    },
+    "methodName": "athena:ListNamedQueries",
+    "resourceName": "",
+    "resourceType": "named-query",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "Database": "analytics_db",
+      "OutputLocation": "s3://demo-athena-results/aaaaaaaa.csv",
+      "Query": "SELECT * FROM events LIMIT 10",
+      "QueryExecutionId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "Region": "us-west-2",
+      "StateChangeReason": "SYNTAX_ERROR: line 1:8",
+      "StatementType": "DML",
+      "Status": "FAILED",
+      "SubmissionDateTime": "",
+      "WorkGroup": "analytics-wg"
+    },
+    "methodName": "athena:ListQueryExecutions",
+    "resourceName": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "resourceType": "query-execution",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "Database": "",
+      "OutputLocation": "",
+      "Query": "SELECT 1",
+      "QueryExecutionId": "ffffffff-0000-1111-2222-333333333333",
+      "Region": "us-west-2",
+      "StateChangeReason": "",
+      "StatementType": "",
+      "Status": "",
+      "SubmissionDateTime": "",
+      "WorkGroup": ""
+    },
+    "methodName": "athena:ListQueryExecutions",
+    "resourceName": "ffffffff-0000-1111-2222-333333333333",
+    "resourceType": "query-execution",
+    "serviceName": "Athena"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:backup:us-west-2:123456789012:backup-vault:demo-vault",
+      "CreationDate": "",
+      "EncryptionKeyArn": "arn:aws:kms:us-west-2:123456789012:key/1234abcd-12ab-34cd-56ef-1234567890ab",
+      "Locked": true,
+      "Name": "demo-vault",
+      "RecoveryPointCount": 3,
+      "Region": "us-west-2"
+    },
+    "methodName": "backup:ListBackupVaults",
+    "resourceName": "demo-vault",
+    "resourceType": "backup-vault",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreationDate": "",
+      "EncryptionKeyArn": "",
+      "Locked": false,
+      "Name": "",
+      "RecoveryPointCount": 0,
+      "Region": "us-west-2"
+    },
+    "methodName": "backup:ListBackupVaults",
+    "resourceName": "",
+    "resourceType": "backup-vault",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:backup:us-west-2:123456789012:backup-plan:plan-0123456789abcdef",
+      "CreationDate": "",
+      "LastExecutionDate": "",
+      "Name": "daily-plan",
+      "PlanId": "plan-0123456789abcdef",
+      "Region": "us-west-2",
+      "VersionId": "ZmFrZXZlcnNpb24"
+    },
+    "methodName": "backup:ListBackupPlans",
+    "resourceName": "daily-plan",
+    "resourceType": "backup-plan",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreationDate": "",
+      "LastExecutionDate": "",
+      "Name": "bare-plan",
+      "PlanId": "",
+      "Region": "us-west-2",
+      "VersionId": ""
+    },
+    "methodName": "backup:ListBackupPlans",
+    "resourceName": "bare-plan",
+    "resourceType": "backup-plan",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "BackupSizeInBytes": 1073741824,
+      "CreationDate": "",
+      "RecoveryPointArn": "arn:aws:ec2:us-west-2::snapshot/snap-0123456789abcdef0",
+      "Region": "us-west-2",
+      "ResourceArn": "arn:aws:ec2:us-west-2:123456789012:volume/vol-0123456789abcdef0",
+      "ResourceType": "EBS",
+      "Status": "COMPLETED",
+      "VaultName": "demo-vault"
+    },
+    "methodName": "backup:ListRecoveryPointsByBackupVault",
+    "resourceName": "arn:aws:ec2:us-west-2::snapshot/snap-0123456789abcdef0",
+    "resourceType": "recovery-point",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "BackupSizeInBytes": 0,
+      "CreationDate": "",
+      "RecoveryPointArn": "arn:aws:ec2:us-west-2::snapshot/snap-0fedcba9876543210",
+      "Region": "us-west-2",
+      "ResourceArn": "",
+      "ResourceType": "",
+      "Status": "",
+      "VaultName": ""
+    },
+    "methodName": "backup:ListRecoveryPointsByBackupVault",
+    "resourceName": "arn:aws:ec2:us-west-2::snapshot/snap-0fedcba9876543210",
+    "resourceType": "recovery-point",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "Policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"backup:*\",\"Resource\":\"*\"}]}",
+      "Region": "us-west-2",
+      "VaultArn": "arn:aws:backup:us-west-2:123456789012:backup-vault:demo-vault",
+      "VaultName": "demo-vault"
+    },
+    "methodName": "backup:GetBackupVaultAccessPolicy",
+    "resourceName": "demo-vault",
+    "resourceType": "vault-access-policy",
+    "serviceName": "Backup"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:codebuild:us-west-2:123456789012:project/demo-build",
+      "Description": "Demo build project",
+      "EnvironmentType": "LINUX_CONTAINER",
+      "Name": "demo-build",
+      "Region": "us-west-2",
+      "SourceType": "GITHUB"
+    },
+    "methodName": "codebuild:ListProjects",
+    "resourceName": "demo-build",
+    "resourceType": "project",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:codebuild:us-west-2:123456789012:project/bare-build",
+      "Description": "",
+      "EnvironmentType": "",
+      "Name": "bare-build",
+      "Region": "us-west-2",
+      "SourceType": ""
+    },
+    "methodName": "codebuild:ListProjects",
+    "resourceName": "bare-build",
+    "resourceType": "project",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "ProjectName": "demo-build",
+      "Region": "us-west-2",
+      "VariableName": "STAGE",
+      "VariableType": "PLAINTEXT"
+    },
+    "methodName": "codebuild:ListProjectEnvironmentVariables",
+    "resourceName": "demo-build/STAGE",
+    "resourceType": "environment-variable",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "ProjectName": "demo-build",
+      "Region": "us-west-2",
+      "VariableName": "DB_PASSWORD",
+      "VariableType": "PARAMETER_STORE"
+    },
+    "methodName": "codebuild:ListProjectEnvironmentVariables",
+    "resourceName": "demo-build/DB_PASSWORD",
+    "resourceType": "environment-variable",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "ProjectName": "demo-build",
+      "Region": "us-west-2",
+      "VariableName": "UNTYPED",
+      "VariableType": ""
+    },
+    "methodName": "codebuild:ListProjectEnvironmentVariables",
+    "resourceName": "demo-build/UNTYPED",
+    "resourceType": "environment-variable",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "BuildId": "demo-build:0123abcd-0000-1111-2222-333344445555",
+      "BuildStatus": "SUCCEEDED",
+      "ProjectName": "demo-build",
+      "Region": "us-west-2",
+      "StartTime": ""
+    },
+    "methodName": "codebuild:ListBuilds",
+    "resourceName": "demo-build:0123abcd-0000-1111-2222-333344445555",
+    "resourceType": "build",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "BuildId": "bare-build:ffff0000-1111-2222-3333-444455556666",
+      "BuildStatus": "",
+      "ProjectName": "",
+      "Region": "us-west-2",
+      "StartTime": ""
+    },
+    "methodName": "codebuild:ListBuilds",
+    "resourceName": "bare-build:ffff0000-1111-2222-3333-444455556666",
+    "resourceType": "build",
+    "serviceName": "CodeBuild"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:codecommit:us-west-2:123456789012:demo-repo",
+      "CloneUrlHttp": "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/demo-repo",
+      "CloneUrlSsh": "ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/demo-repo",
+      "DefaultBranch": "main",
+      "Description": "Demo repository",
+      "Name": "demo-repo",
+      "Region": "us-west-2"
+    },
+    "methodName": "codecommit:ListRepositories",
+    "resourceName": "demo-repo",
+    "resourceType": "repository",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CloneUrlHttp": "",
+      "CloneUrlSsh": "",
+      "DefaultBranch": "",
+      "Description": "",
+      "Name": "bare-repo",
+      "Region": "us-west-2"
+    },
+    "methodName": "codecommit:ListRepositories",
+    "resourceName": "bare-repo",
+    "resourceType": "repository",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {
+      "BranchName": "main",
+      "Region": "us-west-2",
+      "RepositoryName": "demo-repo"
+    },
+    "methodName": "codecommit:ListBranches",
+    "resourceName": "demo-repo/main",
+    "resourceType": "branch",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {
+      "BranchName": "feature/login",
+      "Region": "us-west-2",
+      "RepositoryName": "demo-repo"
+    },
+    "methodName": "codecommit:ListBranches",
+    "resourceName": "demo-repo/feature/login",
+    "resourceType": "branch",
+    "serviceName": "CodeCommit"
+  },
+  {
+    "details": {
+      "ApplicationId": "11111111-aaaa-bbbb-cccc-222222222222",
+      "ComputePlatform": "Server",
+      "CreateTime": "",
+      "LinkedToGitHub": "false",
+      "Name": "demo-app",
+      "Region": "us-west-2"
+    },
+    "methodName": "codedeploy:ListApplications",
+    "resourceName": "demo-app",
+    "resourceType": "application",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {
+      "ApplicationId": "",
+      "ComputePlatform": "",
+      "CreateTime": "",
+      "LinkedToGitHub": "false",
+      "Name": "bare-app",
+      "Region": "us-west-2"
+    },
+    "methodName": "codedeploy:ListApplications",
+    "resourceName": "bare-app",
+    "resourceType": "application",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {
+      "ApplicationName": "demo-app",
+      "ComputePlatform": "Server",
+      "DeploymentConfigName": "CodeDeployDefault.OneAtATime",
+      "DeploymentGroupId": "33333333-aaaa-bbbb-cccc-444444444444",
+      "GroupName": "demo-group",
+      "Region": "us-west-2",
+      "ServiceRoleArn": "arn:aws:iam::123456789012:role/demo-codedeploy-role"
+    },
+    "methodName": "codedeploy:ListDeploymentGroups",
+    "resourceName": "demo-app/demo-group",
+    "resourceType": "deployment-group",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {
+      "ApplicationName": "",
+      "ComputePlatform": "",
+      "DeploymentConfigName": "",
+      "DeploymentGroupId": "",
+      "GroupName": "bare-group",
+      "Region": "us-west-2",
+      "ServiceRoleArn": ""
+    },
+    "methodName": "codedeploy:ListDeploymentGroups",
+    "resourceName": "bare-group",
+    "resourceType": "deployment-group",
+    "serviceName": "CodeDeploy"
+  },
+  {
+    "details": {
+      "ComputePlatform": "Server",
+      "CreateTime": "",
+      "DeploymentConfigId": "55555555-aaaa-bbbb-cccc-666666666666",
+      "Name": "CodeDeployDefault.OneAtATime",
+      "Region": "us-west-2"
+    },
+    "methodName": "codedeploy:ListDeploymentConfigs",
+    "resourceName": "CodeDeployDefault.OneAtATime",
+    "resourceType": "deployment-config",
+    "serviceName": "CodeDeploy"
+  }
+]

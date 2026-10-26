@@ -12,9 +12,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/acm v1.50.6
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.49.1
 	github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
+	github.com/aws/aws-sdk-go-v2/service/athena v1.66.6
+	github.com/aws/aws-sdk-go-v2/service/backup v1.69.3
 	github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.2
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.6
+	github.com/aws/aws-sdk-go-v2/service/codebuild v1.78.6
+	github.com/aws/aws-sdk-go-v2/service/codecommit v1.44.1
+	github.com/aws/aws-sdk-go-v2/service/codedeploy v1.46.1
 	github.com/aws/aws-sdk-go-v2/service/codepipeline v1.56.1
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.42.6
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.5

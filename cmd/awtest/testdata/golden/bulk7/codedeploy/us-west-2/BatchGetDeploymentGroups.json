@@ -1,0 +1,1 @@
+{"deploymentGroupsInfo":[{"applicationName":"demo-app","deploymentGroupName":"demo-group","deploymentGroupId":"33333333-aaaa-bbbb-cccc-444444444444","deploymentConfigName":"CodeDeployDefault.OneAtATime","computePlatform":"Server","serviceRoleArn":"arn:aws:iam::123456789012:role/demo-codedeploy-role"},{"deploymentGroupName":"bare-group"}],"errorMessage":""}

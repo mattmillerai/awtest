@@ -1,0 +1,1 @@
+{"WorkGroups":[{"Name":"analytics-wg","State":"ENABLED","Description":"Analytics team workgroup","EngineVersion":{"SelectedEngineVersion":"AUTO","EffectiveEngineVersion":"Athena engine version 3"}},{"State":"DISABLED"}]}

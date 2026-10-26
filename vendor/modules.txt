@@ -48,14 +48,9 @@ github.com/aws/aws-sdk-go/private/protocol/restjson
 github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/apigateway
-github.com/aws/aws-sdk-go/service/athena
-github.com/aws/aws-sdk-go/service/backup
 github.com/aws/aws-sdk-go/service/cloudfront
 github.com/aws/aws-sdk-go/service/cloudwatch
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
-github.com/aws/aws-sdk-go/service/codebuild
-github.com/aws/aws-sdk-go/service/codecommit
-github.com/aws/aws-sdk-go/service/codedeploy
 github.com/aws/aws-sdk-go/service/directconnect
 github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/ec2
@@ -164,6 +159,18 @@ github.com/aws/aws-sdk-go-v2/service/appsync
 github.com/aws/aws-sdk-go-v2/service/appsync/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/appsync/schemas
 github.com/aws/aws-sdk-go-v2/service/appsync/types
+# github.com/aws/aws-sdk-go-v2/service/athena v1.66.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/athena
+github.com/aws/aws-sdk-go-v2/service/athena/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/athena/schemas
+github.com/aws/aws-sdk-go-v2/service/athena/types
+# github.com/aws/aws-sdk-go-v2/service/backup v1.69.3
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/backup
+github.com/aws/aws-sdk-go-v2/service/backup/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/backup/schemas
+github.com/aws/aws-sdk-go-v2/service/backup/types
 # github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/batch
@@ -181,6 +188,24 @@ github.com/aws/aws-sdk-go-v2/service/cloudtrail
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/types
+# github.com/aws/aws-sdk-go-v2/service/codebuild v1.78.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/codebuild
+github.com/aws/aws-sdk-go-v2/service/codebuild/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/codebuild/schemas
+github.com/aws/aws-sdk-go-v2/service/codebuild/types
+# github.com/aws/aws-sdk-go-v2/service/codecommit v1.44.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/codecommit
+github.com/aws/aws-sdk-go-v2/service/codecommit/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/codecommit/schemas
+github.com/aws/aws-sdk-go-v2/service/codecommit/types
+# github.com/aws/aws-sdk-go-v2/service/codedeploy v1.46.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/codedeploy
+github.com/aws/aws-sdk-go-v2/service/codedeploy/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas
+github.com/aws/aws-sdk-go-v2/service/codedeploy/types
 # github.com/aws/aws-sdk-go-v2/service/codepipeline v1.56.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/codepipeline

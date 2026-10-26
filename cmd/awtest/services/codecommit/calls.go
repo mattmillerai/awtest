@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/codecommit"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/codecommit"
 )
 
 type ccRepository struct {
@@ -31,17 +31,17 @@ type ccBranch struct {
 var CodeCommitCalls = []types.AWSService{
 	{
 		Name: "codecommit:ListRepositories",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allRepos []ccRepository
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codecommit.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codecommit.NewFromConfig)
 
-				var repoNames []*string
+				var repoNames []string
 				input := &codecommit.ListRepositoriesInput{}
 				for {
-					output, err := svc.ListRepositoriesWithContext(ctx, input)
+					output, err := svc.ListRepositories(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codecommit:ListRepositories", err)
@@ -50,7 +50,7 @@ var CodeCommitCalls = []types.AWSService{
 
 					for _, repo := range output.Repositories {
 						if repo.RepositoryName != nil {
-							repoNames = append(repoNames, repo.RepositoryName)
+							repoNames = append(repoNames, *repo.RepositoryName)
 						}
 					}
 
@@ -71,7 +71,7 @@ var CodeCommitCalls = []types.AWSService{
 					batchInput := &codecommit.BatchGetRepositoriesInput{
 						RepositoryNames: batch,
 					}
-					batchOutput, err := svc.BatchGetRepositoriesWithContext(ctx, batchInput)
+					batchOutput, err := svc.BatchGetRepositories(ctx, batchInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codecommit:ListRepositories", err)
@@ -175,17 +175,17 @@ var CodeCommitCalls = []types.AWSService{
 	},
 	{
 		Name: "codecommit:ListBranches",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allBranches []ccBranch
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := codecommit.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, codecommit.NewFromConfig)
 
-				var repoNames []*string
+				var repoNames []string
 				listInput := &codecommit.ListRepositoriesInput{}
 				for {
-					listOutput, err := svc.ListRepositoriesWithContext(ctx, listInput)
+					listOutput, err := svc.ListRepositories(ctx, listInput)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "codecommit:ListBranches", err)
@@ -194,7 +194,7 @@ var CodeCommitCalls = []types.AWSService{
 
 					for _, repo := range listOutput.Repositories {
 						if repo.RepositoryName != nil {
-							repoNames = append(repoNames, repo.RepositoryName)
+							repoNames = append(repoNames, *repo.RepositoryName)
 						}
 					}
 
@@ -206,10 +206,10 @@ var CodeCommitCalls = []types.AWSService{
 
 				for _, repoName := range repoNames {
 					branchInput := &codecommit.ListBranchesInput{
-						RepositoryName: repoName,
+						RepositoryName: aws.String(repoName),
 					}
 					for {
-						branchOutput, err := svc.ListBranchesWithContext(ctx, branchInput)
+						branchOutput, err := svc.ListBranches(ctx, branchInput)
 						if err != nil {
 							lastErr = err
 							utils.HandleAWSError(false, "codecommit:ListBranches", err)
@@ -217,14 +217,9 @@ var CodeCommitCalls = []types.AWSService{
 						}
 
 						for _, branch := range branchOutput.Branches {
-							branchName := ""
-							if branch != nil {
-								branchName = *branch
-							}
-
 							allBranches = append(allBranches, ccBranch{
-								RepositoryName: *repoName,
-								BranchName:     branchName,
+								RepositoryName: repoName,
+								BranchName:     branch,
 								Region:         region,
 							})
 						}

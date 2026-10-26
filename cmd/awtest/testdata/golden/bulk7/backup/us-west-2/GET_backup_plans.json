@@ -1,0 +1,1 @@
+{"BackupPlansList":[{"BackupPlanName":"daily-plan","BackupPlanId":"plan-0123456789abcdef","BackupPlanArn":"arn:aws:backup:us-west-2:123456789012:backup-plan:plan-0123456789abcdef","VersionId":"ZmFrZXZlcnNpb24"},{"BackupPlanName":"bare-plan"}]}
