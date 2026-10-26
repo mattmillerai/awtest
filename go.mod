@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.10
 	github.com/aws/aws-sdk-go-v2/service/acm v1.50.6
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.49.1
+	github.com/aws/aws-sdk-go-v2/service/apigateway v1.52.3
 	github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
 	github.com/aws/aws-sdk-go-v2/service/athena v1.66.6
 	github.com/aws/aws-sdk-go-v2/service/backup v1.69.3
@@ -53,8 +54,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.85.2
 	github.com/aws/aws-sdk-go-v2/service/ses v1.42.5
 	github.com/aws/aws-sdk-go-v2/service/sfn v1.52.1
+	github.com/aws/aws-sdk-go-v2/service/sns v1.47.6
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.5
 	github.com/aws/aws-sdk-go-v2/service/transcribe v1.66.6

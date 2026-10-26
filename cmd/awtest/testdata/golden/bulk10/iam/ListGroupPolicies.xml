@@ -1,0 +1,1 @@
+<ListGroupPoliciesResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><ListGroupPoliciesResult><PolicyNames><member>demo-group-inline</member></PolicyNames><IsTruncated>false</IsTruncated></ListGroupPoliciesResult><ResponseMetadata><RequestId>r1</RequestId></ResponseMetadata></ListGroupPoliciesResponse>

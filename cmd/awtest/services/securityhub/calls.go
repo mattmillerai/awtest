@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+	shtypes "github.com/aws/aws-sdk-go-v2/service/securityhub/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/securityhub"
 )
 
 type shStandard struct {
@@ -51,16 +52,16 @@ func extractStandardName(arn string) string {
 var SecurityHubCalls = []types.AWSService{
 	{
 		Name: "securityhub:GetEnabledStandards",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allStandards []shStandard
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, securityhub.NewFromConfig)
 
 				input := &securityhub.GetEnabledStandardsInput{}
 				for {
-					output, err := svc.GetEnabledStandardsWithContext(ctx, input)
+					output, err := svc.GetEnabledStandards(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "securityhub:GetEnabledStandards", err)
@@ -68,25 +69,10 @@ var SecurityHubCalls = []types.AWSService{
 					}
 
 					for _, sub := range output.StandardsSubscriptions {
-						subscriptionArn := ""
-						if sub.StandardsSubscriptionArn != nil {
-							subscriptionArn = *sub.StandardsSubscriptionArn
-						}
-
-						standardsArn := ""
-						if sub.StandardsArn != nil {
-							standardsArn = *sub.StandardsArn
-						}
-
-						standardsStatus := ""
-						if sub.StandardsStatus != nil {
-							standardsStatus = *sub.StandardsStatus
-						}
-
 						allStandards = append(allStandards, shStandard{
-							StandardsSubscriptionArn: subscriptionArn,
-							StandardsArn:             standardsArn,
-							StandardsStatus:          standardsStatus,
+							StandardsSubscriptionArn: aws.ToString(sub.StandardsSubscriptionArn),
+							StandardsArn:             aws.ToString(sub.StandardsArn),
+							StandardsStatus:          string(sub.StandardsStatus),
 							Region:                   region,
 						})
 					}
@@ -150,32 +136,32 @@ var SecurityHubCalls = []types.AWSService{
 	},
 	{
 		Name: "securityhub:GetFindings",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allFindings []shFinding
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, securityhub.NewFromConfig)
 
 				input := &securityhub.GetFindingsInput{
-					Filters: &securityhub.AwsSecurityFindingFilters{
-						RecordState: []*securityhub.StringFilter{
+					Filters: &shtypes.AwsSecurityFindingFilters{
+						RecordState: []shtypes.StringFilter{
 							{
-								Comparison: aws.String("EQUALS"),
+								Comparison: shtypes.StringFilterComparison("EQUALS"),
 								Value:      aws.String("ACTIVE"),
 							},
 						},
 					},
-					MaxResults: aws.Int64(100),
-					SortCriteria: []*securityhub.SortCriterion{
+					MaxResults: aws.Int32(100),
+					SortCriteria: []shtypes.SortCriterion{
 						{
 							Field:     aws.String("SeverityLabel"),
-							SortOrder: aws.String("desc"),
+							SortOrder: shtypes.SortOrder("desc"),
 						},
 					},
 				}
 
-				output, err := svc.GetFindingsWithContext(ctx, input)
+				output, err := svc.GetFindings(ctx, input)
 				if err != nil {
 					lastErr = err
 					utils.HandleAWSError(false, "securityhub:GetFindings", err)
@@ -183,50 +169,30 @@ var SecurityHubCalls = []types.AWSService{
 				}
 
 				for _, finding := range output.Findings {
-					id := ""
-					if finding.Id != nil {
-						id = *finding.Id
-					}
-
-					title := ""
-					if finding.Title != nil {
-						title = *finding.Title
-					}
-
 					severityLabel := ""
-					if finding.Severity != nil && finding.Severity.Label != nil {
-						severityLabel = *finding.Severity.Label
+					if finding.Severity != nil {
+						severityLabel = string(finding.Severity.Label)
 					}
 
 					complianceStatus := ""
-					if finding.Compliance != nil && finding.Compliance.Status != nil {
-						complianceStatus = *finding.Compliance.Status
-					}
-
-					productName := ""
-					if finding.ProductName != nil {
-						productName = *finding.ProductName
+					if finding.Compliance != nil {
+						complianceStatus = string(finding.Compliance.Status)
 					}
 
 					resourceType := ""
-					if len(finding.Resources) > 0 && finding.Resources[0].Type != nil {
-						resourceType = *finding.Resources[0].Type
-					}
-
-					generatorId := ""
-					if finding.GeneratorId != nil {
-						generatorId = *finding.GeneratorId
+					if len(finding.Resources) > 0 {
+						resourceType = aws.ToString(finding.Resources[0].Type)
 					}
 
 					allFindings = append(allFindings, shFinding{
-						Id:               id,
-						Title:            title,
+						Id:               aws.ToString(finding.Id),
+						Title:            aws.ToString(finding.Title),
 						SeverityLabel:    severityLabel,
 						ComplianceStatus: complianceStatus,
-						ProductName:      productName,
+						ProductName:      aws.ToString(finding.ProductName),
 						ResourceType:     resourceType,
 						Region:           region,
-						GeneratorId:      generatorId,
+						GeneratorId:      aws.ToString(finding.GeneratorId),
 					})
 				}
 			}
@@ -290,16 +256,16 @@ var SecurityHubCalls = []types.AWSService{
 	},
 	{
 		Name: "securityhub:ListEnabledProductsForImport",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allProducts []shProduct
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := securityhub.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, securityhub.NewFromConfig)
 
 				input := &securityhub.ListEnabledProductsForImportInput{}
 				for {
-					output, err := svc.ListEnabledProductsForImportWithContext(ctx, input)
+					output, err := svc.ListEnabledProductsForImport(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "securityhub:ListEnabledProductsForImport", err)
@@ -307,13 +273,8 @@ var SecurityHubCalls = []types.AWSService{
 					}
 
 					for _, productArn := range output.ProductSubscriptions {
-						arn := ""
-						if productArn != nil {
-							arn = *productArn
-						}
-
 						allProducts = append(allProducts, shProduct{
-							ProductSubscriptionArn: arn,
+							ProductSubscriptionArn: productArn,
 							Region:                 region,
 						})
 					}

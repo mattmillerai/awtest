@@ -1,0 +1,1 @@
+<ListTopicsResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/"><ListTopicsResult><Topics><member><TopicArn>arn:aws:sns:us-west-2:123456789012:demo-alerts</TopicArn></member></Topics></ListTopicsResult><ResponseMetadata><RequestId>r1</RequestId></ResponseMetadata></ListTopicsResponse>

@@ -5,20 +5,21 @@ import (
 	"fmt"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"time"
 )
 
 var IAMCalls = []types.AWSService{
 	{
 		Name: "iam:ListUsers",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := iam.New(sess)
-			output, err := svc.ListUsersWithContext(ctx, &iam.ListUsersInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
+			output, err := svc.ListUsers(ctx, &iam.ListUsersInput{})
 			return map[string]interface{}{
 				"output": output,
-				"sess":   sess,
+				"cfg":    cfg,
 				"ctx":    ctx,
 			}, err
 		},
@@ -39,12 +40,12 @@ var IAMCalls = []types.AWSService{
 
 			if outputMap, ok := output.(map[string]interface{}); ok {
 				iamOutput, _ := outputMap["output"].(*iam.ListUsersOutput)
-				sess, _ := outputMap["sess"].(*session.Session)
+				cfg, _ := outputMap["cfg"].(aws.Config)
 				ctx, _ := outputMap["ctx"].(context.Context)
 				if ctx == nil {
 					ctx = context.Background()
 				}
-				svc := iam.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 				for _, user := range iamOutput.Users {
 					userName := ""
 					if user.UserName != nil {
@@ -64,7 +65,7 @@ var IAMCalls = []types.AWSService{
 					utils.PrintResult(debug, "", "iam:ListUsers", fmt.Sprintf("IAM user: %s", utils.ColorizeItem(userName)), nil)
 
 					// list groups for user
-					groupOutput, err := svc.ListGroupsForUserWithContext(ctx, &iam.ListGroupsForUserInput{
+					groupOutput, err := svc.ListGroupsForUser(ctx, &iam.ListGroupsForUserInput{
 						UserName: user.UserName,
 					})
 					if err != nil {
@@ -74,7 +75,7 @@ var IAMCalls = []types.AWSService{
 							MethodName:   "iam:ListGroupsForUser",
 							ResourceType: "user",
 							ResourceName: userName,
-							Error:        err,
+							Error:        awsv2.Wrap(err),
 							Timestamp:    time.Now(),
 						})
 					} else {
@@ -98,7 +99,7 @@ var IAMCalls = []types.AWSService{
 					}
 
 					// list attached user policies
-					attachedPolicyOutput, err := svc.ListAttachedUserPoliciesWithContext(ctx, &iam.ListAttachedUserPoliciesInput{
+					attachedPolicyOutput, err := svc.ListAttachedUserPolicies(ctx, &iam.ListAttachedUserPoliciesInput{
 						UserName: user.UserName,
 					})
 					if err != nil {
@@ -108,7 +109,7 @@ var IAMCalls = []types.AWSService{
 							MethodName:   "iam:ListAttachedUserPolicies",
 							ResourceType: "user",
 							ResourceName: userName,
-							Error:        err,
+							Error:        awsv2.Wrap(err),
 							Timestamp:    time.Now(),
 						})
 					} else {
@@ -132,7 +133,7 @@ var IAMCalls = []types.AWSService{
 					}
 
 					// list user policies
-					policyOutput, err := svc.ListUserPoliciesWithContext(ctx, &iam.ListUserPoliciesInput{
+					policyOutput, err := svc.ListUserPolicies(ctx, &iam.ListUserPoliciesInput{
 						UserName: user.UserName,
 					})
 					if err != nil {
@@ -142,15 +143,11 @@ var IAMCalls = []types.AWSService{
 							MethodName:   "iam:ListUserPolicies",
 							ResourceType: "user",
 							ResourceName: userName,
-							Error:        err,
+							Error:        awsv2.Wrap(err),
 							Timestamp:    time.Now(),
 						})
 					} else {
-						for _, policyName := range policyOutput.PolicyNames {
-							pName := ""
-							if policyName != nil {
-								pName = *policyName
-							}
+						for _, pName := range policyOutput.PolicyNames {
 
 							results = append(results, types.ScanResult{
 								ServiceName:  "IAM",
@@ -166,7 +163,7 @@ var IAMCalls = []types.AWSService{
 					}
 
 					// list access keys
-					accessKeyOutput, err := svc.ListAccessKeysWithContext(ctx, &iam.ListAccessKeysInput{
+					accessKeyOutput, err := svc.ListAccessKeys(ctx, &iam.ListAccessKeysInput{
 						UserName: user.UserName,
 					})
 					if err != nil {
@@ -176,7 +173,7 @@ var IAMCalls = []types.AWSService{
 							MethodName:   "iam:ListAccessKeys",
 							ResourceType: "user",
 							ResourceName: userName,
-							Error:        err,
+							Error:        awsv2.Wrap(err),
 							Timestamp:    time.Now(),
 						})
 					} else {

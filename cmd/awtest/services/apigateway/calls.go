@@ -3,75 +3,76 @@ package apigateway
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/apigateway"
+	agtypes "github.com/aws/aws-sdk-go-v2/service/apigateway/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/apigateway"
-	"time"
 )
 
 type ApiWithStages struct {
-	Api                 *apigateway.RestApi
-	Stages              []*apigateway.Stage
-	Models              []*apigateway.Model
-	Resources           []*apigateway.Resource // Add this line
+	Api                 agtypes.RestApi
+	Stages              []agtypes.Stage
+	Models              []agtypes.Model
+	Resources           []agtypes.Resource // Add this line
 	Region              string
 	MethodParams        map[string]map[string]map[string]bool
-	MethodIntegrations  map[string]map[string]*apigateway.Integration
+	MethodIntegrations  map[string]map[string]*apigateway.GetIntegrationOutput
 	AuthorizationScopes map[string]map[string][]string
 }
 
 var APIGatewayCalls = []types.AWSService{
 	{
 		Name: "apigateway:RestApis",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allApisWithStages []ApiWithStages
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := apigateway.New(regionSess)
-				apisOutput, err := svc.GetRestApisWithContext(ctx, &apigateway.GetRestApisInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, apigateway.NewFromConfig)
+				apisOutput, err := svc.GetRestApis(ctx, &apigateway.GetRestApisInput{})
 				if err != nil {
 					return nil, err
 				}
 				for _, api := range apisOutput.Items {
-					stagesOutput, err := svc.GetStagesWithContext(ctx, &apigateway.GetStagesInput{RestApiId: api.Id})
+					stagesOutput, err := svc.GetStages(ctx, &apigateway.GetStagesInput{RestApiId: api.Id})
 					if err != nil {
 						return nil, err
 					}
-					modelsOutput, err := svc.GetModelsWithContext(ctx, &apigateway.GetModelsInput{RestApiId: api.Id})
+					modelsOutput, err := svc.GetModels(ctx, &apigateway.GetModelsInput{RestApiId: api.Id})
 					if err != nil {
 						return nil, err
 					}
-					resourcesOutput, err := svc.GetResourcesWithContext(ctx, &apigateway.GetResourcesInput{RestApiId: api.Id})
+					resourcesOutput, err := svc.GetResources(ctx, &apigateway.GetResourcesInput{RestApiId: api.Id})
 					if err != nil {
 						return nil, err
 					}
 
 					methodParams := make(map[string]map[string]map[string]bool)
-					methodIntegrations := make(map[string]map[string]*apigateway.Integration)
+					methodIntegrations := make(map[string]map[string]*apigateway.GetIntegrationOutput)
 					for _, resource := range resourcesOutput.Items {
 						if resource.ResourceMethods != nil {
-							resourceID := *resource.Id
+							resourceID := aws.ToString(resource.Id)
 							methodParams[resourceID] = make(map[string]map[string]bool)
-							methodIntegrations[resourceID] = make(map[string]*apigateway.Integration)
+							methodIntegrations[resourceID] = make(map[string]*apigateway.GetIntegrationOutput)
 
-							for method, _ := range resource.ResourceMethods {
+							for method := range resource.ResourceMethods {
 								input := &apigateway.GetMethodInput{
 									ResourceId: aws.String(resourceID),
 									RestApiId:  api.Id,
 									HttpMethod: aws.String(method),
 								}
 
-								methodOutput, err := svc.GetMethodWithContext(ctx, input)
+								methodOutput, err := svc.GetMethod(ctx, input)
 								if err != nil {
 									return nil, err
 								}
 
 								params := make(map[string]bool)
 								for paramName, paramInfo := range methodOutput.RequestParameters {
-									params[paramName] = aws.BoolValue(paramInfo)
+									params[paramName] = paramInfo
 								}
 
 								methodParams[resourceID][method] = params
@@ -82,7 +83,7 @@ var APIGatewayCalls = []types.AWSService{
 									RestApiId:  api.Id,
 									HttpMethod: aws.String(method),
 								}
-								integrationOutput, err := svc.GetIntegrationWithContext(ctx, integrationInput)
+								integrationOutput, err := svc.GetIntegration(ctx, integrationInput)
 
 								if err != nil {
 									// handle the error or just continue if integration is not a necessity
@@ -124,8 +125,8 @@ var APIGatewayCalls = []types.AWSService{
 			if apisWithStages, ok := output.([]ApiWithStages); ok {
 				for _, apiWithStages := range apisWithStages {
 					fmt.Println()
-					apiName := *apiWithStages.Api.Name
-					restApiId := *apiWithStages.Api.Id
+					apiName := aws.ToString(apiWithStages.Api.Name)
+					restApiId := aws.ToString(apiWithStages.Api.Id)
 					region := apiWithStages.Region
 					apiUrl := fmt.Sprintf("https://%s.execute-api.%s.amazonaws.com", restApiId, region)
 					utils.PrintResult(debug, "", "apigateway:RestApis", fmt.Sprintf("Found API Gateway: %s", apiName), nil)
@@ -143,8 +144,8 @@ var APIGatewayCalls = []types.AWSService{
 					// Add this loop to print resources
 					if len(apiWithStages.Resources) > 0 {
 						for _, resource := range apiWithStages.Resources {
-							resourceID := *resource.Id
-							resourcePath := *resource.Path
+							resourceID := aws.ToString(resource.Id)
+							resourcePath := aws.ToString(resource.Path)
 
 							//utils.PrintResult(debug, "", "apigateway:GetResources", fmt.Sprintf("Resource ID: %s", resourceID), nil)
 							utils.PrintResult(debug, "", "apigateway:GetResources", fmt.Sprintf("Resource Path: %s", resourcePath), nil)
@@ -172,7 +173,7 @@ var APIGatewayCalls = []types.AWSService{
 					if len(apiWithStages.MethodIntegrations) > 0 {
 						for resourceID, methods := range apiWithStages.MethodIntegrations {
 							for method, integration := range methods {
-								utils.PrintResult(debug, "", "apigateway:GetMethodIntegration", fmt.Sprintf("Integration Type for Method %s of Resource %s: %s", method, resourceID, *integration.Type), nil)
+								utils.PrintResult(debug, "", "apigateway:GetMethodIntegration", fmt.Sprintf("Integration Type for Method %s of Resource %s: %s", method, resourceID, string(integration.Type)), nil)
 							}
 						}
 					}
@@ -181,13 +182,14 @@ var APIGatewayCalls = []types.AWSService{
 						utils.PrintResult(debug, "", "apigateway:GetStages", fmt.Sprintf("No stages found for API: %s, but access is granted.", apiName), nil)
 					} else {
 						for _, stage := range apiWithStages.Stages {
-							utils.PrintResult(debug, "", "apigateway:GetStages", fmt.Sprintf("Found Stage: %s (%s)", *stage.StageName, apiName), nil)
+							stageName := aws.ToString(stage.StageName)
+							utils.PrintResult(debug, "", "apigateway:GetStages", fmt.Sprintf("Found Stage: %s (%s)", stageName, apiName), nil)
 
 							results = append(results, types.ScanResult{
 								ServiceName:  "APIGateway",
 								MethodName:   "apigateway:GetStages",
 								ResourceType: "stage",
-								ResourceName: *stage.StageName,
+								ResourceName: stageName,
 								Details:      map[string]interface{}{},
 								Timestamp:    time.Now(),
 							})
@@ -195,13 +197,14 @@ var APIGatewayCalls = []types.AWSService{
 					}
 					if len(apiWithStages.Models) > 0 {
 						for _, model := range apiWithStages.Models {
-							utils.PrintResult(debug, "", "apigateway:GetModels", fmt.Sprintf("Found Model: %s (%s)", *model.Name, apiName), nil)
+							modelName := aws.ToString(model.Name)
+							utils.PrintResult(debug, "", "apigateway:GetModels", fmt.Sprintf("Found Model: %s (%s)", modelName, apiName), nil)
 
 							results = append(results, types.ScanResult{
 								ServiceName:  "APIGateway",
 								MethodName:   "apigateway:GetModels",
 								ResourceType: "model",
-								ResourceName: *model.Name,
+								ResourceName: modelName,
 								Details:      map[string]interface{}{},
 								Timestamp:    time.Now(),
 							})
@@ -215,12 +218,11 @@ var APIGatewayCalls = []types.AWSService{
 	},
 	{
 		Name: "apigateway:GetApiKeys",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allApiKeys []*apigateway.ApiKey
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allApiKeys []agtypes.ApiKey
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := apigateway.New(regionSess)
-				output, err := svc.GetApiKeysWithContext(ctx, &apigateway.GetApiKeysInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, apigateway.NewFromConfig)
+				output, err := svc.GetApiKeys(ctx, &apigateway.GetApiKeysInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -242,18 +244,19 @@ var APIGatewayCalls = []types.AWSService{
 					},
 				}
 			}
-			if apiKeys, ok := output.([]*apigateway.ApiKey); ok {
+			if apiKeys, ok := output.([]agtypes.ApiKey); ok {
 				if len(apiKeys) == 0 {
 					utils.PrintAccessGranted(debug, "apigateway:GetApiKeys", "API keys")
 				} else {
 					for _, apiKey := range apiKeys {
-						utils.PrintResult(debug, "", "apigateway:GetApiKeys", fmt.Sprintf("Found API Key: %s", *apiKey.Id), nil)
+						keyID := aws.ToString(apiKey.Id)
+						utils.PrintResult(debug, "", "apigateway:GetApiKeys", fmt.Sprintf("Found API Key: %s", keyID), nil)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "APIGateway",
 							MethodName:   "apigateway:GetApiKeys",
 							ResourceType: "api-key",
-							ResourceName: *apiKey.Id,
+							ResourceName: keyID,
 							Details:      map[string]interface{}{},
 							Timestamp:    time.Now(),
 						})
@@ -266,12 +269,11 @@ var APIGatewayCalls = []types.AWSService{
 	},
 	{
 		Name: "apigateway:GetDomainNames",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allDomainNames []*apigateway.DomainName
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allDomainNames []agtypes.DomainName
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := apigateway.New(regionSess)
-				output, err := svc.GetDomainNamesWithContext(ctx, &apigateway.GetDomainNamesInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, apigateway.NewFromConfig)
+				output, err := svc.GetDomainNames(ctx, &apigateway.GetDomainNamesInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -293,18 +295,19 @@ var APIGatewayCalls = []types.AWSService{
 					},
 				}
 			}
-			if domainNames, ok := output.([]*apigateway.DomainName); ok {
+			if domainNames, ok := output.([]agtypes.DomainName); ok {
 				if len(domainNames) == 0 {
 					utils.PrintAccessGranted(debug, "apigateway:GetDomainNames", "domain names")
 				} else {
 					for _, domainName := range domainNames {
-						utils.PrintResult(debug, "", "apigateway:GetDomainNames", fmt.Sprintf("Found Domain Name: %s", *domainName.DomainName), nil)
+						name := aws.ToString(domainName.DomainName)
+						utils.PrintResult(debug, "", "apigateway:GetDomainNames", fmt.Sprintf("Found Domain Name: %s", name), nil)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "APIGateway",
 							MethodName:   "apigateway:GetDomainNames",
 							ResourceType: "domain-name",
-							ResourceName: *domainName.DomainName,
+							ResourceName: name,
 							Details:      map[string]interface{}{},
 							Timestamp:    time.Now(),
 						})

@@ -47,7 +47,6 @@ github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restjson
 github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
-github.com/aws/aws-sdk-go/service/apigateway
 github.com/aws/aws-sdk-go/service/cloudfront
 github.com/aws/aws-sdk-go/service/cloudwatch
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
@@ -61,8 +60,6 @@ github.com/aws/aws-sdk-go/service/ivsrealtime
 github.com/aws/aws-sdk-go/service/lambda
 github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
-github.com/aws/aws-sdk-go/service/securityhub
-github.com/aws/aws-sdk-go/service/sns
 github.com/aws/aws-sdk-go/service/sqs
 github.com/aws/aws-sdk-go/service/sso
 github.com/aws/aws-sdk-go/service/sso/ssoiface
@@ -143,6 +140,13 @@ github.com/aws/aws-sdk-go-v2/service/amplify
 github.com/aws/aws-sdk-go-v2/service/amplify/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/amplify/schemas
 github.com/aws/aws-sdk-go-v2/service/amplify/types
+# github.com/aws/aws-sdk-go-v2/service/apigateway v1.52.3
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/apigateway
+github.com/aws/aws-sdk-go-v2/service/apigateway/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/apigateway/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/apigateway/schemas
+github.com/aws/aws-sdk-go-v2/service/apigateway/types
 # github.com/aws/aws-sdk-go-v2/service/appsync v1.62.6
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/appsync
@@ -414,6 +418,14 @@ github.com/aws/aws-sdk-go-v2/service/secretsmanager
 github.com/aws/aws-sdk-go-v2/service/secretsmanager/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/secretsmanager/schemas
 github.com/aws/aws-sdk-go-v2/service/secretsmanager/types
+# github.com/aws/aws-sdk-go-v2/service/securityhub v1.85.2
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/securityhub
+github.com/aws/aws-sdk-go-v2/service/securityhub/document
+github.com/aws/aws-sdk-go-v2/service/securityhub/internal/document
+github.com/aws/aws-sdk-go-v2/service/securityhub/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/securityhub/schemas
+github.com/aws/aws-sdk-go-v2/service/securityhub/types
 # github.com/aws/aws-sdk-go-v2/service/ses v1.42.5
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ses
@@ -430,6 +442,11 @@ github.com/aws/aws-sdk-go-v2/service/sfn/types
 github.com/aws/aws-sdk-go-v2/service/signin
 github.com/aws/aws-sdk-go-v2/service/signin/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/signin/types
+# github.com/aws/aws-sdk-go-v2/service/sns v1.47.6
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/sns
+github.com/aws/aws-sdk-go-v2/service/sns/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/sns/types
 # github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ssm

@@ -1,0 +1,365 @@
+[
+  {
+    "details": {},
+    "methodName": "apigateway:RestApis",
+    "resourceName": "demo-api",
+    "resourceType": "rest-api",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetResources",
+    "resourceName": "/",
+    "resourceType": "resource",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetResources",
+    "resourceName": "/items",
+    "resourceType": "resource",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetStages",
+    "resourceName": "prod",
+    "resourceType": "stage",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetStages",
+    "resourceName": "dev",
+    "resourceType": "stage",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetModels",
+    "resourceName": "DemoModel",
+    "resourceType": "model",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetApiKeys",
+    "resourceName": "key1abcdef",
+    "resourceType": "api-key",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "apigateway:GetDomainNames",
+    "resourceName": "api.demo.example.com",
+    "resourceType": "domain-name",
+    "serviceName": "APIGateway"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListUsers",
+    "resourceName": "demo-user",
+    "resourceType": "user",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "demo-user"
+    },
+    "methodName": "iam:ListGroupsForUser",
+    "resourceName": "demo-admins",
+    "resourceType": "group",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "demo-user"
+    },
+    "methodName": "iam:ListAttachedUserPolicies",
+    "resourceName": "demo-readonly",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "demo-user"
+    },
+    "methodName": "iam:ListUserPolicies",
+    "resourceName": "demo-inline",
+    "resourceType": "inline-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "demo-user"
+    },
+    "methodName": "iam:ListAccessKeys",
+    "resourceName": "AKIADEMOEXAMPLE0001",
+    "resourceType": "access-key",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListUsers",
+    "resourceName": "bare-user",
+    "resourceType": "user",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "bare-user"
+    },
+    "methodName": "iam:ListGroupsForUser",
+    "resourceName": "demo-admins",
+    "resourceType": "group",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "bare-user"
+    },
+    "methodName": "iam:ListAttachedUserPolicies",
+    "resourceName": "demo-readonly",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "bare-user"
+    },
+    "methodName": "iam:ListUserPolicies",
+    "resourceName": "demo-inline",
+    "resourceType": "inline-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "user": "bare-user"
+    },
+    "methodName": "iam:ListAccessKeys",
+    "resourceName": "AKIADEMOEXAMPLE0001",
+    "resourceType": "access-key",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:role/service-role/demo-role",
+      "create_date": "2024-01-01T00:00:00Z",
+      "description": "Fictional role",
+      "max_session_duration": 3600,
+      "path": "/service-role/",
+      "trust_findings": [
+        "cross-account principal: 999999999999 (role account is 123456789012)"
+      ],
+      "trusted_principals": [
+        "AWS:arn:aws:iam::999999999999:root",
+        "Service:lambda.amazonaws.com"
+      ]
+    },
+    "methodName": "iam:ListRoles",
+    "resourceName": "demo-role",
+    "resourceType": "role",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:role/bare-role",
+      "create_date": "2024-01-01T00:00:00Z",
+      "path": "/",
+      "trust_findings": [],
+      "trusted_principals": []
+    },
+    "methodName": "iam:ListRoles",
+    "resourceName": "bare-role",
+    "resourceType": "role",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "policy_arn": "arn:aws:iam::123456789012:policy/demo-readonly",
+      "role": "demo-role"
+    },
+    "methodName": "iam:ListAttachedRolePolicies",
+    "resourceName": "demo-role/demo-readonly",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "role": "demo-role"
+    },
+    "methodName": "iam:ListRolePolicies",
+    "resourceName": "demo-role/demo-role-inline",
+    "resourceType": "inline-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "policy_arn": "arn:aws:iam::123456789012:policy/demo-readonly",
+      "role": "bare-role"
+    },
+    "methodName": "iam:ListAttachedRolePolicies",
+    "resourceName": "bare-role/demo-readonly",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "role": "bare-role"
+    },
+    "methodName": "iam:ListRolePolicies",
+    "resourceName": "bare-role/demo-role-inline",
+    "resourceType": "inline-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:group/demo-admins",
+      "create_date": "2024-01-01T00:00:00Z",
+      "path": "/"
+    },
+    "methodName": "iam:ListGroups",
+    "resourceName": "demo-admins",
+    "resourceType": "group",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "group": "demo-admins",
+      "policy_arn": "arn:aws:iam::123456789012:policy/demo-readonly"
+    },
+    "methodName": "iam:ListAttachedGroupPolicies",
+    "resourceName": "demo-admins/demo-readonly",
+    "resourceType": "attached-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "group": "demo-admins"
+    },
+    "methodName": "iam:ListGroupPolicies",
+    "resourceName": "demo-admins/demo-group-inline",
+    "resourceType": "inline-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:policy/demo-readonly",
+      "attachment_count": 3,
+      "create_date": "2024-01-01T00:00:00Z",
+      "default_version_id": "v1",
+      "is_attachable": true,
+      "path": "/",
+      "update_date": "2024-02-01T00:00:00Z"
+    },
+    "methodName": "iam:ListPolicies",
+    "resourceName": "demo-readonly",
+    "resourceType": "policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "",
+      "create_date": "",
+      "default_version_id": "",
+      "is_attachable": false,
+      "path": "",
+      "update_date": ""
+    },
+    "methodName": "iam:ListPolicies",
+    "resourceName": "bare-policy",
+    "resourceType": "policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "Region": "us-west-2",
+      "StandardsArn": "arn:aws:securityhub:us-west-2::standards/aws-foundational-security-best-practices/v/1.0.0",
+      "StandardsStatus": "READY",
+      "StandardsSubscriptionArn": "arn:aws:securityhub:us-west-2:123456789012:subscription/aws-foundational-security-best-practices/v/1.0.0"
+    },
+    "methodName": "securityhub:GetEnabledStandards",
+    "resourceName": "aws-foundational-security-best-practices",
+    "resourceType": "standard",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "Region": "us-west-2",
+      "StandardsArn": "",
+      "StandardsStatus": "",
+      "StandardsSubscriptionArn": "arn:aws:securityhub:us-west-2:123456789012:subscription/cis-aws-foundations-benchmark/v/1.2.0"
+    },
+    "methodName": "securityhub:GetEnabledStandards",
+    "resourceName": "",
+    "resourceType": "standard",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "ComplianceStatus": "FAILED",
+      "GeneratorId": "demo-generator-1",
+      "Id": "arn:aws:securityhub:us-west-2:123456789012:finding/demo-finding-1",
+      "ProductName": "GuardDuty",
+      "Region": "us-west-2",
+      "ResourceType": "AwsS3Bucket",
+      "SeverityLabel": "HIGH",
+      "Title": "Demo S3 bucket allows public read"
+    },
+    "methodName": "securityhub:GetFindings",
+    "resourceName": "Demo S3 bucket allows public read",
+    "resourceType": "finding",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "ComplianceStatus": "",
+      "GeneratorId": "demo-generator-2",
+      "Id": "arn:aws:securityhub:us-west-2:123456789012:finding/demo-finding-2",
+      "ProductName": "",
+      "Region": "us-west-2",
+      "ResourceType": "",
+      "SeverityLabel": "",
+      "Title": ""
+    },
+    "methodName": "securityhub:GetFindings",
+    "resourceName": "demo-generator-2",
+    "resourceType": "finding",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "ProductSubscriptionArn": "arn:aws:securityhub:us-west-2:123456789012:product-subscription/aws/guardduty",
+      "Region": "us-west-2"
+    },
+    "methodName": "securityhub:ListEnabledProductsForImport",
+    "resourceName": "arn:aws:securityhub:us-west-2:123456789012:product-subscription/aws/guardduty",
+    "resourceType": "product",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "ProductSubscriptionArn": "arn:aws:securityhub:us-west-2:123456789012:product-subscription/aws/inspector",
+      "Region": "us-west-2"
+    },
+    "methodName": "securityhub:ListEnabledProductsForImport",
+    "resourceName": "arn:aws:securityhub:us-west-2:123456789012:product-subscription/aws/inspector",
+    "resourceType": "product",
+    "serviceName": "SecurityHub"
+  },
+  {
+    "details": {
+      "DisplayName": "Demo Alerts",
+      "EffectiveDeliveryPolicy": "{\"http\":{\"defaultHealthyRetryPolicy\":{\"numRetries\":3}}}",
+      "Owner": "123456789012",
+      "SubscriptionsConfirmed": "2",
+      "SubscriptionsDeleted": "1",
+      "SubscriptionsPending": "0",
+      "TopicArn": "arn:aws:sns:us-west-2:123456789012:demo-alerts"
+    },
+    "methodName": "sns:ListTopics",
+    "resourceName": "arn:aws:sns:us-west-2:123456789012:demo-alerts",
+    "resourceType": "topic",
+    "serviceName": "SNS"
+  }
+]

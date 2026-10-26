@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
@@ -45,13 +45,7 @@ type followupStep struct {
 }
 
 func isAccessDenied(err error) bool {
-	if ae, ok := err.(awserr.Error); ok {
-		switch ae.Code() {
-		case "AccessDenied", "AccessDeniedException", "UnauthorizedOperation", "Forbidden":
-			return true
-		}
-	}
-	return false
+	return awsv2.HasErrorCode(err, "AccessDenied", "AccessDeniedException", "UnauthorizedOperation", "Forbidden")
 }
 
 // runFollowups runs steps for the first limit names. kind is the parent
@@ -73,6 +67,7 @@ func runFollowups(ctx context.Context, debug bool, kind, listMethod string, name
 			}
 			items, err := step.List(ctx, name)
 			if err != nil {
+				err = awsv2.Wrap(err)
 				utils.HandleAWSError(debug, step.Method, err)
 				results = append(results, types.ScanResult{
 					ServiceName:  "IAM",
@@ -148,7 +143,7 @@ func listTruncatedNote(debug bool, method, kind string, limit int) types.ScanRes
 }
 
 func errResult(method string, err error) []types.ScanResult {
-	return []types.ScanResult{{ServiceName: "IAM", MethodName: method, Error: err, Timestamp: time.Now()}}
+	return []types.ScanResult{{ServiceName: "IAM", MethodName: method, Error: awsv2.Wrap(err), Timestamp: time.Now()}}
 }
 
 func str(p *string) string {

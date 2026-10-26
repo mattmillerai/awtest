@@ -187,6 +187,29 @@ so absent values keep printing `""`, and `replay-bulk9.json` is unchanged.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk9`
 green without regenerating it.
 
+## Bulk 10 golden (securityhub, apigateway, sns, iam)
+
+`replay-bulk10.json` is the v1 baseline for the tenth bulk migration batch:
+the securityhub, apigateway, sns and iam calls (iam: ListUsers, ListRoles,
+ListGroups, ListPolicies and their follow-ups). It is produced from the
+fictional fixtures in `bulk10/` (fixture dir `testdata/golden/bulk10`) with
+`awtest -replay <abs>/testdata/golden/bulk10 -services securityhub,apigateway,sns,iam -quiet -format json`.
+The functional tests in each service package additionally cover populated and
+sparse `details`, error text, pagination and the region loop.
+
+Intentional v1 -> v2 difference (accepted as minimal and unavoidable with the
+typed v2 API): for the sparse policy `bare-policy` returned by
+`iam:ListPolicies`, `is_attachable` was absent from `details` in v1 (the
+`*bool` field was nil, so the key was not set) and is `false` after the
+migration, because the v2 `Policy.IsAttachable` is a plain `bool` and an absent
+field cannot be told apart from `false` through the typed API. That one line
+(`"is_attachable": false,`) was added to `replay-bulk10.json` by hand; nothing
+else in the golden changed. (`attachment_count` and the role
+`max_session_duration` remain pointers in v2, so they stay absent when absent.)
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk10`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

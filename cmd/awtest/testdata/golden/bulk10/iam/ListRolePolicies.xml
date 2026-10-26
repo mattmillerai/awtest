@@ -1,0 +1,1 @@
+<ListRolePoliciesResponse xmlns="https://iam.amazonaws.com/doc/2010-05-08/"><ListRolePoliciesResult><PolicyNames><member>demo-role-inline</member></PolicyNames><IsTruncated>false</IsTruncated></ListRolePoliciesResult><ResponseMetadata><RequestId>r1</RequestId></ResponseMetadata></ListRolePoliciesResponse>

@@ -121,6 +121,12 @@
 //     the region loop; and organizations (ListAccounts, ListRoots with
 //     ListOrganizationalUnitsForParent, ListPolicies), a global service pinned
 //     to us-east-1.
+//     Bulk 10 is migrated too: securityhub (GetEnabledStandards,
+//     GetFindings, ListEnabledProductsForImport), apigateway (RestApis with
+//     its stage, model, resource and method follow-ups, GetApiKeys,
+//     GetDomainNames) and sns (ListTopics with GetTopicAttributes in each
+//     topic's region), regional loops; and iam (ListUsers, ListRoles,
+//     ListGroups, ListPolicies, with v2 paginators where v1 paginated), global.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

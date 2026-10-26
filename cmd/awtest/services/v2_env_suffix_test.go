@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/acm"
 	"github.com/aws/aws-sdk-go-v2/service/amplify"
+	"github.com/aws/aws-sdk-go-v2/service/apigateway"
 	"github.com/aws/aws-sdk-go-v2/service/appsync"
 	"github.com/aws/aws-sdk-go-v2/service/athena"
 	"github.com/aws/aws-sdk-go-v2/service/backup"
@@ -48,8 +49,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe"
@@ -138,6 +141,11 @@ var v2EnvSuffix = map[string][]string{
 	"opensearch":    {"OPENSEARCH"},
 	"organizations": {"ORGANIZATIONS"},
 	"sagemaker":     {"SAGEMAKER"},
+
+	"securityhub": {"SECURITYHUB"},
+	"apigateway":  {"API_GATEWAY"},
+	"sns":         {"SNS"},
+	"iam":         {"IAM"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -200,6 +208,11 @@ var v2ServiceIDs = map[string][]string{
 	"opensearch":    {opensearch.ServiceID},
 	"organizations": {organizations.ServiceID},
 	"sagemaker":     {sagemaker.ServiceID},
+
+	"securityhub": {securityhub.ServiceID},
+	"apigateway":  {apigateway.ServiceID},
+	"sns":         {sns.ServiceID},
+	"iam":         {iam.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

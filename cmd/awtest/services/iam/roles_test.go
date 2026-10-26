@@ -2,7 +2,6 @@ package iam
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -11,30 +10,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
-
-// hostGuard fails any request not addressed to the fake server.
-type hostGuard struct {
-	host     string
-	delegate http.RoundTripper
-	mu       sync.Mutex
-	stray    []string
-}
-
-func (g *hostGuard) RoundTrip(r *http.Request) (*http.Response, error) {
-	if r.URL.Host == g.host {
-		return g.delegate.RoundTrip(r)
-	}
-	g.mu.Lock()
-	g.stray = append(g.stray, r.URL.Host)
-	g.mu.Unlock()
-	return nil, errors.New("blocked non-test host " + r.URL.Host)
-}
 
 type fakeIAM struct {
 	mu      sync.Mutex
@@ -49,8 +28,10 @@ func (f *fakeIAM) count(a string) int {
 	return f.actions[a]
 }
 
-// newFakeIAM starts a fake IAM endpoint and returns a session pointing at it.
-func newFakeIAM(t *testing.T, h func(action string, form url.Values) (int, string)) (*fakeIAM, *session.Session) {
+// newFakeIAM starts a fake IAM endpoint and returns a context carrying a v2
+// config that points at it (and only at it: the endpoint is explicit and the
+// transport is the fake server's client).
+func newFakeIAM(t *testing.T, h func(action string, form url.Values) (int, string)) (*fakeIAM, context.Context) {
 	t.Helper()
 	fake := &fakeIAM{actions: map[string]int{}, forms: map[string]url.Values{}, handler: h}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,26 +48,24 @@ func newFakeIAM(t *testing.T, h func(action string, form url.Values) (int, strin
 	}))
 	t.Cleanup(srv.Close)
 
-	g := &hostGuard{host: strings.TrimPrefix(srv.URL, "http://"), delegate: http.DefaultTransport}
-	orig := http.DefaultTransport
-	http.DefaultTransport = g
-	t.Cleanup(func() {
-		http.DefaultTransport = orig
-		if len(g.stray) > 0 {
-			t.Errorf("requests bypassed the fake server: %v", g.stray)
-		}
-	})
-
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewStaticCredentials("AKIAFAKE", "fake", ""),
-		Endpoint:    aws.String(srv.URL),
-		MaxRetries:  aws.Int(0),
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("AWS_EC2_METADATA_DISABLED", "true")
+	for _, k := range []string{"AWS_PROFILE", "AWS_DEFAULT_PROFILE", "AWS_SHARED_CREDENTIALS_FILE", "AWS_CONFIG_FILE", "AWS_REGION", "AWS_DEFAULT_REGION"} {
+		t.Setenv(k, "")
+	}
+	cfg, err := awsv2.LoadConfig(context.Background(), awsv2.Options{
+		Region:          "us-east-1",
+		AccessKeyID:     "AKIAFAKEFAKEFAKE",
+		SecretAccessKey: "fake",
+		Endpoint:        srv.URL,
+		HTTPClient:      srv.Client(),
+		MaxAttempts:     1,
+		Quiet:           true,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	return fake, sess
+	return fake, types.WithAWSConfig(context.Background(), cfg)
 }
 
 func findCall(t *testing.T, name string) types.AWSService {
@@ -105,12 +84,12 @@ func findCall(t *testing.T, name string) types.AWSService {
 	return found
 }
 
-func run(t *testing.T, name string, sess *session.Session) []types.ScanResult {
+func run(t *testing.T, name string, ctx context.Context) []types.ScanResult {
 	t.Helper()
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	c := findCall(t, name)
-	out, err := c.Call(context.Background(), sess)
+	out, err := c.Invoke(ctx, nil)
 	return c.Process(out, err, false)
 }
 
@@ -136,7 +115,7 @@ func byMethod(rs []types.ScanResult, method string) []types.ScanResult {
 
 func TestListRolesFunctional(t *testing.T) {
 	trust1 := url.QueryEscape(`{"Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"}},{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::222222222222:root"}}]}`)
-	fake, sess := newFakeIAM(t, func(action string, form url.Values) (int, string) {
+	fake, ctx := newFakeIAM(t, func(action string, form url.Values) (int, string) {
 		switch action {
 		case "ListRoles":
 			return 200, xmlResp(action, `<Roles>`+roleXML("web", trust1)+roleXML("broken", "%zz")+`</Roles><IsTruncated>false</IsTruncated>`)
@@ -154,7 +133,7 @@ func TestListRolesFunctional(t *testing.T) {
 		return 400, fmt.Sprintf(awsErrXML, "InvalidAction")
 	})
 
-	res := run(t, "iam:ListRoles", sess)
+	res := run(t, "iam:ListRoles", ctx)
 	roles := byMethod(res, "iam:ListRoles")
 	if len(roles) != 2 {
 		t.Fatalf("want 2 role results, got %d: %+v", len(roles), res)
@@ -195,7 +174,7 @@ func TestListRolesCapsAndFollowupBound(t *testing.T) {
 	for i := 0; i < maxRoles+5; i++ {
 		sb.WriteString(roleXML(fmt.Sprintf("r%04d", i), ""))
 	}
-	fake, sess := newFakeIAM(t, func(action string, form url.Values) (int, string) {
+	fake, ctx := newFakeIAM(t, func(action string, form url.Values) (int, string) {
 		switch action {
 		case "ListRoles":
 			return 200, xmlResp(action, `<Roles>`+sb.String()+`</Roles><IsTruncated>false</IsTruncated>`)
@@ -206,7 +185,7 @@ func TestListRolesCapsAndFollowupBound(t *testing.T) {
 		}
 		return 400, fmt.Sprintf(awsErrXML, "InvalidAction")
 	})
-	res := run(t, "iam:ListRoles", sess)
+	res := run(t, "iam:ListRoles", ctx)
 	roleCount, notes := 0, map[string]types.ScanResult{}
 	for _, r := range res {
 		if r.ResourceType == "role" {
@@ -235,7 +214,7 @@ func TestListRolesCapsAndFollowupBound(t *testing.T) {
 }
 
 func TestListRolesFollowupDeniedShortCircuit(t *testing.T) {
-	fake, sess := newFakeIAM(t, func(action string, form url.Values) (int, string) {
+	fake, ctx := newFakeIAM(t, func(action string, form url.Values) (int, string) {
 		switch action {
 		case "ListRoles":
 			return 200, xmlResp(action, `<Roles>`+roleXML("a", "")+roleXML("b", "")+roleXML("c", "")+`</Roles><IsTruncated>false</IsTruncated>`)
@@ -246,7 +225,7 @@ func TestListRolesFollowupDeniedShortCircuit(t *testing.T) {
 		}
 		return 400, fmt.Sprintf(awsErrXML, "InvalidAction")
 	})
-	res := run(t, "iam:ListRoles", sess)
+	res := run(t, "iam:ListRoles", ctx)
 	if c := fake.count("ListAttachedRolePolicies"); c != 1 {
 		t.Errorf("denied follow-up should stop after first call, got %d calls", c)
 	}
@@ -274,10 +253,10 @@ func TestListRolesFollowupDeniedShortCircuit(t *testing.T) {
 }
 
 func TestListRolesError(t *testing.T) {
-	_, sess := newFakeIAM(t, func(string, url.Values) (int, string) {
+	_, ctx := newFakeIAM(t, func(string, url.Values) (int, string) {
 		return 403, fmt.Sprintf(awsErrXML, "AccessDenied")
 	})
-	res := run(t, "iam:ListRoles", sess)
+	res := run(t, "iam:ListRoles", ctx)
 	if len(res) != 1 || res[0].Error == nil || res[0].MethodName != "iam:ListRoles" {
 		t.Errorf("want single error result, got %+v", res)
 	}
@@ -288,7 +267,7 @@ func TestListGroupsFunctional(t *testing.T) {
 	for i := 0; i < maxGroupFollowups+3; i++ {
 		fmt.Fprintf(&sb, `<member><Path>/</Path><GroupName>g%03d</GroupName><GroupId>AGPA</GroupId><Arn>arn:aws:iam::111111111111:group/g%03d</Arn><CreateDate>2024-01-02T03:04:05Z</CreateDate></member>`, i, i)
 	}
-	fake, sess := newFakeIAM(t, func(action string, form url.Values) (int, string) {
+	fake, ctx := newFakeIAM(t, func(action string, form url.Values) (int, string) {
 		switch action {
 		case "ListGroups":
 			return 200, xmlResp(action, `<Groups>`+sb.String()+`</Groups><IsTruncated>false</IsTruncated>`)
@@ -302,7 +281,7 @@ func TestListGroupsFunctional(t *testing.T) {
 		}
 		return 400, fmt.Sprintf(awsErrXML, "InvalidAction")
 	})
-	res := run(t, "iam:ListGroups", sess)
+	res := run(t, "iam:ListGroups", ctx)
 	groups := byMethod(res, "iam:ListGroups")
 	if len(groups) != maxGroupFollowups+3+1 { // + followups-truncated note
 		t.Errorf("iam:ListGroups results = %d", len(groups))
@@ -326,13 +305,13 @@ func TestListGroupsFunctional(t *testing.T) {
 }
 
 func TestListPoliciesFunctional(t *testing.T) {
-	fake, sess := newFakeIAM(t, func(action string, form url.Values) (int, string) {
+	fake, ctx := newFakeIAM(t, func(action string, form url.Values) (int, string) {
 		if action != "ListPolicies" {
 			return 400, fmt.Sprintf(awsErrXML, "InvalidAction")
 		}
 		return 200, xmlResp(action, `<Policies><member><PolicyName>mine</PolicyName><PolicyId>ANPA</PolicyId><Arn>arn:aws:iam::111111111111:policy/mine</Arn><Path>/</Path><DefaultVersionId>v2</DefaultVersionId><AttachmentCount>3</AttachmentCount><IsAttachable>true</IsAttachable><CreateDate>2024-01-02T03:04:05Z</CreateDate><UpdateDate>2024-02-02T03:04:05Z</UpdateDate></member></Policies><IsTruncated>false</IsTruncated>`)
 	})
-	res := run(t, "iam:ListPolicies", sess)
+	res := run(t, "iam:ListPolicies", ctx)
 	form := fake.forms["ListPolicies"]
 	if form.Get("Scope") != "Local" || form.Get("OnlyAttached") != "true" {
 		t.Errorf("request form: %v", form)
@@ -350,7 +329,7 @@ func TestListPoliciesFunctional(t *testing.T) {
 func TestNewEntriesAreGlobalAndReadOnly(t *testing.T) {
 	for _, n := range []string{"iam:ListRoles", "iam:ListGroups", "iam:ListPolicies"} {
 		c := findCall(t, n)
-		if c.Call == nil || c.Process == nil || c.ModuleName == "" {
+		if c.CallV2 == nil || c.Process == nil || c.ModuleName == "" {
 			t.Errorf("%s incomplete", n)
 		}
 	}

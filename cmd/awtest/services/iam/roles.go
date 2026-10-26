@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
@@ -18,15 +19,15 @@ func init() {
 	IAMCalls = append(IAMCalls, listRolesCall, listGroupsCall, listPoliciesCall)
 }
 
-func unpackList(output interface{}) (*listResult, *session.Session, context.Context) {
+func unpackList(output interface{}) (*listResult, aws.Config, bool, context.Context) {
 	m, _ := output.(map[string]interface{})
 	lr, _ := m["output"].(*listResult)
-	sess, _ := m["sess"].(*session.Session)
+	cfg, hasCfg := m["cfg"].(aws.Config)
 	ctx, _ := m["ctx"].(context.Context)
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	return lr, sess, ctx
+	return lr, cfg, hasCfg, ctx
 }
 
 func timeStr(t *time.Time) string {
@@ -38,37 +39,44 @@ func timeStr(t *time.Time) string {
 
 var listRolesCall = types.AWSService{
 	Name: "iam:ListRoles",
-	Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-		svc := iam.New(sess)
+	CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+		svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 		res := &listResult{}
-		var roles []*iam.Role
-		err := svc.ListRolesPagesWithContext(ctx, &iam.ListRolesInput{}, func(page *iam.ListRolesOutput, last bool) bool {
+		var roles []iamtypes.Role
+		var err error
+		pager := iam.NewListRolesPaginator(svc, &iam.ListRolesInput{})
+	pages:
+		for pager.HasMorePages() {
+			var page *iam.ListRolesOutput
+			page, err = pager.NextPage(ctx)
+			if err != nil {
+				break
+			}
 			for _, r := range page.Roles {
 				if len(roles) >= maxRoles {
 					res.Truncated = true
-					return false
+					break pages
 				}
 				roles = append(roles, r)
 			}
-			if len(roles) >= maxRoles && !last {
+			if len(roles) >= maxRoles && pager.HasMorePages() {
 				res.Truncated = true
-				return false
+				break
 			}
-			return true
-		})
+		}
 		res.Items = roles
-		return map[string]interface{}{"output": res, "sess": sess, "ctx": ctx}, err
+		return map[string]interface{}{"output": res, "cfg": cfg, "ctx": ctx}, err
 	},
 	Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 		if err != nil {
 			utils.HandleAWSError(debug, "iam:ListRoles", err)
 			return errResult("iam:ListRoles", err)
 		}
-		lr, sess, ctx := unpackList(output)
+		lr, cfg, hasCfg, ctx := unpackList(output)
 		if lr == nil {
 			return nil
 		}
-		roles, _ := lr.Items.([]*iam.Role)
+		roles, _ := lr.Items.([]iamtypes.Role)
 		var results []types.ScanResult
 		var names []string
 
@@ -81,7 +89,7 @@ var listRolesCall = types.AWSService{
 				"create_date": timeStr(role.CreateDate),
 			}
 			if role.MaxSessionDuration != nil {
-				details["max_session_duration"] = *role.MaxSessionDuration
+				details["max_session_duration"] = int64(*role.MaxSessionDuration)
 			}
 			if role.Description != nil && *role.Description != "" {
 				details["description"] = *role.Description
@@ -108,17 +116,17 @@ var listRolesCall = types.AWSService{
 		if lr.Truncated {
 			results = append(results, listTruncatedNote(debug, "iam:ListRoles", "role", maxRoles))
 		}
-		if sess == nil {
+		if !hasCfg {
 			return results
 		}
 
-		svc := iam.New(sess)
+		svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 		steps := []followupStep{
 			{
 				Method: "iam:ListAttachedRolePolicies",
 				Label:  "attached policy",
 				List: func(ctx context.Context, role string) ([]followupItem, error) {
-					out, err := svc.ListAttachedRolePoliciesWithContext(ctx, &iam.ListAttachedRolePoliciesInput{RoleName: aws.String(role)})
+					out, err := svc.ListAttachedRolePolicies(ctx, &iam.ListAttachedRolePoliciesInput{RoleName: aws.String(role)})
 					if err != nil {
 						return nil, err
 					}
@@ -134,13 +142,13 @@ var listRolesCall = types.AWSService{
 				Method: "iam:ListRolePolicies",
 				Label:  "inline policy",
 				List: func(ctx context.Context, role string) ([]followupItem, error) {
-					out, err := svc.ListRolePoliciesWithContext(ctx, &iam.ListRolePoliciesInput{RoleName: aws.String(role)})
+					out, err := svc.ListRolePolicies(ctx, &iam.ListRolePoliciesInput{RoleName: aws.String(role)})
 					if err != nil {
 						return nil, err
 					}
 					var items []followupItem
 					for _, p := range out.PolicyNames {
-						items = append(items, followupItem{"inline-policy", str(p),
+						items = append(items, followupItem{"inline-policy", p,
 							map[string]interface{}{"role": role}})
 					}
 					return items, nil
@@ -154,37 +162,44 @@ var listRolesCall = types.AWSService{
 
 var listGroupsCall = types.AWSService{
 	Name: "iam:ListGroups",
-	Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-		svc := iam.New(sess)
+	CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+		svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 		res := &listResult{}
-		var groups []*iam.Group
-		err := svc.ListGroupsPagesWithContext(ctx, &iam.ListGroupsInput{}, func(page *iam.ListGroupsOutput, last bool) bool {
+		var groups []iamtypes.Group
+		var err error
+		pager := iam.NewListGroupsPaginator(svc, &iam.ListGroupsInput{})
+	pages:
+		for pager.HasMorePages() {
+			var page *iam.ListGroupsOutput
+			page, err = pager.NextPage(ctx)
+			if err != nil {
+				break
+			}
 			for _, g := range page.Groups {
 				if len(groups) >= maxGroups {
 					res.Truncated = true
-					return false
+					break pages
 				}
 				groups = append(groups, g)
 			}
-			if len(groups) >= maxGroups && !last {
+			if len(groups) >= maxGroups && pager.HasMorePages() {
 				res.Truncated = true
-				return false
+				break
 			}
-			return true
-		})
+		}
 		res.Items = groups
-		return map[string]interface{}{"output": res, "sess": sess, "ctx": ctx}, err
+		return map[string]interface{}{"output": res, "cfg": cfg, "ctx": ctx}, err
 	},
 	Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 		if err != nil {
 			utils.HandleAWSError(debug, "iam:ListGroups", err)
 			return errResult("iam:ListGroups", err)
 		}
-		lr, sess, ctx := unpackList(output)
+		lr, cfg, hasCfg, ctx := unpackList(output)
 		if lr == nil {
 			return nil
 		}
-		groups, _ := lr.Items.([]*iam.Group)
+		groups, _ := lr.Items.([]iamtypes.Group)
 		var results []types.ScanResult
 		var names []string
 
@@ -208,17 +223,17 @@ var listGroupsCall = types.AWSService{
 		if lr.Truncated {
 			results = append(results, listTruncatedNote(debug, "iam:ListGroups", "group", maxGroups))
 		}
-		if sess == nil {
+		if !hasCfg {
 			return results
 		}
 
-		svc := iam.New(sess)
+		svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 		steps := []followupStep{
 			{
 				Method: "iam:ListAttachedGroupPolicies",
 				Label:  "attached policy",
 				List: func(ctx context.Context, group string) ([]followupItem, error) {
-					out, err := svc.ListAttachedGroupPoliciesWithContext(ctx, &iam.ListAttachedGroupPoliciesInput{GroupName: aws.String(group)})
+					out, err := svc.ListAttachedGroupPolicies(ctx, &iam.ListAttachedGroupPoliciesInput{GroupName: aws.String(group)})
 					if err != nil {
 						return nil, err
 					}
@@ -234,13 +249,13 @@ var listGroupsCall = types.AWSService{
 				Method: "iam:ListGroupPolicies",
 				Label:  "inline policy",
 				List: func(ctx context.Context, group string) ([]followupItem, error) {
-					out, err := svc.ListGroupPoliciesWithContext(ctx, &iam.ListGroupPoliciesInput{GroupName: aws.String(group)})
+					out, err := svc.ListGroupPolicies(ctx, &iam.ListGroupPoliciesInput{GroupName: aws.String(group)})
 					if err != nil {
 						return nil, err
 					}
 					var items []followupItem
 					for _, p := range out.PolicyNames {
-						items = append(items, followupItem{"inline-policy", str(p),
+						items = append(items, followupItem{"inline-policy", p,
 							map[string]interface{}{"group": group}})
 					}
 					return items, nil
@@ -258,41 +273,48 @@ var listGroupsCall = types.AWSService{
 // not fetched (no GetPolicyVersion).
 var listPoliciesCall = types.AWSService{
 	Name: "iam:ListPolicies",
-	Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-		svc := iam.New(sess)
+	CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+		svc := awsv2.NewRegionalClient(cfg, "", iam.NewFromConfig)
 		res := &listResult{}
-		var policies []*iam.Policy
+		var policies []iamtypes.Policy
+		var err error
 		input := &iam.ListPoliciesInput{
-			Scope:        aws.String(iam.PolicyScopeTypeLocal),
-			OnlyAttached: aws.Bool(true),
+			Scope:        iamtypes.PolicyScopeTypeLocal,
+			OnlyAttached: true,
 		}
-		err := svc.ListPoliciesPagesWithContext(ctx, input, func(page *iam.ListPoliciesOutput, last bool) bool {
+		pager := iam.NewListPoliciesPaginator(svc, input)
+	pages:
+		for pager.HasMorePages() {
+			var page *iam.ListPoliciesOutput
+			page, err = pager.NextPage(ctx)
+			if err != nil {
+				break
+			}
 			for _, p := range page.Policies {
 				if len(policies) >= maxPolicies {
 					res.Truncated = true
-					return false
+					break pages
 				}
 				policies = append(policies, p)
 			}
-			if len(policies) >= maxPolicies && !last {
+			if len(policies) >= maxPolicies && pager.HasMorePages() {
 				res.Truncated = true
-				return false
+				break
 			}
-			return true
-		})
+		}
 		res.Items = policies
-		return map[string]interface{}{"output": res, "sess": sess, "ctx": ctx}, err
+		return map[string]interface{}{"output": res, "cfg": cfg, "ctx": ctx}, err
 	},
 	Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 		if err != nil {
 			utils.HandleAWSError(debug, "iam:ListPolicies", err)
 			return errResult("iam:ListPolicies", err)
 		}
-		lr, _, _ := unpackList(output)
+		lr, _, _, _ := unpackList(output)
 		if lr == nil {
 			return nil
 		}
-		policies, _ := lr.Items.([]*iam.Policy)
+		policies, _ := lr.Items.([]iamtypes.Policy)
 		var results []types.ScanResult
 		for _, p := range policies {
 			name := str(p.PolicyName)
@@ -304,11 +326,11 @@ var listPoliciesCall = types.AWSService{
 				"update_date":        timeStr(p.UpdateDate),
 			}
 			if p.AttachmentCount != nil {
-				details["attachment_count"] = *p.AttachmentCount
+				details["attachment_count"] = int64(*p.AttachmentCount)
 			}
-			if p.IsAttachable != nil {
-				details["is_attachable"] = *p.IsAttachable
-			}
+			// v2 models IsAttachable as a plain bool, so an absent field is
+			// indistinguishable from false and is always reported.
+			details["is_attachable"] = p.IsAttachable
 			results = append(results, types.ScanResult{
 				ServiceName:  "IAM",
 				MethodName:   "iam:ListPolicies",

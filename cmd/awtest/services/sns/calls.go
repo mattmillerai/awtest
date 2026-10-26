@@ -3,43 +3,44 @@ package sns
 import (
 	"context"
 	"fmt"
-	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sns"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
+	snstypes "github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 type TopicWithAttributes struct {
-	Topic      *sns.Topic
-	Attributes map[string]*string
+	Topic      snstypes.Topic
+	Attributes map[string]string
 }
 
 var SNSCalls = []types.AWSService{
 	{
 		Name: "sns:ListTopics",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allTopicsWithAttributes []TopicWithAttributes
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := sns.New(regionSess)
-				output, err := svc.ListTopicsWithContext(ctx, &sns.ListTopicsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, sns.NewFromConfig)
+				output, err := svc.ListTopics(ctx, &sns.ListTopicsInput{})
 				if err != nil {
 					return nil, err
 				}
 
 				for _, topic := range output.Topics {
-					arnParts := strings.Split(*topic.TopicArn, ":")
+					topicArn := aws.ToString(topic.TopicArn)
+					arnParts := strings.Split(topicArn, ":")
 					if len(arnParts) < 4 {
-						return nil, fmt.Errorf("invalid ARN: %s", *topic.TopicArn)
+						return nil, fmt.Errorf("invalid ARN: %s", topicArn)
 					}
-					region := arnParts[3]
-					attrSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-					svc = sns.New(attrSess)
+					// The attributes are read from the region named in the ARN.
+					attrSvc := awsv2.NewRegionalClient(cfg, arnParts[3], sns.NewFromConfig)
 
-					attrOutput, attrErr := svc.GetTopicAttributesWithContext(ctx, &sns.GetTopicAttributesInput{
+					attrOutput, attrErr := attrSvc.GetTopicAttributes(ctx, &sns.GetTopicAttributesInput{
 						TopicArn: topic.TopicArn,
 					})
 					if attrErr != nil {
@@ -68,17 +69,12 @@ var SNSCalls = []types.AWSService{
 
 			if topics, ok := output.([]TopicWithAttributes); ok {
 				for _, topicWithAttr := range topics {
-					topicArn := ""
-					if topicWithAttr.Topic.TopicArn != nil {
-						topicArn = *topicWithAttr.Topic.TopicArn
-					}
+					topicArn := aws.ToString(topicWithAttr.Topic.TopicArn)
 
 					// Build details from attributes
 					topicDetails := make(map[string]interface{})
 					for name, value := range topicWithAttr.Attributes {
-						if value != nil {
-							topicDetails[name] = *value
-						}
+						topicDetails[name] = value
 					}
 
 					// Add topic result
@@ -97,8 +93,8 @@ var SNSCalls = []types.AWSService{
 					// Print attributes
 					for name, value := range topicWithAttr.Attributes {
 						// Only display DisplayName and number of subscriptions
-						if (name == "DisplayName" || name == "SubscriptionsConfirmed" || name == "SubscriptionsPending" || name == "SubscriptionsDeleted") && value != nil && *value != "" {
-							utils.PrintResult(debug, "", "sns:GetTopicAttributes", fmt.Sprintf("SNS Topic: %s | %s = %s", colorizedTopic, name, *value), nil)
+						if (name == "DisplayName" || name == "SubscriptionsConfirmed" || name == "SubscriptionsPending" || name == "SubscriptionsDeleted") && value != "" {
+							utils.PrintResult(debug, "", "sns:GetTopicAttributes", fmt.Sprintf("SNS Topic: %s | %s = %s", colorizedTopic, name, value), nil)
 						}
 					}
 					// print blank line
