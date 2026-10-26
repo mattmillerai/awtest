@@ -485,7 +485,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 
 ## Contributing
 
-Contributions are welcome! The most common contribution is **adding support for a new AWS service**. A complete service implementation template is provided at [`cmd/awtest/services/_template/`](cmd/awtest/services/_template/) with step-by-step instructions and an annotated reference implementation.
+Contributions are welcome! The most common contribution is **adding support for a new AWS service**. A complete service implementation template is provided at [`cmd/awtest/services/_template/`](cmd/awtest/services/_template/) with step-by-step instructions and an annotated reference implementation. Services are written against [aws-sdk-go-v2](https://github.com/aws/aws-sdk-go-v2): a `CallV2` function that builds its clients with `awsv2.NewRegionalClient(cfg, region, pkg.NewFromConfig)`, and a `Process` function that turns the response into `ScanResult`s.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, including:
 

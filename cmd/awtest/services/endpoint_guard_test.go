@@ -4,149 +4,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go/ast"
-	"go/parser"
-	"go/token"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
-var (
-	forbiddenSessionFuncs = map[string]bool{
-		"New":                   true,
-		"NewSession":            true,
-		"NewSessionWithOptions": true,
-		"Must":                  true,
-	}
-	forbiddenConfigKeys = map[string]bool{
-		"Endpoint":         true,
-		"EndpointResolver": true,
-		"S3ForcePathStyle": true,
-		"S3UseARNRegion":   true,
-		"HTTPClient":       true,
-	}
-)
-
-// scanForSessionBypass parses src and returns a description of every place it
-// constructs a session or sets an aws.Config key owned by the central
-// endpoint helper (utils.ApplyEndpoint).
-func scanForSessionBypass(filename string, src []byte) ([]string, error) {
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, filename, src, 0)
-	if err != nil {
-		return nil, err
-	}
-	var found []string
-	ast.Inspect(f, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.CallExpr:
-			if sel, ok := x.Fun.(*ast.SelectorExpr); ok {
-				if id, ok := sel.X.(*ast.Ident); ok && id.Name == "session" && forbiddenSessionFuncs[sel.Sel.Name] {
-					found = append(found, fmt.Sprintf("%s: call to session.%s", fset.Position(x.Pos()), sel.Sel.Name))
-				}
-			}
-		case *ast.CompositeLit:
-			sel, ok := x.Type.(*ast.SelectorExpr)
-			if !ok {
-				return true
-			}
-			if id, ok := sel.X.(*ast.Ident); !ok || id.Name != "aws" || sel.Sel.Name != "Config" {
-				return true
-			}
-			for _, elt := range x.Elts {
-				kv, ok := elt.(*ast.KeyValueExpr)
-				if !ok {
-					continue
-				}
-				if key, ok := kv.Key.(*ast.Ident); ok && forbiddenConfigKeys[key.Name] {
-					found = append(found, fmt.Sprintf("%s: aws.Config sets %s", fset.Position(kv.Pos()), key.Name))
-				}
-			}
-		}
-		return true
-	})
-	return found, nil
-}
-
-func TestNoServiceBuildsItsOwnSession(t *testing.T) {
-	var violations []string
-	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
-			return nil
-		}
-		src, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		found, err := scanForSessionBypass(path, src)
-		if err != nil {
-			return err
-		}
-		violations = append(violations, found...)
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(violations) > 0 {
-		t.Errorf("services must not construct sessions or set endpoint/HTTP settings themselves; "+
-			"derive per-region sessions with sess.Copy(&aws.Config{Region: aws.String(region)}) so that "+
-			"-endpoint-url, credentials and the HTTP client are inherited:\n  %s", strings.Join(violations, "\n  "))
-	}
-}
-
-func TestSessionBypassScannerDetects(t *testing.T) {
-	src := []byte(`package x
-
-import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-)
-
-func f() {
-	_, _ = session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
-	_ = session.Must(session.NewSession())
-	_ = &aws.Config{Endpoint: aws.String("http://x"), S3ForcePathStyle: aws.Bool(true)}
-}
-`)
-	found, err := scanForSessionBypass("x.go", src)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// NewSession x2, Must, Endpoint, S3ForcePathStyle
-	if len(found) != 5 {
-		t.Errorf("expected 5 detections, got %d: %v", len(found), found)
-	}
-
-	clean := []byte(`package x
-
-func f(sess *session.Session) {
-	_ = sess.Copy(&aws.Config{Region: aws.String("us-east-1")})
-}
-`)
-	found, err = scanForSessionBypass("y.go", clean)
-	if err != nil || len(found) != 0 {
-		t.Errorf("clean source flagged: %v, %v", found, err)
-	}
-}
+// The static halves of this guard (no client built without
+// awsv2.NewClient/NewRegionalClient, no endpoint settings set directly, no
+// aws-sdk-go v1 import anywhere) live in cmd/awtest/awsv2/guard_test.go
+// (TestNoV2ClientBypass, TestNoV1SDKImports). This file is the dynamic half:
+// it runs every service in AllServices through Invoke and proves that every
+// request goes to the custom endpoint.
 
 // guardTransport lets traffic to the local test server through and records
 // (without touching the network) anything addressed elsewhere.
@@ -221,27 +98,26 @@ func (c *int64Counter) get() int {
 	return c.n
 }
 
-func fakeStaticSession(t *testing.T) *session.Session {
-	t.Helper()
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-west-2"),
-		Credentials: credentials.NewStaticCredentials("AKIAFAKEFAKEFAKE", "fake", ""),
-		MaxRetries:  aws.Int(0),
-	})
-	if err != nil {
-		t.Fatal(err)
+func TestAllServicesImplementCallV2(t *testing.T) {
+	all := AllServices()
+	if len(all) == 0 {
+		t.Fatal("AllServices is empty")
 	}
-	return sess
+	for _, svc := range all {
+		if svc.CallV2 == nil {
+			t.Errorf("service %q has no CallV2", svc.Name)
+		}
+		if svc.Process == nil {
+			t.Errorf("service %q has no Process", svc.Name)
+		}
+	}
 }
 
 func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 	guard, srv, counter := setupGuard(t)
 
-	// Every target gets both a v1 session and a v2 config built the guarded
-	// way (explicit test HTTP client, ambient AWS_ENDPOINT_URL* set); Invoke
-	// uses whichever SDK the service implements.
-	sess := fakeStaticSession(t)
-	utils.ApplyEndpoint(sess, srv.URL)
+	// Every target gets a v2 config built the guarded way (explicit test HTTP
+	// client, ambient AWS_ENDPOINT_URL* set to an unreachable host).
 	targets := guardTargets(t)
 	setAmbientEndpoints(t, targets)
 	cfg := guardedV2Config(t, guard, srv.URL)
@@ -261,7 +137,7 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 			}()
 			ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg), 15*time.Second)
 			defer cancel()
-			_, _ = svc.Invoke(ctx, sess)
+			_, _ = svc.Invoke(ctx)
 		}()
 		if counter.get() > before {
 			reached++
@@ -286,36 +162,43 @@ func TestAllServicesHonorCustomEndpoint(t *testing.T) {
 		}
 	}
 
-	t.Run("control: bypassing client is detected", func(t *testing.T) {
-		g2 := &guardTransport{allowedHost: guard.allowedHost, delegate: guard.delegate}
-		http.DefaultTransport = g2
-		bypass := s3.New(session.Must(session.NewSession(&aws.Config{
-			Region:      aws.String("us-west-2"),
-			Credentials: credentials.NewStaticCredentials("AKIAFAKEFAKEFAKE", "fake", ""),
-			MaxRetries:  aws.Int(0),
-		})))
-		_, _ = bypass.ListBuckets(&s3.ListBucketsInput{})
-		if len(g2.snapshot()) == 0 {
-			t.Error("bypassing client was not recorded as a violation")
-		}
-	})
-
-	// Negative control for v2: a service that builds its client with a plain
-	// NewFromConfig lets the ambient AWS_ENDPOINT_URL_STS win over the
-	// configured endpoint; the same harness must record that.
+	// Negative controls: the same harness must record a service that builds
+	// its client with a plain NewFromConfig (the ambient
+	// AWS_ENDPOINT_URL_STS wins over the configured endpoint) or one that
+	// points its client at a foreign endpoint.
 	t.Run("control: unguarded v2 client is detected", func(t *testing.T) {
 		g2 := &guardTransport{allowedHost: guard.allowedHost, delegate: guard.delegate}
 		cfg2 := guardedV2Config(t, g2, srv.URL)
 		ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg2), 15*time.Second)
 		defer cancel()
 		bad := unguardedSyntheticV2Service()
-		_, _ = bad.Invoke(ctx, sess)
+		_, _ = bad.Invoke(ctx)
 		v := g2.snapshot()
 		if len(v) == 0 {
 			t.Fatal("unguarded v2 client was not recorded as an endpoint bypass")
 		}
 		if !strings.Contains(v[0], "ambient-endpoint.invalid") {
 			t.Errorf("violation does not point at the ambient endpoint: %v", v)
+		}
+	})
+
+	t.Run("control: foreign endpoint is detected", func(t *testing.T) {
+		g2 := &guardTransport{allowedHost: guard.allowedHost, delegate: guard.delegate}
+		cfg2 := guardedV2Config(t, g2, srv.URL)
+		ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg2), 15*time.Second)
+		defer cancel()
+		foreign := types.AWSService{
+			Name: "sts:ForeignEndpointSyntheticV2",
+			CallV2: syntheticV2Call(func(cfg aws.Config, region string) *sts.Client {
+				cfg.Region = region
+				return sts.NewFromConfig(cfg, func(o *sts.Options) { o.BaseEndpoint = aws.String("http://real-aws.invalid") })
+			}),
+			Process: func(interface{}, error, bool) []types.ScanResult { return nil },
+		}
+		_, _ = foreign.Invoke(ctx)
+		v := g2.snapshot()
+		if len(v) == 0 || !strings.Contains(v[0], "real-aws.invalid") {
+			t.Fatalf("foreign endpoint was not recorded as a violation: %v", v)
 		}
 	})
 }

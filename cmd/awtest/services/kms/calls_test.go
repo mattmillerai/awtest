@@ -96,7 +96,7 @@ func newEnv(t *testing.T, f *fakeKMS) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := KMSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -105,8 +105,8 @@ func TestServiceIsV2Only(t *testing.T) {
 		t.Fatalf("expected 1 service, got %d", len(KMSCalls))
 	}
 	svc := KMSCalls[0]
-	if svc.CallV2 == nil || svc.Call != nil {
-		t.Errorf("want CallV2 set and Call nil, got CallV2=%v Call=%v", svc.CallV2 != nil, svc.Call != nil)
+	if svc.CallV2 == nil {
+		t.Error("want CallV2 set")
 	}
 	if svc.Name != "kms:ListKeys" {
 		t.Errorf("name = %q", svc.Name)
@@ -203,7 +203,7 @@ func TestAccessDeniedNormalized(t *testing.T) {
 	}
 	ctx := newEnv(t, f)
 	svc := KMSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

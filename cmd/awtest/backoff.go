@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 // Backoff constants for exponential retry on throttled requests.
@@ -45,9 +44,9 @@ func calculateBackoff(attempt int) time.Duration {
 // On ErrorThrottle, retries up to backoffMaxRetries times with exponential backoff.
 // All other error categories return immediately without retry.
 // Backoff state is local — no global coordination.
-func scanWithBackoff(ctx context.Context, service types.AWSService, sess *session.Session, debug bool) ([]types.ScanResult, ErrorCategory) {
+func scanWithBackoff(ctx context.Context, service types.AWSService, debug bool) ([]types.ScanResult, ErrorCategory) {
 	for attempt := 0; attempt <= backoffMaxRetries; attempt++ {
-		results, category := safeScan(ctx, service, sess, debug)
+		results, category := safeScan(ctx, service, debug)
 
 		if category != ErrorThrottle {
 			return results, category

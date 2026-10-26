@@ -132,7 +132,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := SQSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -154,7 +154,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(SQSCalls) != 1 || SQSCalls[0].Name != "sqs:ListQueues" {
 		t.Fatalf("unexpected services: %+v", SQSCalls)
 	}
-	if SQSCalls[0].CallV2 == nil || SQSCalls[0].Call != nil {
+	if SQSCalls[0].CallV2 == nil {
 		t.Error("sqs:ListQueues must implement CallV2 only")
 	}
 }

@@ -140,7 +140,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(EKSCalls) != 1 || EKSCalls[0].Name != "eks:ListClusters" {
 		t.Fatalf("unexpected services: %+v", EKSCalls)
 	}
-	if EKSCalls[0].CallV2 == nil || EKSCalls[0].Call != nil {
+	if EKSCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }
@@ -167,7 +167,7 @@ func TestListClustersThroughInvoke(t *testing.T) {
 	regions := types.RegionsFor(ctx)
 
 	svc := EKSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +224,7 @@ func TestFailedDescribeClusterIsSkipped(t *testing.T) {
 	}
 	ctx := newEnv(t, f)
 	svc := EKSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err != nil {
 		t.Fatalf("per-cluster errors must be swallowed, got %v", err)
 	}
@@ -238,7 +238,7 @@ func TestListClustersAccessDeniedNormalized(t *testing.T) {
 	f := &fakeEKS{denyList: map[string]string{"us-east-2": msg}}
 	ctx := newEnv(t, f)
 	svc := EKSCalls[0]
-	_, err := svc.Invoke(ctx, nil)
+	_, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

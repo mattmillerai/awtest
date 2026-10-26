@@ -104,7 +104,7 @@ func newEnv(t *testing.T, mode string) (context.Context, *fakeCodePipeline) {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := CodePipelineCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -116,8 +116,8 @@ func TestServiceIsV2Only(t *testing.T) {
 	if svc.Name != wantName {
 		t.Errorf("name = %q, want %q", svc.Name, wantName)
 	}
-	if svc.CallV2 == nil || svc.Call != nil {
-		t.Errorf("want CallV2 set and Call nil, got CallV2=%v Call=%v", svc.CallV2 != nil, svc.Call != nil)
+	if svc.CallV2 == nil {
+		t.Error("want CallV2 set")
 	}
 }
 
@@ -167,7 +167,7 @@ func TestInvokeEmpty(t *testing.T) {
 func TestAccessDeniedNormalized(t *testing.T) {
 	ctx, _ := newEnv(t, "denied")
 	svc := CodePipelineCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

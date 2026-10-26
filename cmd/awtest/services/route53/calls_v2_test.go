@@ -68,7 +68,7 @@ func run(t *testing.T, ctx context.Context, i int) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := Route53Calls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -77,7 +77,7 @@ func TestServicesAreV2Only(t *testing.T) {
 		t.Fatalf("unexpected services: %+v", Route53Calls)
 	}
 	for _, s := range Route53Calls {
-		if s.CallV2 == nil || s.Call != nil {
+		if s.CallV2 == nil {
 			t.Errorf("%s must implement CallV2 only", s.Name)
 		}
 	}

@@ -117,7 +117,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(ECSCalls) != 1 || ECSCalls[0].Name != "ecs:ListClusters" {
 		t.Fatalf("unexpected services: %+v", ECSCalls)
 	}
-	if ECSCalls[0].CallV2 == nil || ECSCalls[0].Call != nil {
+	if ECSCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }
@@ -138,7 +138,7 @@ func TestListClustersThroughInvoke(t *testing.T) {
 	regions := types.RegionsFor(ctx)
 
 	svc := ECSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +188,7 @@ func TestListClustersAccessDeniedNormalized(t *testing.T) {
 	f := &fakeECS{deny: map[string]string{"us-east-2": msg}}
 	ctx := newEnv(t, f)
 	svc := ECSCalls[0]
-	_, err := svc.Invoke(ctx, nil)
+	_, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

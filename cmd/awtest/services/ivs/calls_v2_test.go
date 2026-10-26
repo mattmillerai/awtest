@@ -72,7 +72,7 @@ func run(t *testing.T, ctx context.Context, i int) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := IvsCalls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -102,7 +102,7 @@ func TestServicesAreV2Only(t *testing.T) {
 		if s.Name != want[i] {
 			t.Errorf("service %d name = %q, want %q", i, s.Name, want[i])
 		}
-		if s.CallV2 == nil || s.Call != nil {
+		if s.CallV2 == nil {
 			t.Errorf("%s must implement CallV2 only", s.Name)
 		}
 	}
@@ -181,7 +181,7 @@ func TestListStreamKeysProcess(t *testing.T) {
 func TestAccessDeniedExceptionMessage(t *testing.T) {
 	f := &fakeIVS{status: 403, header: map[string]string{"X-Amzn-Errortype": "AccessDeniedException"},
 		body: `{"exceptionMessage":"User is not authorized to perform ivs:ListChannels"}`}
-	_, err := IvsCalls[0].Invoke(newCtx(t, f), nil)
+	_, err := IvsCalls[0].Invoke(newCtx(t, f))
 	if err == nil {
 		t.Fatal("expected error")
 	}

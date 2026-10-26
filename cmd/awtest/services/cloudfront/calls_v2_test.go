@@ -84,7 +84,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := CloudFrontCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -101,7 +101,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(CloudFrontCalls) != 1 || CloudFrontCalls[0].Name != "cloudfront:ListDistributions" {
 		t.Fatalf("unexpected services: %+v", CloudFrontCalls)
 	}
-	if CloudFrontCalls[0].CallV2 == nil || CloudFrontCalls[0].Call != nil {
+	if CloudFrontCalls[0].CallV2 == nil {
 		t.Error("cloudfront:ListDistributions must implement CallV2 only")
 	}
 }

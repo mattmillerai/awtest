@@ -211,7 +211,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := EC2Calls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -219,7 +219,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(EC2Calls) != 1 || EC2Calls[0].Name != "ec2:DescribeInstances" {
 		t.Fatalf("EC2Calls = %+v", EC2Calls)
 	}
-	if EC2Calls[0].CallV2 == nil || EC2Calls[0].Call != nil {
+	if EC2Calls[0].CallV2 == nil {
 		t.Errorf("want CallV2 set and Call nil")
 	}
 }
@@ -457,7 +457,7 @@ func TestDescribeInstancesErrorNormalized(t *testing.T) {
 	}
 	ctx := newEnv(t, f)
 	svc := EC2Calls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

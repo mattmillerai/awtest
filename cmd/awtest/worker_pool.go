@@ -8,14 +8,13 @@ import (
 	"time"
 
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 // runWorkerPool executes services concurrently using a fixed worker pool.
 // Returns collected results (sorted by ServiceName) and skipped service names.
 //
 // If concurrency < 1, it defaults to 1 to avoid deadlock from zero workers.
-func runWorkerPool(ctx context.Context, svcs []types.AWSService, sess *session.Session, concurrency int, quiet, debug bool, progress *progressReporter) ([]types.ScanResult, []string) {
+func runWorkerPool(ctx context.Context, svcs []types.AWSService, concurrency int, quiet, debug bool, progress *progressReporter) ([]types.ScanResult, []string) {
 	if concurrency < 1 {
 		concurrency = 1
 	}
@@ -55,7 +54,7 @@ func runWorkerPool(ctx context.Context, svcs []types.AWSService, sess *session.S
 				default:
 				}
 
-				serviceResults, _ := scanService(ctx, service, sess, debug)
+				serviceResults, _ := scanService(ctx, service, debug)
 
 				// Only append if drain hasn't fired
 				if atomic.LoadInt32(&drained) == 0 {

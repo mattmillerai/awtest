@@ -121,7 +121,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := SecretsManagerCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -141,8 +141,8 @@ func TestServiceIsV2Only(t *testing.T) {
 	if svc.Name != wantName {
 		t.Errorf("name = %q, want %q", svc.Name, wantName)
 	}
-	if svc.CallV2 == nil || svc.Call != nil {
-		t.Errorf("want CallV2 set and Call nil, got CallV2=%v Call=%v", svc.CallV2 != nil, svc.Call != nil)
+	if svc.CallV2 == nil {
+		t.Error("want CallV2 set")
 	}
 }
 
@@ -249,7 +249,7 @@ func TestAccessDeniedNormalizedAbortsLoop(t *testing.T) {
 	}
 	ctx := scoped(newEnv(t, f), "us-east-1", "us-west-2", "eu-west-1")
 	svc := SecretsManagerCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

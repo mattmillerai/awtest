@@ -1,14 +1,11 @@
-// Package awsv2 holds the aws-sdk-go v2 scaffolding for the planned v1 -> v2
-// migration.
+// Package awsv2 holds the aws-sdk-go-v2 scaffolding every service relies on:
+// configuration, retry, endpoint and error-normalisation behaviour. main wires
+// it in (see "Migration status" below).
 //
-// main wires this package in (see "Migration status" below) and the pilot
-// services, sts, kms, ecr and s3, and bulk 1 have been migrated. It holds the configuration, retry, endpoint and
-// error-normalisation behaviour that migrated services rely on.
-//
-// Rules for future callers:
+// Rules for callers:
 //
 //   - Load configuration with LoadConfig, once, at startup before any worker
-//     goroutines. It mirrors the three v1 credential paths (static keys, named
+//     goroutines. It implements the three credential paths (static keys, named
 //     profile, default chain) and guarantees that ambient endpoint settings
 //     never survive in the returned aws.Config.
 //   - Services must build clients only via NewClient or NewRegionalClient. v2
@@ -54,118 +51,45 @@
 //
 // # Migration status
 //
-// aws-sdk-go v1 and v2 coexist while services are migrated one at a time:
+// Every service is on aws-sdk-go-v2 and aws-sdk-go v1 has been removed from
+// the module (TestNoV1SDKImports keeps it out):
 //
-//   - types.AWSService has two mutually exclusive implementations: Call (v1,
-//     takes a *session.Session) and CallV2 (v2, takes an aws.Config). Exactly
-//     one is set. Migrated to v2 (CallV2): sts
-//     (sts:GetCallerIdentity, whose Process also makes the IAM
-//     ListAttachedUserPolicies / ListUserPolicies follow-ups with the v2 config
-//     carried in its output), kms (kms:ListKeys, a regional loop over
-//     types.RegionsFor) and ecr (ecr:DescribeRepositories, ecr:ListImages and
-//     ecr:GetRepositoryPolicy, regional loops with manual NextToken
-//     pagination) and s3 (s3:ListBuckets, whose Process also makes the
-//     GetBucketLocation and region-pinned ListObjectsV2 follow-ups, and
-//     s3:GetBucketPolicy, whose Process runs four read-only checks per bucket
-//     in the bucket's own region; both carry the v2 config in their output
-//     and build the per-bucket-region clients with NewRegionalClient). Bulk 1
-//     is migrated too: batch (batch:ListJobs), cloudformation
-//     (cloudformation:ListStacks), codepipeline (codepipeline:ListPipelines),
-//     glacier (glacier:ListVaults) and eventbridge
-//     (eventbridge:ListEventBuses), all single non-paginated calls. Bulk 2 is
-//     migrated as well: appsync (ListGraphqlApis), secretsmanager
-//     (ListSecrets), ses (ListIdentities) and rds (DescribeDBInstances), all
-//     non-paginated regional loops, and cognitoidentity (ListIdentityPools).
-//     Bulk 3 is migrated too: amplify (amplify:ListApps with ListBranches
-//     follow-ups), certificatemanager (acm:ListCertificates) and
-//     cognitouserpools (cognito-idp:ListUserPools), non-paginated regional
-//     loops, plus stepfunctions (states:ListStateMachines) and systemsmanager
-//     (ssm:DescribeParameters), regional loops with manual NextToken
-//     pagination whose failing regions are skipped.
-//     Bulk 4 is migrated too: ecs (ecs:ListClusters with DescribeClusters) and
-//     fargate (ecs:ListFargateTasks, manual NextToken pagination, failing
-//     regions skipped), both on the ecs module; efs
-//     (efs:DescribeFileSystems) and eks (eks:ListClusters with DescribeCluster
-//     follow-ups), non-paginated regional loops; and elasticache
-//     (elasticache:DescribeCacheClusters, manual Marker pagination, failing
-//     regions skipped).
-//     Bulk 5 is migrated too: redshift (redshift:DescribeClusters, manual Marker
-//     pagination, failing regions skipped), config (config:DescribeConfigurationRecorders
-//     with the recorder status and DescribeConfigRules calls) and lambda
-//     (lambda:ListFunctions with GetFunction / GetFunctionConfiguration
-//     follow-ups), regional loops that abort on the first error, plus
-//     cloudtrail (DescribeTrails, ListTrails) and elasticbeanstalk
-//     (DescribeApplications, DescribeEvents), single non-paginated calls.
-//     Bulk 6 is migrated too: glue (ListWorkflows, ListJobs), iot (ListThings,
-//     ListPolicies, ListCertificates), rekognition (ListCollections,
-//     ListStreamProcessors, DescribeProjects) and transcribe
-//     (ListTranscriptionJobs, ListVocabularies, ListLanguageModels), single
-//     non-paginated calls, plus dynamodb (ListTables, ListExports,
-//     ListBackups), non-paginated regional loops that abort on the first error.
-//     Bulk 7 is migrated too: athena, backup, codebuild, codecommit and
-//     codedeploy (list calls, several with batch-get follow-ups), regional
-//     loops that skip failing regions and fail only when nothing was found.
-//     Bulk 8 is migrated too: directconnect (DescribeConnections,
-//     DescribeVirtualInterfaces, DescribeDirectConnectGateways), emr
-//     (ListClusters with DescribeCluster, ListInstanceGroups,
-//     ListSecurityConfigurations), kinesis (ListStreams, ListShards,
-//     ListStreamConsumers), guardduty (ListDetectors, GetFindings, ListFilters)
-//     and macie2 (ListClassificationJobs, ListFindings, DescribeBuckets),
-//     regional loops with manual token pagination that skip failing regions.
-//     Bulk 9 is migrated too: mediaconvert (ListQueues, ListJobs, ListPresets),
-//     neptune (DescribeDBClusters, DescribeDBInstances,
-//     DescribeDBClusterParameterGroups) and sagemaker (ListNotebookInstances,
-//     ListEndpoints, ListModels, ListTrainingJobs), regional loops with manual
-//     token pagination that skip failing regions; opensearch (ListDomainNames
-//     with batched DescribeDomains), whose first failing ListDomainNames ends
-//     the region loop; and organizations (ListAccounts, ListRoots with
-//     ListOrganizationalUnitsForParent, ListPolicies), a global service pinned
-//     to us-east-1.
-//     Bulk 10 is migrated too: securityhub (GetEnabledStandards,
-//     GetFindings, ListEnabledProductsForImport), apigateway (RestApis with
-//     its stage, model, resource and method follow-ups, GetApiKeys,
-//     GetDomainNames) and sns (ListTopics with GetTopicAttributes in each
-//     topic's region), regional loops; and iam (ListUsers, ListRoles,
-//     ListGroups, ListPolicies, with v2 paginators where v1 paginated), global.
-//     Bulk 11 is migrated too: route53 (ListHostedZones, ListHealthChecks,
-//     global, single calls), cloudfront (ListDistributions, one call per scoped
-//     region) and cloudwatch (DescribeAlarms, ListMetrics on the cloudwatch
-//     module, pinned to v1.52.8 because later releases speak CBOR RPC v2, plus
-//     cloudwatchlogs DescribeLogGroups/DescribeLogStreams with paginators).
-//     Bulk 12 is migrated too: ec2 (DescribeInstances with the user-data and
-//     Elastic IP follow-ups, one call per region, NextToken ignored as in v1)
-//     and vpc (DescribeVpcs, DescribeSubnets, DescribeSecurityGroups with
-//     manual NextToken pagination, failing regions skipped), regional loops
-//     that share the ec2 module (pinned to v1.341.0) and no longer mutate a
-//     shared region.
-//     Bulk 13 is migrated too: sqs (ListQueues, a regional loop whose Process
-//     makes ReceiveMessage / GetQueueAttributes / ListDeadLetterSourceQueues
-//     follow-ups pinned to us-east-1 and an EventBridge DescribeRule in
-//     us-west-2), waf (WAF Classic ListWebACLs), ivs (ListChannels,
-//     ListStreams, ListStreamKeys), ivschat (ListRooms) and ivsrealtime
-//     (ListStages), single non-paginated calls.
-//     Every other service is still v1.
-//   - Callers never invoke either field directly; they use
-//     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config
-//     from the context and returns the error normalised with Wrap
-//     ("<code>: <message>"); for a v1 service it calls Call unchanged. A v2
-//     service without a config in the context gets an error, not a panic.
-//   - main builds the v2 aws.Config next to the v1 session with LoadConfig
-//     (same region, credential paths and validated --endpoint-url; replay
-//     mode uses replay.NewConfig, whose Options.Transport confines requests to
-//     the replay server) and derives the scan context with
-//     types.WithAWSConfig, so every scan path (worker pool, all-regions,
-//     safeScan, scanRegion) carries it.
-//   - Error handling shared by both SDKs (classifyAWSError, failureDetail,
-//     utils.HandleAWSError) reads codes through utils.AWSErrorInfo, which
-//     accepts a v1 awserr.Error or a v2 API error (ErrorCode/ErrorMessage see
-//     through *Error). A test cross-checks that classifyAWSError's throttle
-//     codes equal AwtestThrottleCodes.
-//   - discoverRegions (-all-regions) still uses a v1 ec2 client and the v1
-//     session; it has not been migrated.
-//   - The dynamic guards in services and replay tests run every service
-//     through Invoke with both a v1 session and a v2 config built the guarded
-//     way, so a migrated service is covered automatically.
+//   - types.AWSService has one implementation field, CallV2, which takes the
+//     aws.Config. Callers never invoke it directly; they use
+//     types.AWSService.Invoke(ctx), which takes the config from the context
+//     (types.WithAWSConfig) and returns the error normalised with Wrap
+//     ("<code>: <message>"). A service without a config in the context gets
+//     an error, not a panic.
+//   - main builds the one aws.Config with LoadConfig (region, the three
+//     credential paths and the validated --endpoint-url; replay mode uses
+//     replay.NewConfig, whose Options.Transport confines requests to the
+//     replay server) and derives the scan context with types.WithAWSConfig, so
+//     every scan path (worker pool, all-regions, safeScan, scanRegion) carries
+//     it. discoverRegions (-all-regions) builds its ec2 client with
+//     NewRegionalClient from the same config.
+//   - Error handling (classifyAWSError, failureDetail, utils.HandleAWSError)
+//     reads codes through utils.AWSErrorInfo, which accepts any v2 API error
+//     (ErrorCode/ErrorMessage see through *Error). A test cross-checks that
+//     classifyAWSError's throttle codes equal AwtestThrottleCodes.
+//   - Some service modules are pinned below their newest release because
+//     later ones need a newer core than the pinned one or speak a protocol
+//     the replay fixtures cannot answer (cloudwatch v1.52.8, cloudwatchlogs
+//     v1.89.3, ec2 v1.341.0); see go.mod and testdata/golden/README.md.
+//
+// # Guards
+//
+//   - TestNoV2ClientBypass (static, every non-test file) fails on any client
+//     built without NewClient/NewRegionalClient, any config loading outside
+//     this package and any endpoint or HTTP setting set directly.
+//   - TestAllServicesHonorCustomEndpoint and TestAllServicesHonorRegionScope
+//     (services package, dynamic) run every service in AllServices through
+//     Invoke with a config built the guarded way and hostile ambient
+//     AWS_ENDPOINT_URL* settings; they fail if any request leaves the custom
+//     endpoint or is signed for a region outside the scope. Each service needs
+//     a v2EnvSuffix/v2ServiceIDs entry (v2_env_suffix_test.go), and negative
+//     controls prove the harness detects an unguarded client.
+//   - The replay tests run every service through Invoke against the replay
+//     server and fail on any request that reaches http.DefaultTransport.
 //
 // # Residual risk (out of scope)
 //

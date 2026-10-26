@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 // --- calculateBackoff tests ---
@@ -71,10 +71,10 @@ func makeThrottleService(name string, throttleFor int, successResults []types.Sc
 	var callCount int32
 	svc := types.AWSService{
 		Name: name,
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			n := atomic.AddInt32(&callCount, 1)
 			if int(n) <= throttleFor {
-				return nil, awserr.New("Throttling", "rate exceeded", nil)
+				return nil, &smithy.GenericAPIError{Code: "Throttling", Message: "rate exceeded"}
 			}
 			return "ok", nil
 		},
@@ -92,16 +92,16 @@ func TestScanWithBackoffNonThrottleError(t *testing.T) {
 	var callCount int32
 	svc := types.AWSService{
 		Name: "TestServiceErr",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			atomic.AddInt32(&callCount, 1)
-			return nil, awserr.New("InternalServiceError", "something broke", nil)
+			return nil, &smithy.GenericAPIError{Code: "InternalServiceError", Message: "something broke"}
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			return []types.ScanResult{{ServiceName: "TestServiceErr", Error: err}}
 		},
 	}
 
-	_, category := scanWithBackoff(context.Background(), svc, nil, false)
+	_, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorService {
 		t.Errorf("category = %d, want ErrorService (%d)", category, ErrorService)
@@ -115,16 +115,16 @@ func TestScanWithBackoffAccessDenied(t *testing.T) {
 	var callCount int32
 	svc := types.AWSService{
 		Name: "TestDenied",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			atomic.AddInt32(&callCount, 1)
-			return nil, awserr.New("AccessDeniedException", "access denied", nil)
+			return nil, &smithy.GenericAPIError{Code: "AccessDeniedException", Message: "access denied"}
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			return []types.ScanResult{{ServiceName: "TestDenied", Error: err}}
 		},
 	}
 
-	_, category := scanWithBackoff(context.Background(), svc, nil, false)
+	_, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorDenied {
 		t.Errorf("category = %d, want ErrorDenied (%d)", category, ErrorDenied)
@@ -138,7 +138,7 @@ func TestScanWithBackoffSuccess(t *testing.T) {
 	var callCount int32
 	svc := types.AWSService{
 		Name: "TestSuccess",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			atomic.AddInt32(&callCount, 1)
 			return "ok", nil
 		},
@@ -147,7 +147,7 @@ func TestScanWithBackoffSuccess(t *testing.T) {
 		},
 	}
 
-	results, category := scanWithBackoff(context.Background(), svc, nil, false)
+	results, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorNone {
 		t.Errorf("category = %d, want ErrorNone (%d)", category, ErrorNone)
@@ -167,7 +167,7 @@ func TestScanWithBackoffThrottleThenSuccess(t *testing.T) {
 	}
 	svc, callCount := makeThrottleService("TestRetry", 1, successResults)
 
-	results, category := scanWithBackoff(context.Background(), svc, nil, false)
+	results, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorNone {
 		t.Errorf("category = %d, want ErrorNone (%d)", category, ErrorNone)
@@ -187,7 +187,7 @@ func TestScanWithBackoffExhaustedRetries(t *testing.T) {
 	// Throttle forever — should exhaust all retries
 	svc, callCount := makeThrottleService("TestExhausted", 100, nil)
 
-	results, category := scanWithBackoff(context.Background(), svc, nil, false)
+	results, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorThrottle {
 		t.Errorf("category = %d, want ErrorThrottle (%d)", category, ErrorThrottle)
@@ -208,7 +208,7 @@ func TestScanWithBackoffExhaustedRetries(t *testing.T) {
 func TestScanWithBackoffRateLimitedErrorMessage(t *testing.T) {
 	svc, _ := makeThrottleService("TestRateMsg", 100, nil)
 
-	results, _ := scanWithBackoff(context.Background(), svc, nil, false)
+	results, _ := scanWithBackoff(testCtx(), svc, false)
 
 	if len(results) != 1 {
 		t.Fatalf("results count = %d, want 1", len(results))
@@ -226,12 +226,12 @@ func TestScanWithBackoffContextCancellation(t *testing.T) {
 	// Create a service that always throttles
 	svc, _ := makeThrottleService("TestCancel", 100, nil)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(testCtx())
 	// Cancel immediately so the backoff select picks up ctx.Done()
 	cancel()
 
 	start := time.Now()
-	_, category := scanWithBackoff(ctx, svc, nil, false)
+	_, category := scanWithBackoff(ctx, svc, false)
 	elapsed := time.Since(start)
 
 	if category != ErrorThrottle {
@@ -250,7 +250,7 @@ func TestScanWithBackoffTransparentSuccess(t *testing.T) {
 	}
 	svc, _ := makeThrottleService("TestTransparent", 2, successResults)
 
-	results, category := scanWithBackoff(context.Background(), svc, nil, false)
+	results, category := scanWithBackoff(testCtx(), svc, false)
 
 	if category != ErrorNone {
 		t.Errorf("category = %d, want ErrorNone (transparent success)", category)
@@ -292,10 +292,10 @@ func TestWorkerPoolThrottledServiceDoesNotBlockOthers(t *testing.T) {
 	var throttleCount int32
 	throttleSvc := types.AWSService{
 		Name: "ThrottleSvc",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			n := atomic.AddInt32(&throttleCount, 1)
 			if n <= 1 {
-				return nil, awserr.New("Throttling", "rate exceeded", nil)
+				return nil, &smithy.GenericAPIError{Code: "Throttling", Message: "rate exceeded"}
 			}
 			return "ok", nil
 		},
@@ -309,7 +309,7 @@ func TestWorkerPoolThrottledServiceDoesNotBlockOthers(t *testing.T) {
 
 	fastSvc1 := types.AWSService{
 		Name: "FastSvc1",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return "ok", nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -319,7 +319,7 @@ func TestWorkerPoolThrottledServiceDoesNotBlockOthers(t *testing.T) {
 
 	fastSvc2 := types.AWSService{
 		Name: "FastSvc2",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return "ok", nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -328,7 +328,7 @@ func TestWorkerPoolThrottledServiceDoesNotBlockOthers(t *testing.T) {
 	}
 
 	svcs := []types.AWSService{throttleSvc, fastSvc1, fastSvc2}
-	results, skipped := runWorkerPool(context.Background(), svcs, nil, 3, true, false, nil)
+	results, skipped := runWorkerPool(testCtx(), svcs, 3, true, false, nil)
 
 	if len(skipped) != 0 {
 		t.Errorf("skipped = %v, want none", skipped)

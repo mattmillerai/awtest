@@ -9,10 +9,7 @@ import (
 	"strings"
 	"time"
 
-	awsv2cfg "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/logrusorgru/aurora"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/formatters"
@@ -181,63 +178,13 @@ func main() {
 
 	// Check if AWS_PROFILE is set and no parameters were provided
 	awsProfile := os.Getenv("AWS_PROFILE")
-	var sess *session.Session
 
+	// The aws-sdk-go-v2 config is carried in the scan context. Credential
+	// precedence: static keys, then the named profile, then the default chain.
+	var cfgV2 aws.Config
 	if replaySrv != nil {
 		// Replay never consults the profile, shared config or real credentials.
 		awsProfile = ""
-		sess, err = replay.NewSession(replaySrv, *awsRegion)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: creating replay session: %v\n", err)
-			os.Exit(1)
-		}
-	} else if *awsAccessKeyID == "" || *awsSecretAccessKey == "" {
-		if awsProfile != "" {
-			// Use the AWS_PROFILE if set and no access keys are provided
-			sess, err = session.NewSessionWithOptions(session.Options{
-				Profile:           awsProfile,
-				SharedConfigState: session.SharedConfigEnable,
-				Config: aws.Config{
-					Region: aws.String(*awsRegion),
-				},
-			})
-		} else {
-			// Fall back to default shared config if no profile is set
-			sess, err = session.NewSessionWithOptions(session.Options{
-				SharedConfigState: session.SharedConfigEnable,
-				Config: aws.Config{
-					Region: aws.String(*awsRegion),
-				},
-			})
-		}
-		if err != nil {
-			fmt.Println("Failed to create session with shared config: ", err)
-			return
-		}
-	} else {
-		// Check if the access key starts with 'ASIA'
-		if strings.HasPrefix(*awsAccessKeyID, "ASIA") && *awsSessionToken != "" {
-			// Use the session token as well
-			sess, _ = session.NewSession(&aws.Config{
-				Region:      aws.String(*awsRegion),
-				Credentials: credentials.NewStaticCredentials(*awsAccessKeyID, *awsSecretAccessKey, *awsSessionToken),
-			})
-		} else {
-			// If keys are provided, use them to create session without session token
-			sess, _ = session.NewSession(&aws.Config{
-				Region:      aws.String(*awsRegion),
-				Credentials: credentials.NewStaticCredentials(*awsAccessKeyID, *awsSecretAccessKey, ""),
-			})
-		}
-	}
-
-	utils.ApplyEndpoint(sess, endpoint)
-
-	// The aws-sdk-go-v2 config mirrors the v1 session above (same credential
-	// paths, region and --endpoint-url). It is carried in the scan context for
-	// services implementing CallV2; v1 services ignore it.
-	var cfgV2 awsv2cfg.Config
-	if replaySrv != nil {
 		cfgV2, err = replay.NewConfig(replaySrv, *awsRegion)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: creating replay config: %v\n", err)
@@ -273,8 +220,8 @@ func main() {
 		fmt.Println("-----------------------------")
 		fmt.Println("Using the following AWS configuration:")
 
-		// Get credentials from session if they are not provided explicitly
-		creds, err := sess.Config.Credentials.Get()
+		// Get credentials from the config if they are not provided explicitly
+		creds, err := cfgV2.Credentials.Retrieve(context.Background())
 		if err != nil {
 			fmt.Println("Failed to retrieve credentials from session: ", err)
 		} else {
@@ -324,7 +271,7 @@ func main() {
 
 	var regionStats *regionFailures
 	if *allRegions {
-		regions, source := discoverRegions(ctx, sess)
+		regions, source := discoverRegions(ctx, cfgV2)
 		regions = orderRegions(regions, *awsRegion)
 		regionStats = &regionFailures{}
 		ctx = withAllRegions(ctx, &allRegionsConfig{regions: regions, failures: regionStats})
@@ -337,7 +284,7 @@ func main() {
 		utils.SetErrorDedupe(true)
 	}
 
-	results, skippedServices := scanServices(ctx, filteredSvcs, sess, speedResult.Concurrency, *quiet, *debug)
+	results, skippedServices := scanServices(ctx, filteredSvcs, speedResult.Concurrency, *quiet, *debug)
 
 	if regionStats != nil && !*quiet {
 		printRegionFailures(os.Stderr, regionStats, *debug, utils.SuppressedErrorLines())
@@ -394,9 +341,8 @@ func main() {
 	}
 }
 
-// v2Options maps the command-line inputs to awsv2.Options with the same
-// credential rules as the v1 session in main: static keys when both are given
-// (the session token only matters for ASIA keys, which awsv2 enforces), the
+// v2Options maps the command-line inputs to awsv2.Options: static keys when
+// both are given (the session token only matters for ASIA keys, which awsv2 enforces), the
 // named profile otherwise, and the default chain when neither is set.
 func v2Options(region, endpoint, keyID, secret, token, profile string, quiet, debug bool) awsv2.Options {
 	opts := awsv2.Options{Region: region, Endpoint: endpoint, Quiet: quiet, Debug: debug}
@@ -514,7 +460,7 @@ func validateConcurrency(val int) error {
 // scanServices executes service scans and collects results.
 // When concurrency is 1, services run sequentially (Phase 1 behavior).
 // When concurrency > 1, services run concurrently via a worker pool.
-func scanServices(ctx context.Context, svcs []types.AWSService, sess *session.Session, concurrency int, quiet, debug bool) ([]types.ScanResult, []string) {
+func scanServices(ctx context.Context, svcs []types.AWSService, concurrency int, quiet, debug bool) ([]types.ScanResult, []string) {
 	// Sequential mode: preserve Phase 1 behavior exactly
 	if concurrency <= 1 {
 		var results []types.ScanResult
@@ -528,7 +474,7 @@ func scanServices(ctx context.Context, svcs []types.AWSService, sess *session.Se
 				if !quiet {
 					fmt.Fprintf(os.Stderr, "Scanning %s...\n", service.Name)
 				}
-				serviceResults, _ := scanService(ctx, service, sess, debug)
+				serviceResults, _ := scanService(ctx, service, debug)
 				results = append(results, serviceResults...)
 			}
 		}
@@ -539,7 +485,7 @@ func scanServices(ctx context.Context, svcs []types.AWSService, sess *session.Se
 	utils.ConcurrentMode = true
 	progress := newProgressReporter(len(svcs), quiet)
 	progress.Start()
-	results, skipped := runWorkerPool(ctx, svcs, sess, concurrency, quiet, debug, progress)
+	results, skipped := runWorkerPool(ctx, svcs, concurrency, quiet, debug, progress)
 	progress.Stop()
 	utils.FlushOutput()
 	return results, skipped

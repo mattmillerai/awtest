@@ -4,20 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"sort"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/smithy-go"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 func TestOrderRegions(t *testing.T) {
@@ -42,20 +42,28 @@ func TestOrderRegions(t *testing.T) {
 	}
 }
 
-func testSession(t *testing.T, endpoint string) *session.Session {
+// testCtx is context.Background() carrying an empty aws.Config, which
+// types.AWSService.Invoke requires. Fake services ignore the config.
+func testCtx() context.Context {
+	return types.WithAWSConfig(context.Background(), aws.Config{})
+}
+
+// testConfig builds a v2 config with fake static credentials, no retries and
+// endpoint as the explicit endpoint.
+func testConfig(t *testing.T, endpoint string) aws.Config {
 	t.Helper()
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-west-2"),
-		Credentials: credentials.NewStaticCredentials("AKIAFAKEFAKEFAKE", "fake", ""),
-		MaxRetries:  aws.Int(0),
+	cfg, err := awsv2.LoadConfig(context.Background(), awsv2.Options{
+		Region:          "us-west-2",
+		AccessKeyID:     "AKIAFAKEFAKEFAKE",
+		SecretAccessKey: "fake",
+		Endpoint:        endpoint,
+		MaxAttempts:     1,
+		Quiet:           true,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if endpoint != "" {
-		utils.ApplyEndpoint(sess, endpoint)
-	}
-	return sess
+	return cfg
 }
 
 const describeRegionsXML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -92,7 +100,7 @@ func TestDiscoverRegions(t *testing.T) {
 				_, _ = w.Write([]byte(tt.body))
 			}))
 			defer srv.Close()
-			got, source := discoverRegions(context.Background(), testSession(t, srv.URL))
+			got, source := discoverRegions(testCtx(), testConfig(t, srv.URL))
 			if !reflect.DeepEqual(got, tt.wantRegion) {
 				t.Errorf("regions = %v, want %v", got, tt.wantRegion)
 			}
@@ -105,13 +113,53 @@ func TestDiscoverRegions(t *testing.T) {
 	t.Run("fallback is a copy", func(t *testing.T) {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(403) }))
 		defer srv.Close()
-		got, _ := discoverRegions(context.Background(), testSession(t, srv.URL))
+		got, _ := discoverRegions(testCtx(), testConfig(t, srv.URL))
 		orig := types.DefaultEnabledRegions[0]
 		got[0] = "mutated"
 		if types.DefaultEnabledRegions[0] != orig {
 			t.Error("fallback aliases types.DefaultEnabledRegions")
 		}
 	})
+}
+
+// discoverRegions makes exactly one read-only ec2:DescribeRegions call, signed
+// for the config's region, against the config's explicit endpoint (ambient
+// AWS_ENDPOINT_URL* settings must not redirect it) and without an AllRegions
+// filter, so opt-in regions the account has not enabled are not returned.
+func TestDiscoverRegionsRequest(t *testing.T) {
+	t.Setenv("AWS_ENDPOINT_URL", "http://ambient-endpoint.invalid:9")
+	t.Setenv("AWS_ENDPOINT_URL_EC2", "http://ambient-endpoint.invalid:9")
+
+	var mu sync.Mutex
+	var bodies, auths []string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		mu.Lock()
+		bodies = append(bodies, string(b))
+		auths = append(auths, r.Header.Get("Authorization"))
+		mu.Unlock()
+		_, _ = w.Write([]byte(fmt.Sprintf(describeRegionsXML, regionItem("us-west-2"))))
+	}))
+	defer srv.Close()
+
+	got, source := discoverRegions(testCtx(), testConfig(t, srv.URL))
+	if !reflect.DeepEqual(got, []string{"us-west-2"}) || source != regionSourceDescribe {
+		t.Fatalf("got %v from %q", got, source)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if len(bodies) != 1 {
+		t.Fatalf("requests = %d, want exactly 1", len(bodies))
+	}
+	if !strings.Contains(bodies[0], "Action=DescribeRegions") {
+		t.Errorf("body %q is not a DescribeRegions call", bodies[0])
+	}
+	if strings.Contains(bodies[0], "AllRegions") {
+		t.Errorf("body %q sets AllRegions; only enabled regions may be discovered", bodies[0])
+	}
+	if !strings.Contains(auths[0], "/us-west-2/ec2/aws4_request") {
+		t.Errorf("request not signed for the config region: %q", auths[0])
+	}
 }
 
 // regionalFake loops over types.RegionsFor(ctx) like real services do. fail
@@ -125,7 +173,7 @@ type regionalFake struct {
 func (f *regionalFake) service(name string) types.AWSService {
 	return types.AWSService{
 		Name: name,
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var out []string
 			for _, region := range types.RegionsFor(ctx) {
 				f.mu.Lock()
@@ -169,10 +217,10 @@ func newCfg(regions ...string) (*allRegionsConfig, *regionFailures) {
 func TestScanServiceNoConfigMatchesScanWithBackoff(t *testing.T) {
 	fake := &regionalFake{}
 	svc := fake.service("Fake")
-	ctx := context.Background()
+	ctx := testCtx()
 
-	want, wantCat := scanWithBackoff(ctx, svc, nil, false)
-	got, gotCat := scanService(ctx, svc, nil, false)
+	want, wantCat := scanWithBackoff(ctx, svc, false)
+	got, gotCat := scanService(ctx, svc, false)
 	if !reflect.DeepEqual(resourceNames(got), resourceNames(want)) || gotCat != wantCat {
 		t.Errorf("got %v/%v, want %v/%v", resourceNames(got), gotCat, resourceNames(want), wantCat)
 	}
@@ -186,7 +234,7 @@ func TestScanServiceGlobalRunsOnce(t *testing.T) {
 	calls := 0
 	svc := types.AWSService{
 		Name: "Global",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			mu.Lock()
 			calls++
 			mu.Unlock()
@@ -197,7 +245,7 @@ func TestScanServiceGlobalRunsOnce(t *testing.T) {
 		},
 	}
 	cfg, f := newCfg("eu-west-1", "us-east-1", "ap-south-1")
-	got, cat := scanService(withAllRegions(context.Background(), cfg), svc, nil, false)
+	got, cat := scanService(withAllRegions(testCtx(), cfg), svc, false)
 	if calls != 1 || len(got) != 1 || cat != ErrorNone {
 		t.Errorf("calls=%d results=%d cat=%v, want 1/1/none", calls, len(got), cat)
 	}
@@ -210,7 +258,7 @@ func TestScanServiceRegionalRunsPerRegion(t *testing.T) {
 	fake := &regionalFake{}
 	regions := []string{"eu-west-1", "us-east-1", "ap-south-1"}
 	cfg, f := newCfg(regions...)
-	got, cat := scanService(withAllRegions(context.Background(), cfg), fake.service("Fake"), nil, false)
+	got, cat := scanService(withAllRegions(testCtx(), cfg), fake.service("Fake"), false)
 	if !reflect.DeepEqual(resourceNames(got), regions) {
 		t.Errorf("results %v, want %v (primary first)", resourceNames(got), regions)
 	}
@@ -227,10 +275,10 @@ func TestScanServiceRegionalRunsPerRegion(t *testing.T) {
 
 func TestScanServiceRegionFailureIsolated(t *testing.T) {
 	fake := &regionalFake{fail: map[string]func() error{
-		"ap-south-1": func() error { return awserr.New("AuthFailure", "not enabled", nil) },
+		"ap-south-1": func() error { return &smithy.GenericAPIError{Code: "AuthFailure", Message: "not enabled"} },
 	}}
 	cfg, f := newCfg("us-west-2", "ap-south-1", "eu-west-1")
-	got, cat := scanService(withAllRegions(context.Background(), cfg), fake.service("Fake"), nil, false)
+	got, cat := scanService(withAllRegions(testCtx(), cfg), fake.service("Fake"), false)
 	if want := []string{"us-west-2", "eu-west-1"}; !reflect.DeepEqual(resourceNames(got), want) {
 		t.Errorf("results %v, want %v", resourceNames(got), want)
 	}
@@ -256,7 +304,7 @@ func TestScanServicePanicInLaterRegionRecovered(t *testing.T) {
 		"eu-west-1": func() error { panic("secret-credential-value") },
 	}}
 	cfg, f := newCfg("us-west-2", "eu-west-1", "us-east-1")
-	got, _ := scanService(withAllRegions(context.Background(), cfg), fake.service("Fake"), nil, false)
+	got, _ := scanService(withAllRegions(testCtx(), cfg), fake.service("Fake"), false)
 	if want := []string{"us-west-2", "us-east-1"}; !reflect.DeepEqual(resourceNames(got), want) {
 		t.Errorf("results %v, want %v", resourceNames(got), want)
 	}
@@ -267,12 +315,12 @@ func TestScanServicePanicInLaterRegionRecovered(t *testing.T) {
 }
 
 func TestScanServiceContextCancelStopsEarly(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(testCtx())
 	fake := &regionalFake{fail: map[string]func() error{
 		"us-east-1": func() error { cancel(); return nil },
 	}}
 	cfg, f := newCfg("us-west-2", "us-east-1", "eu-west-1", "ap-south-1")
-	got, _ := scanService(withAllRegions(ctx, cfg), fake.service("Fake"), nil, false)
+	got, _ := scanService(withAllRegions(ctx, cfg), fake.service("Fake"), false)
 	sort.Strings(fake.seen)
 	if want := []string{"us-east-1", "us-west-2"}; !reflect.DeepEqual(fake.seen, want) {
 		t.Errorf("seen %v, want %v", fake.seen, want)
@@ -295,14 +343,14 @@ func TestScanServiceThrottleRetriedInLaterRegion(t *testing.T) {
 		"eu-west-1": func() error {
 			attempts++
 			if attempts == 1 {
-				return awserr.New("Throttling", "slow down", nil)
+				return &smithy.GenericAPIError{Code: "Throttling", Message: "slow down"}
 			}
 			return nil
 		},
 	}}
 	cfg, f := newCfg("us-west-2", "eu-west-1")
 	start := time.Now()
-	got, cat := scanService(withAllRegions(context.Background(), cfg), fake.service("Fake"), nil, false)
+	got, cat := scanService(withAllRegions(testCtx(), cfg), fake.service("Fake"), false)
 	if attempts != 2 || len(got) != 2 || cat != ErrorNone {
 		t.Errorf("attempts=%d results=%d cat=%v", attempts, len(got), cat)
 	}
@@ -315,7 +363,7 @@ func TestScanServiceThrottleRetriedInLaterRegion(t *testing.T) {
 }
 
 func TestThrottleClassificationUsedForRegionErrors(t *testing.T) {
-	if classifyAWSError(awserr.New("Throttling", "x", nil)) != ErrorThrottle {
+	if classifyAWSError(&smithy.GenericAPIError{Code: "Throttling", Message: "x"}) != ErrorThrottle {
 		t.Error("Throttling must classify as throttle")
 	}
 	if classifyAWSError(errors.New("plain")) != ErrorService {
@@ -329,13 +377,13 @@ func TestRunWorkerPoolAllRegionsRace(t *testing.T) {
 	var svcs []types.AWSService
 	for i := 0; i < 12; i++ {
 		fake := &regionalFake{fail: map[string]func() error{
-			"af-south-1": func() error { return awserr.New("AuthFailure", "x", nil) },
+			"af-south-1": func() error { return &smithy.GenericAPIError{Code: "AuthFailure", Message: "x"} },
 		}}
 		svcs = append(svcs, fake.service(fmt.Sprintf("svc-%02d", i)))
 	}
 	svcs = append(svcs, mockService("global", 0))
 
-	results, skipped := runWorkerPool(withAllRegions(context.Background(), cfg), svcs, nil, 6, true, false, nil)
+	results, skipped := runWorkerPool(withAllRegions(testCtx(), cfg), svcs, 6, true, false, nil)
 	if len(skipped) != 0 {
 		t.Errorf("skipped = %v", skipped)
 	}

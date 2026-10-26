@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
@@ -26,7 +25,7 @@ func classifyAWSError(err error) ErrorCategory {
 		return ErrorNone
 	}
 
-	// Both SDKs: an aws-sdk-go v1 awserr.Error or an aws-sdk-go-v2 API error.
+	// An aws-sdk-go-v2 API error (smithy.APIError), possibly wrapped.
 	// The throttle codes must stay in sync with awsv2.AwtestThrottleCodes.
 	if code, _, ok := utils.AWSErrorInfo(err); ok {
 		switch code {
@@ -44,7 +43,7 @@ func classifyAWSError(err error) ErrorCategory {
 }
 
 // safeScan wraps service execution with panic recovery and error classification.
-func safeScan(ctx context.Context, service types.AWSService, sess *session.Session, debug bool) (results []types.ScanResult, category ErrorCategory) {
+func safeScan(ctx context.Context, service types.AWSService, debug bool) (results []types.ScanResult, category ErrorCategory) {
 	defer func() {
 		if r := recover(); r != nil {
 			// DO NOT include stack trace or panic value details that might contain credentials
@@ -58,7 +57,7 @@ func safeScan(ctx context.Context, service types.AWSService, sess *session.Sessi
 		}
 	}()
 
-	output, err := service.Invoke(ctx, sess)
+	output, err := service.Invoke(ctx)
 	serviceResults := service.Process(output, err, debug)
 
 	if err != nil {

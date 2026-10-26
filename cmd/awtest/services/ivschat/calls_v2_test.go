@@ -70,7 +70,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := IvsChatCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -78,7 +78,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(IvsChatCalls) != 1 || IvsChatCalls[0].Name != "ivsChat:ListRooms" {
 		t.Fatalf("unexpected services: %+v", IvsChatCalls)
 	}
-	if IvsChatCalls[0].CallV2 == nil || IvsChatCalls[0].Call != nil {
+	if IvsChatCalls[0].CallV2 == nil {
 		t.Error("ivsChat:ListRooms must implement CallV2 only")
 	}
 }

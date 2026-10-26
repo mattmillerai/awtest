@@ -2,16 +2,25 @@
 package SERVICENAME
 
 import (
+	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
+	"strings"
+	"sync"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/AWSSDKPACKAGE"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	AWSSDKPACKAGEtypes "github.com/aws/aws-sdk-go-v2/service/AWSSDKPACKAGE/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
+	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
 // NOTE: `make test` runs with -race flag by default.
 // Race conditions in tests will be caught automatically.
-// Services must NOT import sync or sync/atomic.
+// Services must NOT import sync or sync/atomic (this test file may: it drives a fake server).
 
 // TODO: Replace DISPLAYNAME with PascalCase service name (e.g., CertificateManager)
 // TODO: Replace APIMETHOD with the API method name (e.g., ListCertificates)
@@ -28,11 +37,11 @@ func TestDISPLAYNAME_APIMETHOD_Process(t *testing.T) {
 		wantResourceName string
 	}{
 		{
-			// TODO: Replace RESULTTYPE with the SDK type for response items
+			// TODO: Replace RESULTTYPE with the SDK type for response items (a value, not a pointer)
 			// TODO: Replace NAMEFIELD with the field used for resource name
 			// TODO: Populate the struct with realistic test data
 			name: "successful response with results",
-			output: []*AWSSDKPACKAGE.RESULTTYPE{
+			output: []AWSSDKPACKAGEtypes.RESULTTYPE{
 				{
 					NAMEFIELD: aws.String("my-resource"),
 				},
@@ -49,7 +58,7 @@ func TestDISPLAYNAME_APIMETHOD_Process(t *testing.T) {
 		},
 		{
 			name:    "empty results",
-			output:  []*AWSSDKPACKAGE.RESULTTYPE{},
+			output:  []AWSSDKPACKAGEtypes.RESULTTYPE{},
 			wantLen: 0,
 		},
 		{
@@ -101,4 +110,119 @@ func TestDISPLAYNAME_APIMETHOD_Process(t *testing.T) {
 			}
 		})
 	}
+}
+
+// fakeServer is an httptest server standing in for the service. It records the
+// SigV4 signing region of every request so the test can prove the region loop
+// and the explicit endpoint are honoured.
+//
+// TODO: Adapt the response to the service's wire protocol:
+//   - JSON (X-Amz-Target, e.g. acm, sfn, dynamodb): Content-Type
+//     application/x-amz-json-1.1 (or 1.0 -- check the SDK's serializers.go) and a JSON body
+//   - Query/EC2 (e.g. sts, iam, rds): Content-Type text/xml and an XML body
+//   - REST JSON/XML (e.g. lambda, s3): the response body in the shape of the SDK's deserializers.go
+//
+// Errors use the protocol's error shape, e.g. JSON: {"__type":"AccessDeniedException","message":"..."}
+type fakeServer struct {
+	mu      sync.Mutex
+	regions []string
+	deny    bool
+}
+
+func (f *fakeServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	_, _ = io.Copy(io.Discard, r.Body)
+	// Credential=<key>/<date>/<region>/<signing name>/aws4_request
+	if parts := strings.Split(r.Header.Get("Authorization"), "Credential="); len(parts) == 2 {
+		if scope := strings.Split(strings.SplitN(parts[1], ",", 2)[0], "/"); len(scope) == 5 {
+			f.mu.Lock()
+			f.regions = append(f.regions, scope[2])
+			f.mu.Unlock()
+		}
+	}
+	w.Header().Set("Content-Type", "application/x-amz-json-1.1")
+	if f.deny {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(w, `{"__type":"AccessDeniedException","message":"User is not authorized"}`)
+		return
+	}
+	// TODO: Replace RESPONSEFIELD and the item with a realistic response body
+	_, _ = io.WriteString(w, `{"RESPONSEFIELD":[{"NAMEFIELD":"my-resource"}]}`)
+}
+
+// newCtx returns a context carrying an aws.Config built the same way main does
+// (awsv2.LoadConfig) but pointed at the fake server. Ambient endpoint settings
+// are set to an unreachable host to prove the service ignores them.
+func newCtx(t *testing.T, f *fakeServer) context.Context {
+	t.Helper()
+	srv := httptest.NewServer(f)
+	t.Cleanup(srv.Close)
+
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("AWS_EC2_METADATA_DISABLED", "true")
+	for _, k := range []string{"AWS_PROFILE", "AWS_DEFAULT_PROFILE", "AWS_SHARED_CREDENTIALS_FILE", "AWS_CONFIG_FILE", "AWS_REGION", "AWS_DEFAULT_REGION"} {
+		t.Setenv(k, "")
+	}
+	const unreachable = "http://ambient-endpoint.invalid:9"
+	t.Setenv("AWS_ENDPOINT_URL", unreachable)
+	// TODO: Replace AWSENVSUFFIX with the service's AWS_ENDPOINT_URL_<SUFFIX> part
+	// (the upper-cased ServiceID from the SDK's api_client.go, spaces -> '_': e.g. ACM, SFN).
+	t.Setenv("AWS_ENDPOINT_URL_AWSENVSUFFIX", unreachable)
+
+	cfg, err := awsv2.LoadConfig(context.Background(), awsv2.Options{
+		Region:          "us-west-2",
+		AccessKeyID:     "AKIAFAKEFAKEFAKE",
+		SecretAccessKey: "fake",
+		Endpoint:        srv.URL,
+		HTTPClient:      srv.Client(), // allowed in tests only
+		MaxAttempts:     1,
+		Quiet:           true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return types.WithAWSConfig(context.Background(), cfg)
+}
+
+// Drives the service through Invoke exactly as the scan does: the config comes
+// from the context and errors are normalised to "<code>: <message>".
+func TestDISPLAYNAME_APIMETHOD_Invoke(t *testing.T) {
+	svc := SERVICECalls[0]
+	if svc.CallV2 == nil {
+		t.Fatal("want CallV2 set")
+	}
+
+	t.Run("regional loop and resources", func(t *testing.T) {
+		f := &fakeServer{}
+		ctx, _ := types.WithRegionScope(newCtx(t, f), []string{"us-east-1", "eu-west-1"})
+		out, err := svc.Invoke(ctx)
+		results := svc.Process(out, err, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// TODO: Global services make one call: drop the region loop and adjust this.
+		if want := []string{"us-east-1", "eu-west-1"}; !reflect.DeepEqual(f.regions, want) {
+			t.Errorf("signing regions = %v, want %v", f.regions, want)
+		}
+		if len(results) != 2 || results[0].ResourceName != "my-resource" {
+			t.Errorf("results = %+v", results)
+		}
+	})
+
+	t.Run("error is normalised", func(t *testing.T) {
+		f := &fakeServer{deny: true}
+		out, err := svc.Invoke(newCtx(t, f))
+		if err == nil || err.Error() != "AccessDeniedException: User is not authorized" {
+			t.Fatalf("err = %v, want %q", err, "AccessDeniedException: User is not authorized")
+		}
+		results := svc.Process(out, err, false)
+		if len(results) != 1 || results[0].Error == nil {
+			t.Errorf("results = %+v", results)
+		}
+	})
+
+	t.Run("missing config is an error, not a panic", func(t *testing.T) {
+		if _, err := svc.Invoke(context.Background()); err == nil {
+			t.Error("expected an error without an aws.Config in the context")
+		}
+	})
 }

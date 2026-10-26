@@ -9,7 +9,7 @@ import (
 
 func TestServicesAreV2Only(t *testing.T) {
 	for i, svc := range CodeBuildCalls {
-		if svc.CallV2 == nil || svc.Call != nil {
+		if svc.CallV2 == nil {
 			t.Errorf("service %d %s: want CallV2 set and Call nil", i, svc.Name)
 		}
 	}

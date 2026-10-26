@@ -13,9 +13,9 @@ import (
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
-// Test-only aws-sdk-go-v2 services. There are no migrated services yet, so
-// these stand in for one to prove that the dynamic guards (endpoint and region
-// scope) work for CallV2 services and detect a deliberately unguarded one.
+// Test-only aws-sdk-go-v2 services. They prove that the dynamic guards
+// (endpoint and region scope) work for CallV2 services and detect a
+// deliberately unguarded one.
 
 // syntheticV2Service is a well-behaved v2 service: one sts:GetCallerIdentity
 // per region of the scan scope, clients built only with NewRegionalClient.
@@ -54,14 +54,12 @@ func syntheticV2Call(newClient func(aws.Config, string) *sts.Client) func(contex
 	}
 }
 
-// guardTarget is a service to run through the dynamic guards. The v1 session
-// and the v2 config are both prepared for every target; Invoke picks the one
-// the service implements, so a service that migrates is covered automatically.
+// guardTarget is a service to run through the dynamic guards.
 type guardTarget struct {
 	svc types.AWSService
 	// envSuffixes are the <SVC> parts of AWS_ENDPOINT_URL_<SVC> to point at an
 	// unreachable host for this service (v2 clients resolve it themselves).
-	// Set from v2EnvSuffix for CallV2 services; empty for v1 services.
+	// Set from the v2EnvSuffix table.
 	envSuffixes []string
 }
 
@@ -93,10 +91,6 @@ func guardTargets(t *testing.T) []guardTarget {
 	t.Helper()
 	var out []guardTarget
 	for _, svc := range AllServices() {
-		if svc.CallV2 == nil {
-			out = append(out, guardTarget{svc: svc})
-			continue
-		}
 		out = append(out, v2Target(t, svc))
 	}
 	return append(out, v2Target(t, syntheticV2Service()))
@@ -110,9 +104,6 @@ func setAmbientEndpoints(t *testing.T, targets []guardTarget) {
 	const unreachable = "http://ambient-endpoint.invalid:9"
 	t.Setenv("AWS_ENDPOINT_URL", unreachable)
 	for _, tg := range targets {
-		if tg.svc.CallV2 == nil {
-			continue
-		}
 		for _, s := range tg.envSuffixes {
 			t.Setenv("AWS_ENDPOINT_URL_"+s, unreachable)
 		}

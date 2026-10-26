@@ -219,7 +219,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := VpcCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -237,7 +237,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(VpcCalls) != 1 || VpcCalls[0].Name != "ec2:DescribeVpcs" {
 		t.Fatalf("VpcCalls = %+v", VpcCalls)
 	}
-	if VpcCalls[0].CallV2 == nil || VpcCalls[0].Call != nil {
+	if VpcCalls[0].CallV2 == nil {
 		t.Errorf("want CallV2 set and Call nil")
 	}
 }
@@ -405,7 +405,7 @@ func TestAllRegionsFailingReturnsLastError(t *testing.T) {
 	f := &fakeVPC{fail: map[string]int{"us-east-1/DescribeVpcs": 0, "eu-west-1/DescribeVpcs": 0}}
 	ctx := scoped(newEnv(t, f), "us-east-1", "eu-west-1")
 	svc := VpcCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

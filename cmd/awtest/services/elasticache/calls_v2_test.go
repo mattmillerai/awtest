@@ -146,7 +146,7 @@ func newEnv(t *testing.T, f *fakeElastiCache) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := ElastiCacheCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -162,7 +162,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(ElastiCacheCalls) != 1 || ElastiCacheCalls[0].Name != "elasticache:DescribeCacheClusters" {
 		t.Fatalf("unexpected services: %+v", ElastiCacheCalls)
 	}
-	if ElastiCacheCalls[0].CallV2 == nil || ElastiCacheCalls[0].Call != nil {
+	if ElastiCacheCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }

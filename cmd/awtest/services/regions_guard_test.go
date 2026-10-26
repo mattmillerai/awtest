@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 // regionsAllowlist lists non-test files that may reference types.Regions
@@ -135,11 +134,8 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 	defer srv.Close()
 	guard.allowedHost = strings.TrimPrefix(srv.URL, "http://")
 
-	sess := fakeStaticSession(t)
-	utils.ApplyEndpoint(sess, srv.URL)
-
 	scoped := []string{"eu-west-1", "ap-south-1", "af-south-1"}
-	allowed := map[string]bool{"us-west-2": true} // the session's default region
+	allowed := map[string]bool{"us-west-2": true} // the config's default region
 	for _, r := range scoped {
 		allowed[r] = true
 	}
@@ -166,7 +162,7 @@ func TestAllServicesHonorRegionScope(t *testing.T) {
 			}()
 			ctx, cancel := context.WithTimeout(types.WithAWSConfig(ctx, cfg), 15*time.Second)
 			defer cancel()
-			_, _ = svc.Invoke(ctx, sess)
+			_, _ = svc.Invoke(ctx)
 		}()
 		if !scope.Used() {
 			continue

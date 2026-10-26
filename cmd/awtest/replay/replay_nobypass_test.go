@@ -48,10 +48,6 @@ func TestEveryServiceStaysOnReplayServer(t *testing.T) {
 	t.Cleanup(func() { http.DefaultTransport = orig })
 
 	srv := startSample(t)
-	sess, err := replay.NewSession(srv, "us-west-2")
-	if err != nil {
-		t.Fatal(err)
-	}
 	cfg := newReplayConfig(t, srv)
 
 	for _, svc := range services.AllServices() {
@@ -63,7 +59,7 @@ func TestEveryServiceStaysOnReplayServer(t *testing.T) {
 			}()
 			ctx, cancel := context.WithTimeout(types.WithAWSConfig(context.Background(), cfg), 30*time.Second)
 			defer cancel()
-			out, err := svc.Invoke(ctx, sess)
+			out, err := svc.Invoke(ctx)
 			svc.Process(out, err, false)
 		}()
 	}
@@ -80,10 +76,6 @@ func TestEveryServiceStaysOnReplayServer(t *testing.T) {
 
 func TestSampleProducesResults(t *testing.T) {
 	srv := startSample(t)
-	sess, err := replay.NewSession(srv, "us-west-2")
-	if err != nil {
-		t.Fatal(err)
-	}
 	cfg := newReplayConfig(t, srv)
 	want := map[string]bool{
 		"sts:GetCallerIdentity": true, "s3:ListBuckets": true, "s3:GetBucketPolicy": true,
@@ -96,7 +88,7 @@ func TestSampleProducesResults(t *testing.T) {
 			continue
 		}
 		found[svc.Name] = true
-		out, err := svc.Invoke(types.WithAWSConfig(context.Background(), cfg), sess)
+		out, err := svc.Invoke(types.WithAWSConfig(context.Background(), cfg))
 		results := svc.Process(out, err, false)
 		if len(results) == 0 {
 			t.Errorf("%s: no results", svc.Name)

@@ -150,7 +150,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := LambdaCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -158,7 +158,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(LambdaCalls) != 1 || LambdaCalls[0].Name != "lambda:ListFunctions" {
 		t.Fatalf("unexpected services: %+v", LambdaCalls)
 	}
-	if LambdaCalls[0].CallV2 == nil || LambdaCalls[0].Call != nil {
+	if LambdaCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }

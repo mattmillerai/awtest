@@ -202,7 +202,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context, i int) ([]types.ScanResult, error) {
 	svc := ECRCalls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -229,8 +229,8 @@ func TestServicesAreV2Only(t *testing.T) {
 		if svc.Name != want[i] {
 			t.Errorf("service %d name = %q, want %q", i, svc.Name, want[i])
 		}
-		if svc.CallV2 == nil || svc.Call != nil {
-			t.Errorf("%s: want CallV2 set and Call nil, got CallV2=%v Call=%v", svc.Name, svc.CallV2 != nil, svc.Call != nil)
+		if svc.CallV2 == nil {
+			t.Errorf("%s: want CallV2 set", svc.Name)
 		}
 	}
 }
@@ -309,7 +309,7 @@ func TestPolicyOutputCarriesText(t *testing.T) {
 		policies: map[string]string{"us-west-2/a": `{"Version":"2012-10-17"}`},
 	}
 	ctx := scoped(newEnv(t, f), "us-west-2")
-	out, err := ECRCalls[svcPolicy].Invoke(ctx, nil)
+	out, err := ECRCalls[svcPolicy].Invoke(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -447,7 +447,7 @@ func TestListImagesTagAndDigest(t *testing.T) {
 		images: map[string][]string{"us-west-2/a": {"latest"}},
 	}
 	ctx := scoped(newEnv(t, f), "us-west-2")
-	out, err := ECRCalls[svcImages].Invoke(ctx, nil)
+	out, err := ECRCalls[svcImages].Invoke(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -502,7 +502,7 @@ func TestDescribeRepositoriesAccessDeniedNormalized(t *testing.T) {
 			}
 			ctx := newEnv(t, f)
 			svc := ECRCalls[i]
-			out, err := svc.Invoke(ctx, nil)
+			out, err := svc.Invoke(ctx)
 			if err == nil {
 				t.Fatal("expected error")
 			}

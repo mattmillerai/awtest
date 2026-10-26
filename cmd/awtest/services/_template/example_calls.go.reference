@@ -1,6 +1,7 @@
 // REFERENCE IMPLEMENTATION: CertificateManager (ACM)
 // This is an annotated copy of cmd/awtest/services/certificatemanager/calls.go
-// showing how each section of the template maps to a real service.
+// showing how each section of the template maps to a real service
+// (aws-sdk-go-v2).
 //
 // This file uses .reference extension so it is NOT compiled by Go.
 
@@ -12,23 +13,26 @@ package certificatemanager
 // The worker pool (worker_pool.go) executes services concurrently at --speed=fast/insane.
 // The safeScan wrapper handles panic recovery and error classification automatically.
 // DO NOT import "sync", "sync/atomic", or spawn goroutines in this file.
-// DO NOT use global mutable state. Each Call() invocation must be self-contained.
+// DO NOT use global mutable state. Each CallV2 invocation must be self-contained.
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	// Standard project imports - same for every service
+	// TEMPLATE: aws.ToString & friends, and the aws.Config type of CallV2
+	"github.com/aws/aws-sdk-go-v2/aws"
+
+	// TEMPLATE: AWSSDKPACKAGE = "acm" (and AWSSDKPACKAGEtypes = acmtypes)
+	// Find your service's package at: github.com/aws/aws-sdk-go-v2/service/
+	"github.com/aws/aws-sdk-go-v2/service/acm"
+	acmtypes "github.com/aws/aws-sdk-go-v2/service/acm/types"
+
+	// Standard project imports - same for every service. awsv2 is the only
+	// sanctioned way to build a client.
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-
-	// TEMPLATE: AWSSDKPACKAGE = "acm"
-	// Find your service's package at: github.com/aws/aws-sdk-go/service/
-	"github.com/aws/aws-sdk-go/service/acm"
 )
 
 // TEMPLATE: var SERVICECalls -> var CertificateManagerCalls
@@ -39,21 +43,23 @@ var CertificateManagerCalls = []types.AWSService{
 		// Here: "acm:ListCertificates"
 		Name: "acm:ListCertificates",
 
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			// TEMPLATE: var allResults []*AWSSDKPACKAGE.RESULTTYPE
-			// Here: []*acm.CertificateSummary
-			var allCertificates []*acm.CertificateSummary
+		// CallV2 receives the aws.Config carried in the context. Callers run it
+		// through types.AWSService.Invoke, which normalises the error to
+		// "<code>: <message>".
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			// TEMPLATE: var allResults []AWSSDKPACKAGEtypes.RESULTTYPE
+			// Here: []acmtypes.CertificateSummary (v2 returns values, not pointers)
+			var allCertificates []acmtypes.CertificateSummary
 
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
+				// TEMPLATE: awsv2.NewRegionalClient(cfg, region, AWSSDKPACKAGE.NewFromConfig)
+				// Here: acm.NewFromConfig is passed as a function value, not called.
+				svc := awsv2.NewRegionalClient(cfg, region, acm.NewFromConfig)
 
-				// TEMPLATE: svc := AWSSDKPACKAGE.New(sess)
-				// Here: acm.New(sess)
-				svc := acm.New(sess)
-
-				// TEMPLATE: svc.APIMethodWithContext(ctx, &AWSSDKPACKAGE.APIMETHODINPUT{})
-				// Here: svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})
-				output, err := svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})
+				// TEMPLATE: svc.APIMETHOD(ctx, &AWSSDKPACKAGE.APIMETHODINPUT{})
+				// Here: svc.ListCertificates(ctx, &acm.ListCertificatesInput{})
+				// (use acm.NewListCertificatesPaginator when every page is wanted)
+				output, err := svc.ListCertificates(ctx, &acm.ListCertificatesInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -82,27 +88,20 @@ var CertificateManagerCalls = []types.AWSService{
 				}
 			}
 
-			// TEMPLATE: output.([]*AWSSDKPACKAGE.RESULTTYPE)
-			// Here: output.([]*acm.CertificateSummary)
-			if certs, ok := output.([]*acm.CertificateSummary); ok {
+			// TEMPLATE: output.([]AWSSDKPACKAGEtypes.RESULTTYPE)
+			// Here: output.([]acmtypes.CertificateSummary)
+			if certs, ok := output.([]acmtypes.CertificateSummary); ok {
 				for _, cert := range certs {
-					// Nil-safe access for pointer fields
+					// Nil-safe access for pointer fields: aws.ToString
 					// TEMPLATE: item.NAMEFIELD
 					// Here: cert.DomainName
-					domainName := ""
-					if cert.DomainName != nil {
-						domainName = *cert.DomainName
-					}
-
-					certArn := ""
-					if cert.CertificateArn != nil {
-						certArn = *cert.CertificateArn
-					}
+					domainName := aws.ToString(cert.DomainName)
+					certArn := aws.ToString(cert.CertificateArn)
 
 					results = append(results, types.ScanResult{
-						ServiceName:  "CertificateManager",     // TEMPLATE: "DISPLAYNAME"
-						MethodName:   "acm:ListCertificates",   // TEMPLATE: "AWSPREFIX:APIMETHOD"
-						ResourceType: "certificate",            // TEMPLATE: "RESOURCETYPE"
+						ServiceName:  "CertificateManager",   // TEMPLATE: "DISPLAYNAME"
+						MethodName:   "acm:ListCertificates", // TEMPLATE: "AWSPREFIX:APIMETHOD"
+						ResourceType: "certificate",          // TEMPLATE: "RESOURCETYPE"
 						ResourceName: domainName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),

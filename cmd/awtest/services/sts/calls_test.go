@@ -121,7 +121,7 @@ func newEnv(t *testing.T, f *fakeAWS) context.Context {
 func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	t.Helper()
 	svc := STSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -130,8 +130,8 @@ func TestServiceIsV2Only(t *testing.T) {
 		t.Fatalf("expected 1 service, got %d", len(STSCalls))
 	}
 	svc := STSCalls[0]
-	if svc.CallV2 == nil || svc.Call != nil {
-		t.Errorf("want CallV2 set and Call nil, got CallV2=%v Call=%v", svc.CallV2 != nil, svc.Call != nil)
+	if svc.CallV2 == nil {
+		t.Error("want CallV2 set")
 	}
 	if svc.Name != "sts:GetCallerIdentity" {
 		t.Errorf("name = %q", svc.Name)
@@ -188,7 +188,7 @@ func TestGetCallerIdentityAccessDeniedNormalized(t *testing.T) {
 	f := &fakeAWS{denySTS: true}
 	ctx := newEnv(t, f)
 	svc := STSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

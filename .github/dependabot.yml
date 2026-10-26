@@ -14,9 +14,6 @@ updates:
           - "minor"
           - "patch"
     ignore:
-      # Manual migration planned; do not auto-bump majors.
-      - dependency-name: "github.com/aws/aws-sdk-go"
-        update-types: ["version-update:semver-major"]
       - dependency-name: "github.com/olekukonko/tablewriter"
         update-types: ["version-update:semver-major"]
     commit-message:

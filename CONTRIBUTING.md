@@ -49,7 +49,7 @@ A complete service implementation template is provided at `cmd/awtest/services/_
 1. **Create your service directory:** `cmd/awtest/services/yourservice/`
 2. **Copy the template:** Copy `cmd/awtest/services/_template/calls.go.tmpl` to `cmd/awtest/services/yourservice/calls.go`
 3. **Replace all placeholders** using the reference table in `cmd/awtest/services/_template/README.md`
-4. **Implement Call()** with the actual AWS SDK v1 API call (use `WithContext` variant)
+4. **Implement CallV2** with the actual aws-sdk-go-v2 API call (`func(ctx context.Context, cfg aws.Config) (interface{}, error)`): build the client with `awsv2.NewRegionalClient(cfg, region, pkg.NewFromConfig)`, call `svc.Method(ctx, &pkg.MethodInput{})` (or the v2 paginator) and read pointer fields with `aws.ToString`
 5. **Implement Process()** to extract and format discovered resources
 6. **Write table-driven tests** in `calls_test.go` (see [Testing Standards](#testing-standards) below; all new services must include tests)
 7. **Register the service** in `cmd/awtest/services/services.go` (maintain alphabetical order; STS must stay first)
@@ -129,7 +129,8 @@ func TestServiceProcess(t *testing.T) {
 
 - Use the standard `testing` package with direct comparisons and `t.Errorf`/`t.Fatalf` for assertions
 - Co-locate tests in `calls_test.go` in the **same package** (not `package X_test`)
-- See any existing service's `calls_test.go` for reference (e.g., `cmd/awtest/services/sagemaker/calls_test.go`)
+- Besides the table-driven `Process()` test, drive `CallV2` through `Invoke` against an `httptest` fake: build the config with `awsv2.LoadConfig` (static fake keys, `Endpoint: srv.URL`, `HTTPClient: srv.Client()`, `MaxAttempts: 1`), carry it with `types.WithAWSConfig(ctx, cfg)` and call `svc.Invoke(ctx)`. `Invoke` returns API errors as `<code>: <message>` (via `awsv2.Wrap`), which is what `Process()` receives
+- See any existing service's `calls_test.go` for reference (e.g., `cmd/awtest/services/certificatemanager/calls_v2_test.go`)
 
 #### Race Detection
 
@@ -168,7 +169,7 @@ When a user runs `--speed=fast` or `--speed=insane`, your service will automatic
 
 **Anti-patterns** (do not do these in a service):
 - Import `sync` or `sync/atomic`
-- Use `go func()` or spawn goroutines inside `Call()` or `Process()`
+- Use `go func()` or spawn goroutines inside `CallV2` or `Process()`
 - Add global mutable state that could be accessed by multiple goroutines
 - Write to stdout (only formatters write to stdout; progress writes to stderr)
 
@@ -185,11 +186,12 @@ Before submitting a new service, verify:
 
 - [ ] Package name is lowercase with no underscores
 - [ ] Exported variable follows `DISPLAYNAMECalls` naming convention
-- [ ] `AWSService` struct fields are correctly populated (Name, Call, Process, ModuleName)
-- [ ] `Call()` accepts `context.Context` and `*session.Session`
-- [ ] Services never construct sessions (`session.New*`/`session.Must`); per-region sessions use `sess.Copy(&aws.Config{Region: aws.String(region)})` so `-endpoint-url` and credentials are inherited (enforced by `TestNoServiceBuildsItsOwnSession`)
+- [ ] `AWSService` struct fields are correctly populated (Name, CallV2, Process, ModuleName)
+- [ ] `CallV2` has the signature `func(context.Context, aws.Config) (interface{}, error)` and is run through `types.AWSService.Invoke(ctx)` (the config comes from `types.WithAWSConfig`)
+- [ ] Clients are built only with `awsv2.NewRegionalClient` / `awsv2.NewClient`, never `pkg.NewFromConfig(cfg)`, `config.LoadDefaultConfig` or hand-set `BaseEndpoint`/`HTTPClient`, so `-endpoint-url` and credentials are inherited and ambient `AWS_ENDPOINT_URL*` settings are ignored (enforced by `TestNoV2ClientBypass` and `TestAllServicesHonorCustomEndpoint`)
+- [ ] The service prefix has an entry in the `v2EnvSuffix` and `v2ServiceIDs` tables in `cmd/awtest/services/v2_env_suffix_test.go` (the SDK `ServiceID` gives the `AWS_ENDPOINT_URL_<SUFFIX>` part; never guess it)
 - [ ] Regional services loop over `types.RegionsFor(ctx)` (never `types.Regions` directly) so `-all-regions` is honored (enforced by `TestServicesUseRegionsFor`); global services must not call it
-- [ ] `Call()` uses `WithContext` variant of the API method for timeout support
+- [ ] API calls are read-only and take the context (`svc.Method(ctx, ...)`) for timeout support (enforced by `TestAllCallsAreReadOnly`)
 - [ ] `Process()` accepts `(interface{}, error, bool)` and returns `[]types.ScanResult`
 - [ ] `Process()` handles errors via `utils.HandleAWSError`
 - [ ] `Process()` returns proper `ScanResult` entries with all fields populated:
@@ -225,7 +227,7 @@ Brief description of the AWS service being added and what resources it enumerate
 ## Checklist
 
 - [ ] Service follows `AWSService` interface pattern
-- [ ] `Call()` uses `WithContext` variant
+- [ ] `CallV2` passes the context to every API call
 - [ ] Error handling uses `utils.HandleAWSError`
 - [ ] Table-driven tests added in `calls_test.go`
 - [ ] Service registered in `services.go` (alphabetical order)
@@ -256,5 +258,5 @@ Releases are fully automated via GitHub Actions, release-please, and GoReleaser.
 ## Development Requirements
 
 - **Go:** 1.26+ (must match version in `go.mod`)
-- **AWS SDK:** v1 (`github.com/aws/aws-sdk-go`) -- do not use SDK v2
+- **AWS SDK:** v2 (`github.com/aws/aws-sdk-go-v2`) -- aws-sdk-go v1 has been removed and must not be reintroduced (enforced by `TestNoV1SDKImports`)
 - **Test framework:** standard `testing` package (no external test dependencies)

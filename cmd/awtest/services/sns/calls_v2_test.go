@@ -128,7 +128,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := SNSCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -136,7 +136,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(SNSCalls) != 1 || SNSCalls[0].Name != "sns:ListTopics" {
 		t.Fatalf("unexpected services: %+v", SNSCalls)
 	}
-	if SNSCalls[0].CallV2 == nil || SNSCalls[0].Call != nil {
+	if SNSCalls[0].CallV2 == nil {
 		t.Error("sns:ListTopics must implement CallV2 only")
 	}
 }

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 // EndpointEnvVar is the environment variable consulted when -endpoint-url is unset.
@@ -54,20 +51,4 @@ func ResolveEndpointURL(flagValue string, getenv func(string) string) (string, e
 		}
 	}
 	return "", nil
-}
-
-// ApplyEndpoint points sess at a custom AWS-compatible endpoint. It is a no-op
-// when endpointURL is empty.
-//
-// Every client built from the session (sess.Copy, svc.New(sess, &aws.Config{Region: r}))
-// inherits Config.Endpoint and S3ForcePathStyle, so regional clients are covered.
-// Services must therefore never construct their own sessions; derive them with
-// sess.Copy instead. S3 is switched to path-style because virtual-hosted-style
-// addressing would resolve bucket.<host> names that a local endpoint can't serve.
-func ApplyEndpoint(sess *session.Session, endpointURL string) {
-	if endpointURL == "" {
-		return
-	}
-	sess.Config.Endpoint = aws.String(endpointURL)
-	sess.Config.S3ForcePathStyle = aws.Bool(true)
 }

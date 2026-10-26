@@ -8,9 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
@@ -28,21 +27,24 @@ const (
 // only regions enabled for the account, so opt-in regions the account has not
 // enabled are skipped instead of erroring, and newly launched regions are picked
 // up automatically. The static types.DefaultEnabledRegions list is only the
-// fallback when the call fails or returns nothing. sess is used as-is, so
-// -endpoint-url and credentials are honored.
-func discoverRegions(ctx context.Context, sess *session.Session) (regions []string, source string) {
+// fallback when the call fails or returns nothing. cfg is used as-is (client in
+// cfg.Region, via awsv2.NewRegionalClient), so -endpoint-url and credentials
+// are honored.
+func discoverRegions(ctx context.Context, cfg aws.Config) (regions []string, source string) {
 	ctx, cancel := context.WithTimeout(ctx, discoverRegionsTimeout)
 	defer cancel()
 
-	out, err := ec2.New(sess).DescribeRegionsWithContext(ctx, &ec2.DescribeRegionsInput{})
+	svc := awsv2.NewRegionalClient(cfg, cfg.Region, ec2.NewFromConfig)
+	out, err := svc.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
 	if err == nil && out != nil {
 		seen := make(map[string]bool)
 		for _, r := range out.Regions {
-			if r == nil || r.RegionName == nil || *r.RegionName == "" || seen[*r.RegionName] {
+			name := aws.ToString(r.RegionName)
+			if name == "" || seen[name] {
 				continue
 			}
-			seen[*r.RegionName] = true
-			regions = append(regions, *r.RegionName)
+			seen[name] = true
+			regions = append(regions, name)
 		}
 		sort.Strings(regions)
 	}
@@ -132,14 +134,14 @@ func allRegionsFrom(ctx context.Context) *allRegionsConfig {
 // the normal path; if the service never consulted the region scope it is
 // global and is done. Otherwise the remaining regions are scanned one by one
 // with failures isolated per region.
-func scanService(ctx context.Context, service types.AWSService, sess *session.Session, debug bool) ([]types.ScanResult, ErrorCategory) {
+func scanService(ctx context.Context, service types.AWSService, debug bool) ([]types.ScanResult, ErrorCategory) {
 	cfg := allRegionsFrom(ctx)
 	if cfg == nil || len(cfg.regions) == 0 {
-		return scanWithBackoff(ctx, service, sess, debug)
+		return scanWithBackoff(ctx, service, debug)
 	}
 
 	firstCtx, scope := types.WithRegionScope(ctx, cfg.regions[:1])
-	results, worst := scanWithBackoff(firstCtx, service, sess, debug)
+	results, worst := scanWithBackoff(firstCtx, service, debug)
 	if !scope.Used() {
 		return results, worst
 	}
@@ -149,7 +151,7 @@ func scanService(ctx context.Context, service types.AWSService, sess *session.Se
 			break
 		}
 		regionCtx, _ := types.WithRegionScope(ctx, []string{region})
-		regionResults, err := scanRegion(regionCtx, service, sess, debug)
+		regionResults, err := scanRegion(regionCtx, service, debug)
 		if err != nil {
 			if ctx.Err() != nil {
 				break
@@ -169,13 +171,13 @@ func scanService(ctx context.Context, service types.AWSService, sess *session.Se
 
 var errRegionPanic = errors.New("panic recovered")
 
-// scanRegion runs a single-region Call with panic recovery and the same
+// scanRegion runs a single-region CallV2 with panic recovery and the same
 // throttle retry policy as scanWithBackoff. Errors are returned, not printed.
-func scanRegion(ctx context.Context, service types.AWSService, sess *session.Session, debug bool) ([]types.ScanResult, error) {
+func scanRegion(ctx context.Context, service types.AWSService, debug bool) ([]types.ScanResult, error) {
 	var err error
 	for attempt := 0; attempt <= backoffMaxRetries; attempt++ {
 		var results []types.ScanResult
-		results, err = callRegionOnce(ctx, service, sess, debug)
+		results, err = callRegionOnce(ctx, service, debug)
 		if err == nil || classifyAWSError(err) != ErrorThrottle || attempt == backoffMaxRetries {
 			return results, err
 		}
@@ -190,14 +192,14 @@ func scanRegion(ctx context.Context, service types.AWSService, sess *session.Ses
 	return nil, err
 }
 
-func callRegionOnce(ctx context.Context, service types.AWSService, sess *session.Session, debug bool) (results []types.ScanResult, err error) {
+func callRegionOnce(ctx context.Context, service types.AWSService, debug bool) (results []types.ScanResult, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			// Deliberately drop the panic value: it might contain credentials.
 			results, err = nil, errRegionPanic
 		}
 	}()
-	output, err := service.Invoke(ctx, sess)
+	output, err := service.Invoke(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -205,10 +207,6 @@ func callRegionOnce(ctx context.Context, service types.AWSService, sess *session
 }
 
 func failureDetail(err error) string {
-	var awsErr awserr.Error
-	if errors.As(err, &awsErr) {
-		return awsErr.Code()
-	}
 	if code := awsv2.ErrorCode(err); code != "" {
 		return code
 	}

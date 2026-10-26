@@ -2,6 +2,7 @@ package replay
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"net"
 	"net/http"
@@ -14,15 +15,28 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 )
+
+// testConfig is the replay config with the SDK's retries switched off, so one
+// client call is exactly one request to the replay server.
+func testConfig(t *testing.T, srv *Server) aws.Config {
+	t.Helper()
+	cfg, err := NewConfig(srv, "us-west-2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.Retryer = func() aws.Retryer { return aws.NopRetryer{} }
+	return cfg
+}
 
 func mapFS(files ...string) fstest.MapFS {
 	m := fstest.MapFS{}
@@ -266,52 +280,49 @@ func startEmpty(t *testing.T) *Server {
 
 func TestUnknownCallErrorsParseWithSDK(t *testing.T) {
 	srv := startEmpty(t)
-	sess, err := NewSession(srv, "us-west-2")
-	if err != nil {
-		t.Fatal(err)
-	}
-	cfg := &aws.Config{MaxRetries: aws.Int(0)}
+	cfg := testConfig(t, srv)
 	ctx := context.Background()
+	const region = "us-west-2"
 
 	checks := []struct {
 		name, code, unmatched string
 		call                  func() error
 	}{
 		{"sts (query)", "AccessDenied", "sts:GetCallerIdentity", func() error {
-			_, err := sts.New(sess, cfg).GetCallerIdentityWithContext(ctx, &sts.GetCallerIdentityInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, sts.NewFromConfig).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 			return err
 		}},
 		{"iam (query)", "AccessDenied", "iam:ListUsers", func() error {
-			_, err := iam.New(sess, cfg).ListUsersWithContext(ctx, &iam.ListUsersInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, iam.NewFromConfig).ListUsers(ctx, &iam.ListUsersInput{})
 			return err
 		}},
 		{"ec2", "UnauthorizedOperation", "ec2:DescribeInstances", func() error {
-			_, err := ec2.New(sess, cfg).DescribeInstancesWithContext(ctx, &ec2.DescribeInstancesInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, ec2.NewFromConfig).DescribeInstances(ctx, &ec2.DescribeInstancesInput{})
 			return err
 		}},
 		{"s3", "AccessDenied", "s3:ListBuckets", func() error {
-			_, err := s3.New(sess, cfg).ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, s3.NewFromConfig).ListBuckets(ctx, &s3.ListBucketsInput{})
 			return err
 		}},
 		{"dynamodb (json)", "AccessDeniedException", "dynamodb:ListTables", func() error {
-			_, err := dynamodb.New(sess, cfg).ListTablesWithContext(ctx, &dynamodb.ListTablesInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, dynamodb.NewFromConfig).ListTables(ctx, &dynamodb.ListTablesInput{})
 			return err
 		}},
 		{"lambda (rest)", "AccessDeniedException", "lambda:GET_2015-03-31_functions", func() error {
-			_, err := lambda.New(sess, cfg).ListFunctionsWithContext(ctx, &lambda.ListFunctionsInput{})
+			_, err := awsv2.NewRegionalClient(cfg, region, lambda.NewFromConfig).ListFunctions(ctx, &lambda.ListFunctionsInput{})
 			return err
 		}},
 	}
 	var wantUnmatched []string
 	for _, c := range checks {
 		err := c.call()
-		ae, ok := err.(awserr.Error)
-		if !ok || ae.Code() != c.code {
+		var ae smithy.APIError
+		if !errors.As(err, &ae) || ae.ErrorCode() != c.code {
 			t.Errorf("%s: err = %v, want code %s", c.name, err, c.code)
 			continue
 		}
-		if !strings.Contains(ae.Message(), "no fixture for "+c.unmatched[:strings.Index(c.unmatched, ":")]) {
-			t.Errorf("%s: message %q", c.name, ae.Message())
+		if !strings.Contains(ae.ErrorMessage(), "no fixture for "+c.unmatched[:strings.Index(c.unmatched, ":")]) {
+			t.Errorf("%s: message %q", c.name, ae.ErrorMessage())
 		}
 		wantUnmatched = append(wantUnmatched, c.unmatched)
 	}
@@ -347,9 +358,9 @@ func TestServesFixtureWithStatus(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer srv.Close()
-	sess, _ := NewSession(srv, "us-west-2")
-	_, err = s3.New(sess, &aws.Config{MaxRetries: aws.Int(0)}).GetBucketPolicy(&s3.GetBucketPolicyInput{Bucket: aws.String("b")})
-	if ae, ok := err.(awserr.Error); !ok || ae.Code() != "NoSuchBucketPolicy" {
+	_, err = awsv2.NewRegionalClient(testConfig(t, srv), "us-west-2", s3.NewFromConfig).GetBucketPolicy(context.Background(), &s3.GetBucketPolicyInput{Bucket: aws.String("b")})
+	var ae smithy.APIError
+	if !errors.As(err, &ae) || ae.ErrorCode() != "NoSuchBucketPolicy" {
 		t.Errorf("err = %v", err)
 	}
 	if len(srv.Unmatched()) != 0 {

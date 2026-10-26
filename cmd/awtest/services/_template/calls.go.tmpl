@@ -6,60 +6,75 @@ package SERVICENAME
 // The worker pool (worker_pool.go) executes services concurrently at --speed=fast/insane.
 // The safeScan wrapper handles panic recovery and error classification automatically.
 // DO NOT import "sync", "sync/atomic", or spawn goroutines in this file.
-// DO NOT use global mutable state. Each Call() invocation must be self-contained.
+// DO NOT use global mutable state. Each CallV2 invocation must be self-contained.
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
 
-	// TODO: Replace AWSSDKPACKAGE with the AWS SDK v1 service package
-	// Examples: "github.com/aws/aws-sdk-go/service/acm"
-	//           "github.com/aws/aws-sdk-go/service/sfn"
-	//           "github.com/aws/aws-sdk-go/service/elasticache"
-	AWSSDKPACKAGE "github.com/aws/aws-sdk-go/service/AWSSDKPACKAGE"
+	// TODO: Replace AWSSDKPACKAGE with the aws-sdk-go-v2 service package
+	// (find it under vendor/github.com/aws/aws-sdk-go-v2/service/ after `go get`)
+	// Examples: "github.com/aws/aws-sdk-go-v2/service/acm"
+	//           "github.com/aws/aws-sdk-go-v2/service/sfn"
+	//           "github.com/aws/aws-sdk-go-v2/service/elasticache"
+	"github.com/aws/aws-sdk-go-v2/service/AWSSDKPACKAGE"
+	AWSSDKPACKAGEtypes "github.com/aws/aws-sdk-go-v2/service/AWSSDKPACKAGE/types"
 )
 
 // TODO: Replace DISPLAYNAME with PascalCase service name (e.g., CertificateManager, StepFunctions)
 // TODO: Replace SERVICECalls with DISPLAYNAMECalls (e.g., CertificateManagerCalls, StepFunctionsCalls)
 var SERVICECalls = []types.AWSService{
 	{
-		// TODO: Replace AWSPREFIX:APIMethod with the actual API call identifier
+		// TODO: Replace AWSPREFIX:APIMETHOD with the actual API call identifier
 		// Format: "awsprefix:APIMethod" (e.g., "acm:ListCertificates", "sfn:ListStateMachines")
 		Name: "AWSPREFIX:APIMETHOD",
 
-		// Call is invoked via the safeScan wrapper which handles panic recovery and error classification.
-		// No concurrency-related code is needed here — just implement the AWS API call.
-		// Never construct sessions in a service (session.New*/Must): derive per-region sessions
-		// with sess.Copy(&aws.Config{Region: aws.String(region)}) so -endpoint-url and credentials are inherited.
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		// CallV2 is invoked through types.AWSService.Invoke, which passes the aws.Config
+		// carried in the context and normalises the returned error to "<code>: <message>".
+		// The safeScan wrapper handles panic recovery and error classification.
+		// No concurrency-related code is needed here -- just implement the AWS API call.
+		// Build clients ONLY with awsv2.NewRegionalClient / awsv2.NewClient (never
+		// pkg.NewFromConfig directly, never config.LoadDefaultConfig, never set
+		// BaseEndpoint/HTTPClient yourself): they keep -endpoint-url and credentials and
+		// ignore ambient AWS_ENDPOINT_URL* settings. A static guard fails the build otherwise.
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			// TODO: Replace RESULTTYPE with the SDK type for individual items in the response
-			// Examples: *acm.CertificateSummary, *sfn.StateMachineListItem
-			var allResults []*AWSSDKPACKAGE.RESULTTYPE
+			// (v2 returns values, not pointers). Examples: acmtypes.CertificateSummary,
+			// sfntypes.StateMachineListItem
+			var allResults []AWSSDKPACKAGEtypes.RESULTTYPE
 
 			// TODO: For GLOBAL services (e.g., IAM, Route53, CloudFront, S3 bucket listing),
-			// remove this region loop and call the API once with a single region (e.g., "us-east-1").
-			// Only REGIONAL services need to iterate over types.RegionsFor(ctx).
+			// remove this region loop and build ONE client with a fixed region
+			// (e.g., awsv2.NewRegionalClient(cfg, "us-east-1", ...)).
+			// Only REGIONAL services iterate over types.RegionsFor(ctx).
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
+				// TODO: Replace AWSSDKPACKAGE.NewFromConfig with the service's constructor
+				// (pass the function itself, do not call it).
+				svc := awsv2.NewRegionalClient(cfg, region, AWSSDKPACKAGE.NewFromConfig)
 
-				// TODO: Replace AWSSDKPACKAGE.New with the correct SDK client constructor
-				// Examples: acm.New(sess), sfn.New(sess), elasticache.New(sess)
-				svc := AWSSDKPACKAGE.New(sess)
-
-				// TODO: Replace with the actual API call using WithContext variant
-				// - Always use the WithContext variant for timeout support
+				// TODO: Replace with the actual API call. v2 methods always take the context.
 				// - Replace APIMETHODINPUT with the correct input struct
+				// - If the API paginates and the call should walk every page, use the v2
+				//   paginator instead of a single call:
+				//     p := AWSSDKPACKAGE.NewAPIMETHODPaginator(svc, &AWSSDKPACKAGE.APIMETHODINPUT{})
+				//     for p.HasMorePages() {
+				//         page, err := p.NextPage(ctx)
+				//         if err != nil {
+				//             return nil, err
+				//         }
+				//         allResults = append(allResults, page.RESPONSEFIELD...)
+				//     }
 				// Examples:
-				//   svc.ListCertificatesWithContext(ctx, &acm.ListCertificatesInput{})
-				//   svc.ListStateMachinesWithContext(ctx, &sfn.ListStateMachinesInput{})
-				output, err := svc.APIMethodWithContext(ctx, &AWSSDKPACKAGE.APIMETHODINPUT{})
+				//   svc.ListCertificates(ctx, &acm.ListCertificatesInput{})
+				//   svc.ListStateMachines(ctx, &sfn.ListStateMachinesInput{})
+				output, err := svc.APIMETHOD(ctx, &AWSSDKPACKAGE.APIMETHODINPUT{})
 				if err != nil {
 					return nil, err
 				}
@@ -74,7 +89,8 @@ var SERVICECalls = []types.AWSService{
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			var results []types.ScanResult
 
-			// Handle errors using the standard error handler
+			// Handle errors using the standard error handler. err is already
+			// normalised ("<code>: <message>") by Invoke.
 			if err != nil {
 				// TODO: Replace AWSPREFIX:APIMETHOD with the same value used in Name above
 				utils.HandleAWSError(debug, "AWSPREFIX:APIMETHOD", err)
@@ -89,19 +105,13 @@ var SERVICECalls = []types.AWSService{
 				}
 			}
 
-			// TODO: Replace RESULTTYPE with the same SDK type used in Call()
-			if items, ok := output.([]*AWSSDKPACKAGE.RESULTTYPE); ok {
+			// TODO: Replace RESULTTYPE with the same SDK type used in CallV2
+			if items, ok := output.([]AWSSDKPACKAGEtypes.RESULTTYPE); ok {
 				for _, item := range items {
-					// TODO: Extract the resource name from the API response item
-					// Use nil-safe access for pointer fields:
-					//   name := ""
-					//   if item.Name != nil {
-					//       name = *item.Name
-					//   }
-					resourceName := ""
-					if item.NAMEFIELD != nil {
-						resourceName = *item.NAMEFIELD
-					}
+					// TODO: Extract the resource name from the API response item.
+					// v2 string fields are still *string: read them with aws.ToString,
+					// which is nil-safe (also aws.ToInt32, aws.ToBool, aws.ToTime, ...).
+					resourceName := aws.ToString(item.NAMEFIELD)
 
 					results = append(results, types.ScanResult{
 						// TODO: Replace these fields with actual values
@@ -110,8 +120,8 @@ var SERVICECalls = []types.AWSService{
 						ResourceType: "RESOURCETYPE", // lowercase singular (e.g., "certificate", "statemachine")
 						ResourceName: resourceName,
 						// TODO: Populate Details with relevant resource metadata (e.g., ARN, region, status)
-						Details:      map[string]interface{}{},
-						Timestamp:    time.Now(),
+						Details:   map[string]interface{}{},
+						Timestamp: time.Now(),
 					})
 
 					// TODO: Customize the PrintResult output format
@@ -120,7 +130,7 @@ var SERVICECalls = []types.AWSService{
 						fmt.Sprintf("DISPLAYNAME: %s", utils.ColorizeItem(resourceName)), nil)
 				}
 			} else if output != nil {
-				// Type assertion failed -- Call() return type may not match Process() expectation
+				// Type assertion failed -- CallV2 return type may not match Process() expectation
 				utils.HandleAWSError(debug, "AWSPREFIX:APIMETHOD", fmt.Errorf("unexpected output type %T", output))
 			}
 			return results

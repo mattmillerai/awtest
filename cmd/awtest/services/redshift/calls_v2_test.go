@@ -155,7 +155,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := RedshiftCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -163,7 +163,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(RedshiftCalls) != 1 || RedshiftCalls[0].Name != "redshift:DescribeClusters" {
 		t.Fatalf("unexpected services: %+v", RedshiftCalls)
 	}
-	if RedshiftCalls[0].CallV2 == nil || RedshiftCalls[0].Call != nil {
+	if RedshiftCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }

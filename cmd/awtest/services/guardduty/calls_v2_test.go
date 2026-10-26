@@ -117,7 +117,7 @@ func newEnv(t *testing.T, f *fakeSvc, regions ...string) context.Context {
 
 func run(ctx context.Context, i int) ([]types.ScanResult, error) {
 	svc := GuardDutyCalls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 

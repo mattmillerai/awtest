@@ -2,10 +2,10 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
@@ -24,7 +24,7 @@ func TestAWSErrorInfo(t *testing.T) {
 		code, msg string
 		ok        bool
 	}{
-		{"v1", awserr.New("AccessDenied", "v1 msg", nil), "AccessDenied", "v1 msg", true},
+		{"v2 wrapped in fmt", fmt.Errorf("ctx: %w", &smithy.GenericAPIError{Code: "AccessDenied", Message: "msg"}), "AccessDenied", "msg", true},
 		{"v2 wrapped", v2Err("Throttling", "slow"), "Throttling", "slow", true},
 		{"v2 raw smithy", &smithy.GenericAPIError{Code: "X", Message: "y"}, "X", "y", true},
 		{"plain", errors.New("boom"), "", "", false},
@@ -90,7 +90,7 @@ func TestHandleAWSErrorV2InvalidKeyQuiet(t *testing.T) {
 	}
 }
 
-func TestHandleAWSErrorV2MatchesV1Output(t *testing.T) {
+func TestHandleAWSErrorWrappedMatchesRawAPIError(t *testing.T) {
 	for _, tc := range []struct{ code, msg string }{
 		{"AccessDenied", "User is not authorized"},
 		{"UnauthorizedOperation", "You are not authorized"},
@@ -98,13 +98,13 @@ func TestHandleAWSErrorV2MatchesV1Output(t *testing.T) {
 		{types.InvalidClientTokenId, "bad token"},
 	} {
 		for _, debug := range []bool{false, true} {
-			v1Out, v1Res := captureHandle(t, debug, "svc:Call", awserr.New(tc.code, tc.msg, nil))
+			rawOut, rawRes := captureHandle(t, debug, "svc:Call", &smithy.GenericAPIError{Code: tc.code, Message: tc.msg})
 			v2Out, v2Res := captureHandle(t, debug, "svc:Call", v2Err(tc.code, tc.msg))
-			if v1Out != v2Out {
-				t.Errorf("%s debug=%v: v1 output %q != v2 output %q", tc.code, debug, v1Out, v2Out)
+			if rawOut != v2Out {
+				t.Errorf("%s debug=%v: raw output %q != v2 output %q", tc.code, debug, rawOut, v2Out)
 			}
-			if (v1Res == nil) != (v2Res == nil) {
-				t.Errorf("%s debug=%v: v1 result %v, v2 result %v", tc.code, debug, v1Res, v2Res)
+			if (rawRes == nil) != (v2Res == nil) {
+				t.Errorf("%s debug=%v: raw result %v, v2 result %v", tc.code, debug, rawRes, v2Res)
 			}
 		}
 	}

@@ -338,9 +338,9 @@ func f(rt int) (aws.Config, error) {
 func f(c int) (aws.Config, error) {
 	return awsv2.LoadConfig(nil, awsv2.Options{Region: "r", HTTPClient: c})
 }`, 1},
-		{"v1 only", hdr + `import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/sts"
+		{"files that import no aws-sdk-go-v2 package are ignored", hdr + `import (
+	"example.com/other/aws"
+	"example.com/other/service/sts"
 )
 func f() { _ = sts.New(nil); _ = aws.Config{}; _ = thing{HTTPClient: nil} }`, 0},
 		{"no imports", hdr + `func f(o *opts) { o.BaseEndpoint = nil }`, 0},

@@ -143,7 +143,7 @@ func scoped(ctx context.Context, regions ...string) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := ConfigCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -153,7 +153,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(ConfigCalls) != 1 || ConfigCalls[0].Name != "config:DescribeConfigurationRecorders" {
 		t.Fatalf("unexpected services: %+v", ConfigCalls)
 	}
-	if ConfigCalls[0].CallV2 == nil || ConfigCalls[0].Call != nil {
+	if ConfigCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }

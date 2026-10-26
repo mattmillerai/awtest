@@ -178,7 +178,7 @@ func newEnv(t *testing.T, f *fakeECS) context.Context {
 
 func run(ctx context.Context) ([]types.ScanResult, error) {
 	svc := FargateCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -198,7 +198,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(FargateCalls) != 1 || FargateCalls[0].Name != "ecs:ListFargateTasks" {
 		t.Fatalf("unexpected services: %+v", FargateCalls)
 	}
-	if FargateCalls[0].CallV2 == nil || FargateCalls[0].Call != nil {
+	if FargateCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 func TestClassifyAWSError(t *testing.T) {
@@ -26,49 +26,49 @@ func TestClassifyAWSError(t *testing.T) {
 		// Throttle errors
 		{
 			name:    "RequestLimitExceeded is throttle",
-			err:     awserr.New("RequestLimitExceeded", "rate exceeded", nil),
+			err:     &smithy.GenericAPIError{Code: "RequestLimitExceeded", Message: "rate exceeded"},
 			wantCat: ErrorThrottle,
 		},
 		{
 			name:    "Throttling is throttle",
-			err:     awserr.New("Throttling", "rate exceeded", nil),
+			err:     &smithy.GenericAPIError{Code: "Throttling", Message: "rate exceeded"},
 			wantCat: ErrorThrottle,
 		},
 		{
 			name:    "TooManyRequestsException is throttle",
-			err:     awserr.New("TooManyRequestsException", "too many requests", nil),
+			err:     &smithy.GenericAPIError{Code: "TooManyRequestsException", Message: "too many requests"},
 			wantCat: ErrorThrottle,
 		},
 		// Access denied errors
 		{
 			name:    "AccessDeniedException is denied",
-			err:     awserr.New("AccessDeniedException", "access denied", nil),
+			err:     &smithy.GenericAPIError{Code: "AccessDeniedException", Message: "access denied"},
 			wantCat: ErrorDenied,
 		},
 		{
 			name:    "AccessDenied is denied",
-			err:     awserr.New("AccessDenied", "access denied", nil),
+			err:     &smithy.GenericAPIError{Code: "AccessDenied", Message: "access denied"},
 			wantCat: ErrorDenied,
 		},
 		{
 			name:    "UnauthorizedOperation is denied",
-			err:     awserr.New("UnauthorizedOperation", "unauthorized", nil),
+			err:     &smithy.GenericAPIError{Code: "UnauthorizedOperation", Message: "unauthorized"},
 			wantCat: ErrorDenied,
 		},
 		{
 			name:    "AuthorizationError is denied",
-			err:     awserr.New("AuthorizationError", "auth error", nil),
+			err:     &smithy.GenericAPIError{Code: "AuthorizationError", Message: "auth error"},
 			wantCat: ErrorDenied,
 		},
 		{
 			name:    "UnauthorizedAccess is denied",
-			err:     awserr.New("UnauthorizedAccess", "unauthorized access", nil),
+			err:     &smithy.GenericAPIError{Code: "UnauthorizedAccess", Message: "unauthorized access"},
 			wantCat: ErrorDenied,
 		},
 		// Service errors
 		{
 			name:    "unknown AWS error is service error",
-			err:     awserr.New("InternalServiceError", "internal error", nil),
+			err:     &smithy.GenericAPIError{Code: "InternalServiceError", Message: "internal error"},
 			wantCat: ErrorService,
 		},
 		{
@@ -91,7 +91,7 @@ func TestClassifyAWSError(t *testing.T) {
 func TestSafeScanPanicRecovery(t *testing.T) {
 	panicService := types.AWSService{
 		Name: "TestPanic",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			panic("something went wrong")
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -99,7 +99,7 @@ func TestSafeScanPanicRecovery(t *testing.T) {
 		},
 	}
 
-	results, category := safeScan(context.Background(), panicService, nil, false)
+	results, category := safeScan(testCtx(), panicService, false)
 
 	if category != ErrorService {
 		t.Errorf("panic category = %d, want ErrorService (%d)", category, ErrorService)
@@ -121,7 +121,7 @@ func TestSafeScanPanicRecovery(t *testing.T) {
 func TestSafeScanPanicWithStringValue(t *testing.T) {
 	panicService := types.AWSService{
 		Name: "TestPanicString",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			panic("unexpected string panic value")
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -129,7 +129,7 @@ func TestSafeScanPanicWithStringValue(t *testing.T) {
 		},
 	}
 
-	results, category := safeScan(context.Background(), panicService, nil, false)
+	results, category := safeScan(testCtx(), panicService, false)
 
 	if category != ErrorService {
 		t.Errorf("category = %d, want ErrorService (%d)", category, ErrorService)
@@ -146,7 +146,7 @@ func TestSafeScanPanicNoCredentialLeakage(t *testing.T) {
 	// Simulate a panic that includes credential-like data
 	panicService := types.AWSService{
 		Name: "TestCredLeak",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			panic("error with AKIAIOSFODNN7EXAMPLE and wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -154,7 +154,7 @@ func TestSafeScanPanicNoCredentialLeakage(t *testing.T) {
 		},
 	}
 
-	results, _ := safeScan(context.Background(), panicService, nil, false)
+	results, _ := safeScan(testCtx(), panicService, false)
 
 	if len(results) != 1 {
 		t.Fatalf("results count = %d, want 1", len(results))
@@ -176,8 +176,8 @@ func TestSafeScanThrottleClassification(t *testing.T) {
 		t.Run(code, func(t *testing.T) {
 			service := types.AWSService{
 				Name: "TestThrottle",
-				Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-					return nil, awserr.New(code, "rate exceeded", nil)
+				CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+					return nil, &smithy.GenericAPIError{Code: code, Message: "rate exceeded"}
 				},
 				Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 					return []types.ScanResult{{
@@ -187,7 +187,7 @@ func TestSafeScanThrottleClassification(t *testing.T) {
 				},
 			}
 
-			_, category := safeScan(context.Background(), service, nil, false)
+			_, category := safeScan(testCtx(), service, false)
 			if category != ErrorThrottle {
 				t.Errorf("category for %s = %d, want ErrorThrottle (%d)", code, category, ErrorThrottle)
 			}
@@ -202,8 +202,8 @@ func TestSafeScanAccessDeniedClassification(t *testing.T) {
 		t.Run(code, func(t *testing.T) {
 			service := types.AWSService{
 				Name: "TestDenied",
-				Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-					return nil, awserr.New(code, "access denied", nil)
+				CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+					return nil, &smithy.GenericAPIError{Code: code, Message: "access denied"}
 				},
 				Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 					return []types.ScanResult{{
@@ -213,7 +213,7 @@ func TestSafeScanAccessDeniedClassification(t *testing.T) {
 				},
 			}
 
-			_, category := safeScan(context.Background(), service, nil, false)
+			_, category := safeScan(testCtx(), service, false)
 			if category != ErrorDenied {
 				t.Errorf("category for %s = %d, want ErrorDenied (%d)", code, category, ErrorDenied)
 			}
@@ -224,8 +224,8 @@ func TestSafeScanAccessDeniedClassification(t *testing.T) {
 func TestSafeScanServiceErrorClassification(t *testing.T) {
 	service := types.AWSService{
 		Name: "TestServiceErr",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			return nil, awserr.New("InternalServiceError", "something broke", nil)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			return nil, &smithy.GenericAPIError{Code: "InternalServiceError", Message: "something broke"}
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
 			return []types.ScanResult{{
@@ -235,7 +235,7 @@ func TestSafeScanServiceErrorClassification(t *testing.T) {
 		},
 	}
 
-	_, category := safeScan(context.Background(), service, nil, false)
+	_, category := safeScan(testCtx(), service, false)
 	if category != ErrorService {
 		t.Errorf("category = %d, want ErrorService (%d)", category, ErrorService)
 	}
@@ -244,7 +244,7 @@ func TestSafeScanServiceErrorClassification(t *testing.T) {
 func TestSafeScanNormalExecution(t *testing.T) {
 	service := types.AWSService{
 		Name: "TestNormal",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return "mock-output", nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -255,7 +255,7 @@ func TestSafeScanNormalExecution(t *testing.T) {
 		},
 	}
 
-	results, category := safeScan(context.Background(), service, nil, false)
+	results, category := safeScan(testCtx(), service, false)
 
 	if category != ErrorNone {
 		t.Errorf("category = %d, want ErrorNone (%d)", category, ErrorNone)
@@ -274,7 +274,7 @@ func TestSafeScanNormalExecution(t *testing.T) {
 func TestSafeScanNilError(t *testing.T) {
 	service := types.AWSService{
 		Name: "TestNilErr",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return "output", nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -282,7 +282,7 @@ func TestSafeScanNilError(t *testing.T) {
 		},
 	}
 
-	_, category := safeScan(context.Background(), service, nil, false)
+	_, category := safeScan(testCtx(), service, false)
 	if category != ErrorNone {
 		t.Errorf("category = %d, want ErrorNone (%d)", category, ErrorNone)
 	}
@@ -291,7 +291,7 @@ func TestSafeScanNilError(t *testing.T) {
 func TestScanServicesPanicIsolation(t *testing.T) {
 	panicService := types.AWSService{
 		Name: "PanicSvc",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			panic("boom")
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -300,7 +300,7 @@ func TestScanServicesPanicIsolation(t *testing.T) {
 	}
 	normalService := types.AWSService{
 		Name: "NormalSvc",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return "ok", nil
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -309,7 +309,7 @@ func TestScanServicesPanicIsolation(t *testing.T) {
 	}
 
 	svcs := []types.AWSService{panicService, normalService}
-	results, skipped := scanServices(context.Background(), svcs, nil, 1, true, false)
+	results, skipped := scanServices(testCtx(), svcs, 1, true, false)
 
 	if len(skipped) != 0 {
 		t.Errorf("skipped = %v, want none", skipped)
@@ -341,7 +341,7 @@ func TestScanServicesPanicIsolation(t *testing.T) {
 func TestSafeScanNonAWSError(t *testing.T) {
 	service := types.AWSService{
 		Name: "TestPlainErr",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			return nil, fmt.Errorf("connection timeout")
 		},
 		Process: func(output interface{}, err error, debug bool) []types.ScanResult {
@@ -352,7 +352,7 @@ func TestSafeScanNonAWSError(t *testing.T) {
 		},
 	}
 
-	_, category := safeScan(context.Background(), service, nil, false)
+	_, category := safeScan(testCtx(), service, false)
 	if category != ErrorService {
 		t.Errorf("category = %d, want ErrorService (%d)", category, ErrorService)
 	}

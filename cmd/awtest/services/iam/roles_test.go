@@ -89,7 +89,7 @@ func run(t *testing.T, name string, ctx context.Context) []types.ScanResult {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	c := findCall(t, name)
-	out, err := c.Invoke(ctx, nil)
+	out, err := c.Invoke(ctx)
 	return c.Process(out, err, false)
 }
 

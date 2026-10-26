@@ -3,13 +3,6 @@ package utils
 import (
 	"strings"
 	"testing"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
 func TestValidateEndpointURL(t *testing.T) {
@@ -86,70 +79,5 @@ func TestResolveEndpointURL(t *testing.T) {
 				t.Errorf("got %q, want %q", got, tt.want)
 			}
 		})
-	}
-}
-
-func newTestSession(t *testing.T) *session.Session {
-	t.Helper()
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-west-2"),
-		Credentials: credentials.NewStaticCredentials("AKIAFAKE", "fake", ""),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return sess
-}
-
-func TestApplyEndpointEmptyIsNoOp(t *testing.T) {
-	sess := newTestSession(t)
-	ApplyEndpoint(sess, "")
-	if sess.Config.Endpoint != nil || sess.Config.S3ForcePathStyle != nil {
-		t.Errorf("expected no-op, got Endpoint=%v S3ForcePathStyle=%v", sess.Config.Endpoint, sess.Config.S3ForcePathStyle)
-	}
-}
-
-func TestApplyEndpointSetsConfig(t *testing.T) {
-	sess := newTestSession(t)
-	ApplyEndpoint(sess, "http://localhost:4566")
-	if aws.StringValue(sess.Config.Endpoint) != "http://localhost:4566" {
-		t.Errorf("Endpoint = %q", aws.StringValue(sess.Config.Endpoint))
-	}
-	if !aws.BoolValue(sess.Config.S3ForcePathStyle) {
-		t.Error("S3ForcePathStyle not set")
-	}
-}
-
-func TestApplyEndpointInheritedByClients(t *testing.T) {
-	const ep = "http://localhost:4566"
-	sess := newTestSession(t)
-	ApplyEndpoint(sess, ep)
-
-	if got := s3.New(sess).Client.Endpoint; got != ep {
-		t.Errorf("s3 endpoint = %q", got)
-	}
-	if got := sqs.New(sess.Copy(&aws.Config{Region: aws.String("eu-west-1")})).Client.Endpoint; got != ep {
-		t.Errorf("sqs copy endpoint = %q", got)
-	}
-	if got := ec2.New(sess, &aws.Config{Region: aws.String("ap-south-1")}).Client.Endpoint; got != ep {
-		t.Errorf("ec2 endpoint = %q", got)
-	}
-}
-
-func TestApplyEndpointS3PathStyle(t *testing.T) {
-	sess := newTestSession(t)
-	ApplyEndpoint(sess, "http://localhost:4566")
-	req, _ := s3.New(sess).GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String("my-bucket"),
-		Key:    aws.String("key.txt"),
-	})
-	if err := req.Build(); err != nil {
-		t.Fatal(err)
-	}
-	if req.HTTPRequest.URL.Host != "localhost:4566" {
-		t.Errorf("host = %q, want localhost:4566", req.HTTPRequest.URL.Host)
-	}
-	if !strings.HasPrefix(req.HTTPRequest.URL.Path, "/my-bucket/") {
-		t.Errorf("path = %q, want path-style with bucket", req.HTTPRequest.URL.Path)
 	}
 }

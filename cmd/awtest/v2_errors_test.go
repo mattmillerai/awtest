@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
@@ -41,10 +40,10 @@ func TestClassifyAWSErrorV2(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.code, func(t *testing.T) {
 			if got := classifyAWSError(v2APIError(tc.code)); got != tc.want {
-				t.Errorf("v2 %s: got %v, want %v", tc.code, got, tc.want)
+				t.Errorf("wrapped %s: got %v, want %v", tc.code, got, tc.want)
 			}
-			if got := classifyAWSError(awserr.New(tc.code, "m", nil)); got != tc.want {
-				t.Errorf("v1 %s: got %v, want %v", tc.code, got, tc.want)
+			if got := classifyAWSError(&smithy.GenericAPIError{Code: tc.code, Message: "m"}); got != tc.want {
+				t.Errorf("raw %s: got %v, want %v", tc.code, got, tc.want)
 			}
 		})
 	}
@@ -58,10 +57,10 @@ func TestClassifyAWSErrorV2(t *testing.T) {
 
 func TestFailureDetailV2(t *testing.T) {
 	if got := failureDetail(v2APIError("AuthFailure")); got != "AuthFailure" {
-		t.Errorf("v2 detail = %q, want the code", got)
+		t.Errorf("wrapped detail = %q, want the code", got)
 	}
-	if got := failureDetail(awserr.New("AuthFailure", "m", nil)); got != "AuthFailure" {
-		t.Errorf("v1 detail = %q, want the code", got)
+	if got := failureDetail(&smithy.GenericAPIError{Code: "AuthFailure", Message: "m"}); got != "AuthFailure" {
+		t.Errorf("raw detail = %q, want the code", got)
 	}
 	plain := errors.New("plain failure")
 	if got := failureDetail(plain); got != "plain failure" {
@@ -86,11 +85,11 @@ var probeThrottleCodes = []string{
 // (and so retries itself with backoff).
 func TestThrottleCodesMatchAwsv2(t *testing.T) {
 	for _, code := range awsv2.AwtestThrottleCodes {
-		if got := classifyAWSError(awserr.New(code, "m", nil)); got != ErrorThrottle {
-			t.Errorf("v1 %s: classified %v, want ErrorThrottle", code, got)
+		if got := classifyAWSError(&smithy.GenericAPIError{Code: code, Message: "m"}); got != ErrorThrottle {
+			t.Errorf("raw %s: classified %v, want ErrorThrottle", code, got)
 		}
 		if got := classifyAWSError(v2APIError(code)); got != ErrorThrottle {
-			t.Errorf("v2 %s: classified %v, want ErrorThrottle", code, got)
+			t.Errorf("wrapped %s: classified %v, want ErrorThrottle", code, got)
 		}
 	}
 
@@ -100,7 +99,7 @@ func TestThrottleCodesMatchAwsv2(t *testing.T) {
 	}
 	var missing []string
 	for _, code := range probeThrottleCodes {
-		for name, err := range map[string]error{"v1": awserr.New(code, "m", nil), "v2": v2APIError(code)} {
+		for name, err := range map[string]error{"raw": &smithy.GenericAPIError{Code: code, Message: "m"}, "wrapped": v2APIError(code)} {
 			if classifyAWSError(err) == ErrorThrottle && !inList[code] {
 				missing = append(missing, fmt.Sprintf("%s(%s)", code, name))
 			}
@@ -129,8 +128,8 @@ func TestSafeScanV2ServiceUsesContextConfig(t *testing.T) {
 			return []types.ScanResult{{ServiceName: "v2-throttled", Error: err}}
 		},
 	}
-	ctx := types.WithAWSConfig(context.Background(), aws.Config{Region: "eu-north-1"})
-	results, cat := safeScan(ctx, svc, nil, false)
+	ctx := types.WithAWSConfig(testCtx(), aws.Config{Region: "eu-north-1"})
+	results, cat := safeScan(ctx, svc, false)
 	if cat != ErrorThrottle {
 		t.Errorf("category = %v, want ErrorThrottle", cat)
 	}
@@ -142,7 +141,7 @@ func TestSafeScanV2ServiceUsesContextConfig(t *testing.T) {
 	}
 
 	// No config in the context: a clear error, not a panic.
-	results, cat = safeScan(context.Background(), svc, nil, false)
+	results, cat = safeScan(context.Background(), svc, false)
 	if cat != ErrorService || len(results) != 1 || results[0].Error == nil {
 		t.Errorf("missing config: cat=%v results=%+v", cat, results)
 	}

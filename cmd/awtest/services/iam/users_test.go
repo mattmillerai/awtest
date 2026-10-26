@@ -19,7 +19,7 @@ func TestServicesAreV2Only(t *testing.T) {
 		if svc.Name != want[i] {
 			t.Errorf("service %d = %q, want %q", i, svc.Name, want[i])
 		}
-		if svc.CallV2 == nil || svc.Call != nil {
+		if svc.CallV2 == nil {
 			t.Errorf("%s must implement CallV2 only", svc.Name)
 		}
 	}

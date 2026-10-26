@@ -109,7 +109,7 @@ func TestServiceIsV2Only(t *testing.T) {
 	if len(EfsCalls) != 1 || EfsCalls[0].Name != "efs:DescribeFileSystems" {
 		t.Fatalf("unexpected services: %+v", EfsCalls)
 	}
-	if EfsCalls[0].CallV2 == nil || EfsCalls[0].Call != nil {
+	if EfsCalls[0].CallV2 == nil {
 		t.Error("want CallV2 set and Call nil")
 	}
 }
@@ -131,7 +131,7 @@ func TestDescribeFileSystemsThroughInvoke(t *testing.T) {
 	regions := types.RegionsFor(ctx)
 
 	svc := EfsCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,7 +176,7 @@ func TestDescribeFileSystemsAccessDeniedNormalized(t *testing.T) {
 	f := &fakeEFS{deny: map[string]string{"us-east-2": msg}}
 	ctx := newEnv(t, f)
 	svc := EfsCalls[0]
-	_, err := svc.Invoke(ctx, nil)
+	_, err := svc.Invoke(ctx)
 	if err == nil {
 		t.Fatal("expected error")
 	}

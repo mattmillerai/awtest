@@ -110,7 +110,7 @@ func newEnv(t *testing.T, f *fakeBeanstalk) context.Context {
 
 func run(ctx context.Context, i int) ([]types.ScanResult, error) {
 	svc := ElasticBeanstalkCalls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -123,7 +123,7 @@ func TestServicesAreV2Only(t *testing.T) {
 		if svc.Name != want[i] {
 			t.Errorf("service %d name = %q, want %q", i, svc.Name, want[i])
 		}
-		if svc.CallV2 == nil || svc.Call != nil {
+		if svc.CallV2 == nil {
 			t.Errorf("%s: want CallV2 set and Call nil", svc.Name)
 		}
 	}

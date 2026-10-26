@@ -75,7 +75,7 @@ import (
 //     also exported as <pkg>.ServiceID).
 //  2. Add the prefix (the part of AWSService.Name before ':') to v2ServiceIDs
 //     with that package's ServiceID constant, one per client the service's
-//     Call/Process builds (e.g. sts also makes IAM follow-up calls).
+//     CallV2/Process builds (e.g. sts also makes IAM follow-up calls).
 //  3. Add the prefix to v2EnvSuffix with the matching suffixes of
 //     AWS_ENDPOINT_URL_<SUFFIX>, in the same order. The SDK derives the suffix
 //     from the ServiceID with strings.ToUpper and spaces -> '_'
@@ -84,12 +84,12 @@ import (
 //     "certificatemanager" would give CERTIFICATEMANAGER instead of ACM, and the
 //     ambient-endpoint guard would then pass vacuously.
 //
-// guardTargets fails the test when a CallV2 service has no v2EnvSuffix entry;
+// guardTargets fails the test when a service has no v2EnvSuffix entry;
 // TestV2EnvSuffixMatchesServiceID proves the two tables agree.
 
 // v2EnvSuffix maps a service-name prefix to the <SVC> parts of
-// AWS_ENDPOINT_URL_<SVC> that the service's clients resolve. v1 services need
-// no entry. The "sts" prefix also covers the test-only synthetic v2 service.
+// AWS_ENDPOINT_URL_<SVC> that the service's clients resolve. Every service in
+// AllServices needs an entry. The "sts" prefix also covers the test-only synthetic v2 service.
 var v2EnvSuffix = map[string][]string{
 	"sts": {"STS", "IAM"}, // Process makes IAM follow-up calls with the same config
 	"kms": {"KMS"},
@@ -286,16 +286,10 @@ func TestV2EnvSuffixMatchesServiceID(t *testing.T) {
 	}
 }
 
-// TestGuardTargetsUseExplicitSuffixes checks that every CallV2 guard target got
-// its suffixes from the table and v1 targets got none.
+// TestGuardTargetsUseExplicitSuffixes checks that every guard target got its
+// suffixes from the table.
 func TestGuardTargetsUseExplicitSuffixes(t *testing.T) {
 	for _, tg := range guardTargets(t) {
-		if tg.svc.CallV2 == nil {
-			if len(tg.envSuffixes) != 0 {
-				t.Errorf("v1 service %s has env suffixes %v", tg.svc.Name, tg.envSuffixes)
-			}
-			continue
-		}
 		want := v2EnvSuffix[servicePrefix(tg.svc.Name)]
 		if strings.Join(tg.envSuffixes, ",") != strings.Join(want, ",") {
 			t.Errorf("%s: suffixes %v, want %v", tg.svc.Name, tg.envSuffixes, want)

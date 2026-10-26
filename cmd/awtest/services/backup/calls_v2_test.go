@@ -100,7 +100,7 @@ func newEnv(t *testing.T, f *fakeSvc, regions ...string) context.Context {
 
 func run(ctx context.Context, i int) ([]types.ScanResult, error) {
 	svc := BackupCalls[i]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -114,7 +114,7 @@ func detailsOf(results []types.ScanResult) []map[string]interface{} {
 
 func TestServicesAreV2Only(t *testing.T) {
 	for i, svc := range BackupCalls {
-		if svc.CallV2 == nil || svc.Call != nil {
+		if svc.CallV2 == nil {
 			t.Errorf("service %d %s: want CallV2 set and Call nil", i, svc.Name)
 		}
 	}

@@ -66,7 +66,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := WafCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -74,7 +74,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(WafCalls) != 1 || WafCalls[0].Name != "waf:ListWebACLs" {
 		t.Fatalf("unexpected services: %+v", WafCalls)
 	}
-	if WafCalls[0].CallV2 == nil || WafCalls[0].Call != nil {
+	if WafCalls[0].CallV2 == nil {
 		t.Error("waf:ListWebACLs must implement CallV2 only")
 	}
 }

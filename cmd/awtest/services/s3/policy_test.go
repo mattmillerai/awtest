@@ -122,8 +122,8 @@ func TestServicesAreV2Only(t *testing.T) {
 	names := map[string]bool{}
 	for _, e := range S3Calls {
 		names[e.Name] = true
-		if e.CallV2 == nil || e.Call != nil {
-			t.Errorf("%s: CallV2 set = %v, Call set = %v; want v2 only", e.Name, e.CallV2 != nil, e.Call != nil)
+		if e.CallV2 == nil {
+			t.Errorf("%s: CallV2 is nil", e.Name)
 		}
 	}
 	for _, n := range []string{"s3:ListBuckets", "s3:GetBucketPolicy"} {
@@ -360,7 +360,7 @@ func run(t *testing.T, name string, ctx context.Context) []types.ScanResult {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	c := findCall(t, name)
-	out, err := c.Invoke(ctx, nil)
+	out, err := c.Invoke(ctx)
 	return c.Process(out, err, false)
 }
 

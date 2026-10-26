@@ -18,11 +18,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/mattmillerai/awtest/cmd/awtest/utils"
 )
 
 // SampleName is the -replay value selecting the embedded sample fixtures.
@@ -124,27 +119,6 @@ func RestrictedTransport(addr string) *http.Transport {
 		MaxIdleConnsPerHost: 20,
 		IdleConnTimeout:     30 * time.Second,
 	}
-}
-
-// NewSession builds a session with fake static credentials whose HTTP client
-// can only reach srv, then points every client at srv. Shared config files,
-// profiles and credential environment variables are not consulted.
-func NewSession(srv *Server, region string) (*session.Session, error) {
-	addr := strings.TrimPrefix(srv.URL, "http://")
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigDisable,
-		SharedConfigFiles: []string{},
-		Config: aws.Config{
-			Region:      aws.String(region),
-			Credentials: credentials.NewStaticCredentials(FakeAccessKeyID, FakeSecretAccessKey, ""),
-			HTTPClient:  &http.Client{Transport: RestrictedTransport(addr), Timeout: 60 * time.Second},
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	utils.ApplyEndpoint(sess, srv.URL)
-	return sess, nil
 }
 
 type protocol int

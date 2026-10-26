@@ -71,7 +71,7 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 	utils.Quiet = true
 	t.Cleanup(func() { utils.Quiet = false })
 	svc := IvsRealtimeCalls[0]
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	return svc.Process(out, err, false), err
 }
 
@@ -79,7 +79,7 @@ func TestServicesAreV2Only(t *testing.T) {
 	if len(IvsRealtimeCalls) != 1 || IvsRealtimeCalls[0].Name != "ivsRealtime:ListStages" {
 		t.Fatalf("unexpected services: %+v", IvsRealtimeCalls)
 	}
-	if IvsRealtimeCalls[0].CallV2 == nil || IvsRealtimeCalls[0].Call != nil {
+	if IvsRealtimeCalls[0].CallV2 == nil {
 		t.Error("ivsRealtime:ListStages must implement CallV2 only")
 	}
 }

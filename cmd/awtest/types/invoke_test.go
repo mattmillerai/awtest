@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
@@ -24,27 +23,7 @@ func TestAWSConfigContext(t *testing.T) {
 	}
 }
 
-func TestInvokeV1CallsCallUnchanged(t *testing.T) {
-	sess := &session.Session{}
-	want := errors.New("plain v1 error")
-	var gotSess *session.Session
-	svc := types.AWSService{Name: "v1", Call: func(_ context.Context, s *session.Session) (interface{}, error) {
-		gotSess = s
-		return "out", want
-	}}
-	// A v2 config in the context must not matter for a v1 service.
-	ctx := types.WithAWSConfig(context.Background(), aws.Config{})
-	out, err := svc.Invoke(ctx, sess)
-	if out != "out" || err != want || gotSess != sess {
-		t.Fatalf("out=%v err=%v sess same=%v", out, err, gotSess == sess)
-	}
-	var wrapped *awsv2.Error
-	if errors.As(err, &wrapped) {
-		t.Fatal("v1 errors must not be wrapped")
-	}
-}
-
-func TestInvokeV2UsesContextConfigAndWrapsErrors(t *testing.T) {
+func TestInvokeUsesContextConfigAndWrapsErrors(t *testing.T) {
 	var gotRegion string
 	api := &smithy.OperationError{ServiceID: "STS", OperationName: "GetCallerIdentity",
 		Err: &smithy.GenericAPIError{Code: "AccessDenied", Message: "nope"}}
@@ -53,7 +32,7 @@ func TestInvokeV2UsesContextConfigAndWrapsErrors(t *testing.T) {
 		return "out", api
 	}}
 	ctx := types.WithAWSConfig(context.Background(), aws.Config{Region: "ap-south-1"})
-	out, err := svc.Invoke(ctx, nil)
+	out, err := svc.Invoke(ctx)
 	if gotRegion != "ap-south-1" {
 		t.Errorf("CallV2 got region %q, want the ctx config's", gotRegion)
 	}
@@ -73,21 +52,21 @@ func TestInvokeV2UsesContextConfigAndWrapsErrors(t *testing.T) {
 	}
 }
 
-func TestInvokeV2NilErrorStaysNil(t *testing.T) {
+func TestInvokeNilErrorStaysNil(t *testing.T) {
 	svc := types.AWSService{Name: "v2", CallV2: func(context.Context, aws.Config) (interface{}, error) { return 1, nil }}
-	out, err := svc.Invoke(types.WithAWSConfig(context.Background(), aws.Config{}), nil)
+	out, err := svc.Invoke(types.WithAWSConfig(context.Background(), aws.Config{}))
 	if err != nil || out != 1 {
 		t.Fatalf("out=%v err=%v", out, err)
 	}
 }
 
-func TestInvokeV2MissingConfigIsAnErrorNotAPanic(t *testing.T) {
+func TestInvokeMissingConfigIsAnErrorNotAPanic(t *testing.T) {
 	called := false
 	svc := types.AWSService{Name: "needs-cfg", CallV2: func(context.Context, aws.Config) (interface{}, error) {
 		called = true
 		return nil, nil
 	}}
-	_, err := svc.Invoke(context.Background(), nil)
+	_, err := svc.Invoke(context.Background())
 	if err == nil || !strings.Contains(err.Error(), "needs-cfg") || !strings.Contains(err.Error(), "v2 config") {
 		t.Fatalf("err = %v", err)
 	}
@@ -97,15 +76,11 @@ func TestInvokeV2MissingConfigIsAnErrorNotAPanic(t *testing.T) {
 }
 
 func TestInvokeMisconfiguredService(t *testing.T) {
-	if _, err := (types.AWSService{Name: "none"}).Invoke(context.Background(), nil); err == nil {
-		t.Error("service with neither Call nor CallV2 must return an error")
+	_, err := (types.AWSService{Name: "none"}).Invoke(types.WithAWSConfig(context.Background(), aws.Config{}))
+	if err == nil || !strings.Contains(err.Error(), "none") {
+		t.Errorf("service without CallV2 must return an error naming it, got %v", err)
 	}
-	both := types.AWSService{
-		Name:   "both",
-		Call:   func(context.Context, *session.Session) (interface{}, error) { return nil, nil },
-		CallV2: func(context.Context, aws.Config) (interface{}, error) { return nil, nil },
-	}
-	if _, err := both.Invoke(types.WithAWSConfig(context.Background(), aws.Config{}), nil); err == nil {
-		t.Error("service with both Call and CallV2 must return an error")
+	if _, err := (types.AWSService{Name: "none"}).Invoke(context.Background()); err == nil {
+		t.Error("service without CallV2 and without a config must return an error")
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 )
 
 // captureLines runs fn with output buffered (ConcurrentMode) and returns the
@@ -38,8 +38,8 @@ type dedupeCall struct {
 }
 
 func TestHandleAWSErrorDedupe(t *testing.T) {
-	denied := awserr.New("AccessDenied", "nope", nil)
-	throttled := awserr.New("Throttling", "slow", nil)
+	denied := &smithy.GenericAPIError{Code: "AccessDenied", Message: "nope"}
+	throttled := &smithy.GenericAPIError{Code: "Throttling", Message: "slow"}
 	plain := errors.New("boom")
 
 	tests := []struct {
@@ -84,7 +84,7 @@ func TestHandleAWSErrorDedupe(t *testing.T) {
 
 func TestHandleAWSErrorDedupeStillReturnsInvalidKey(t *testing.T) {
 	SetErrorDedupe(true)
-	err := awserr.New(types.InvalidClientTokenId, "bad token", nil)
+	err := &smithy.GenericAPIError{Code: types.InvalidClientTokenId, Message: "bad token"}
 	printed := captureLines(t, func() {
 		for i := 0; i < 3; i++ {
 			got := HandleAWSError(false, "a", err)
@@ -103,7 +103,7 @@ func TestHandleAWSErrorDedupeStillReturnsInvalidKey(t *testing.T) {
 
 func TestHandleAWSErrorDedupeConcurrent(t *testing.T) {
 	SetErrorDedupe(true)
-	err := awserr.New("AccessDenied", "nope", nil)
+	err := &smithy.GenericAPIError{Code: "AccessDenied", Message: "nope"}
 	const goroutines, perG = 8, 25
 	printed := captureLines(t, func() {
 		var wg sync.WaitGroup
@@ -128,7 +128,7 @@ func TestHandleAWSErrorDedupeConcurrent(t *testing.T) {
 
 func TestSetErrorDedupeResets(t *testing.T) {
 	SetErrorDedupe(true)
-	err := awserr.New("AccessDenied", "nope", nil)
+	err := &smithy.GenericAPIError{Code: "AccessDenied", Message: "nope"}
 	captureLines(t, func() {
 		HandleAWSError(false, "a", err)
 		HandleAWSError(false, "a", err)
