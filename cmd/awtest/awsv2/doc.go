@@ -132,6 +132,12 @@
 //     region) and cloudwatch (DescribeAlarms, ListMetrics on the cloudwatch
 //     module, pinned to v1.52.8 because later releases speak CBOR RPC v2, plus
 //     cloudwatchlogs DescribeLogGroups/DescribeLogStreams with paginators).
+//     Bulk 12 is migrated too: ec2 (DescribeInstances with the user-data and
+//     Elastic IP follow-ups, one call per region, NextToken ignored as in v1)
+//     and vpc (DescribeVpcs, DescribeSubnets, DescribeSecurityGroups with
+//     manual NextToken pagination, failing regions skipped), regional loops
+//     that share the ec2 module (pinned to v1.341.0) and no longer mutate a
+//     shared region.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

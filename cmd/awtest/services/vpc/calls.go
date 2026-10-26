@@ -3,40 +3,41 @@ package vpc
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"time"
 )
 
 // VPCInfrastructure holds aggregated VPC, Subnet, and Security Group results.
 type VPCInfrastructure struct {
-	VPCs           []*ec2.Vpc
-	Subnets        []*ec2.Subnet
-	SecurityGroups []*ec2.SecurityGroup
+	VPCs           []ec2types.Vpc
+	Subnets        []ec2types.Subnet
+	SecurityGroups []ec2types.SecurityGroup
 	PartialErrors  []error
 }
 
 var VpcCalls = []types.AWSService{
 	{
 		Name: "ec2:DescribeVpcs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			infra := &VPCInfrastructure{}
 			var lastErr error
 			anyRegionSucceeded := false
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := ec2.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, ec2.NewFromConfig)
 				regionFailed := false
 
 				// DescribeVpcs
-				var regionVpcs []*ec2.Vpc
+				var regionVpcs []ec2types.Vpc
 				vpcInput := &ec2.DescribeVpcsInput{}
 				for {
-					output, err := svc.DescribeVpcsWithContext(ctx, vpcInput)
+					output, err := svc.DescribeVpcs(ctx, vpcInput)
 					if err != nil {
 						lastErr = err
 						regionFailed = true
@@ -54,12 +55,12 @@ var VpcCalls = []types.AWSService{
 				}
 
 				// DescribeSubnets
-				var regionSubnets []*ec2.Subnet
+				var regionSubnets []ec2types.Subnet
 				subnetInput := &ec2.DescribeSubnetsInput{}
 				for {
-					output, err := svc.DescribeSubnetsWithContext(ctx, subnetInput)
+					output, err := svc.DescribeSubnets(ctx, subnetInput)
 					if err != nil {
-						infra.PartialErrors = append(infra.PartialErrors, fmt.Errorf("ec2:DescribeSubnets in %s: %v", region, err))
+						infra.PartialErrors = append(infra.PartialErrors, fmt.Errorf("ec2:DescribeSubnets in %s: %v", region, awsv2.Wrap(err)))
 						break
 					}
 					regionSubnets = append(regionSubnets, output.Subnets...)
@@ -70,12 +71,12 @@ var VpcCalls = []types.AWSService{
 				}
 
 				// DescribeSecurityGroups
-				var regionSGs []*ec2.SecurityGroup
+				var regionSGs []ec2types.SecurityGroup
 				sgInput := &ec2.DescribeSecurityGroupsInput{}
 				for {
-					output, err := svc.DescribeSecurityGroupsWithContext(ctx, sgInput)
+					output, err := svc.DescribeSecurityGroups(ctx, sgInput)
 					if err != nil {
-						infra.PartialErrors = append(infra.PartialErrors, fmt.Errorf("ec2:DescribeSecurityGroups in %s: %v", region, err))
+						infra.PartialErrors = append(infra.PartialErrors, fmt.Errorf("ec2:DescribeSecurityGroups in %s: %v", region, awsv2.Wrap(err)))
 						break
 					}
 					regionSGs = append(regionSGs, output.SecurityGroups...)
@@ -170,15 +171,9 @@ func processVPCs(infra *VPCInfrastructure, debug bool) []types.ScanResult {
 			cidrBlock = *v.CidrBlock
 		}
 
-		state := ""
-		if v.State != nil {
-			state = *v.State
-		}
+		state := string(v.State)
 
-		isDefault := false
-		if v.IsDefault != nil {
-			isDefault = *v.IsDefault
-		}
+		isDefault := aws.ToBool(v.IsDefault)
 
 		subnetCount := subnetsByVPC[vpcId]
 		sgCount := sgsByVPC[vpcId]

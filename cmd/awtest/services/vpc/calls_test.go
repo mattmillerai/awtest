@@ -2,9 +2,9 @@ package vpc
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"testing"
 )
 
@@ -22,15 +22,15 @@ func TestProcess(t *testing.T) {
 		{
 			name: "VPC with subnets and security groups",
 			input: &VPCInfrastructure{
-				VPCs: []*ec2.Vpc{
+				VPCs: []ec2types.Vpc{
 					{
 						VpcId:     aws.String("vpc-0123456789abcdef0"),
 						CidrBlock: aws.String("10.0.0.0/16"),
-						State:     aws.String("available"),
+						State:     ec2types.VpcStateAvailable,
 						IsDefault: aws.Bool(false),
 					},
 				},
-				Subnets: []*ec2.Subnet{
+				Subnets: []ec2types.Subnet{
 					{
 						SubnetId:         aws.String("subnet-aaa"),
 						VpcId:            aws.String("vpc-0123456789abcdef0"),
@@ -44,22 +44,22 @@ func TestProcess(t *testing.T) {
 						AvailabilityZone: aws.String("us-east-1b"),
 					},
 				},
-				SecurityGroups: []*ec2.SecurityGroup{
+				SecurityGroups: []ec2types.SecurityGroup{
 					{
 						GroupId:             aws.String("sg-aaa"),
 						GroupName:           aws.String("default"),
 						VpcId:               aws.String("vpc-0123456789abcdef0"),
 						Description:         aws.String("default VPC security group"),
-						IpPermissions:       []*ec2.IpPermission{{IpProtocol: aws.String("-1")}},
-						IpPermissionsEgress: []*ec2.IpPermission{{IpProtocol: aws.String("-1")}},
+						IpPermissions:       []ec2types.IpPermission{{IpProtocol: aws.String("-1")}},
+						IpPermissionsEgress: []ec2types.IpPermission{{IpProtocol: aws.String("-1")}},
 					},
 					{
 						GroupId:             aws.String("sg-bbb"),
 						GroupName:           aws.String("web"),
 						VpcId:               aws.String("vpc-0123456789abcdef0"),
 						Description:         aws.String("web security group"),
-						IpPermissions:       []*ec2.IpPermission{{IpProtocol: aws.String("tcp")}, {IpProtocol: aws.String("tcp")}},
-						IpPermissionsEgress: []*ec2.IpPermission{},
+						IpPermissions:       []ec2types.IpPermission{{IpProtocol: aws.String("tcp")}, {IpProtocol: aws.String("tcp")}},
+						IpPermissionsEgress: []ec2types.IpPermission{},
 					},
 				},
 			},
@@ -138,16 +138,16 @@ func TestProcess(t *testing.T) {
 		{
 			name: "default VPC",
 			input: &VPCInfrastructure{
-				VPCs: []*ec2.Vpc{
+				VPCs: []ec2types.Vpc{
 					{
 						VpcId:     aws.String("vpc-default"),
 						CidrBlock: aws.String("172.31.0.0/16"),
-						State:     aws.String("available"),
+						State:     ec2types.VpcStateAvailable,
 						IsDefault: aws.Bool(true),
 					},
 				},
-				Subnets:        []*ec2.Subnet{},
-				SecurityGroups: []*ec2.SecurityGroup{},
+				Subnets:        []ec2types.Subnet{},
+				SecurityGroups: []ec2types.SecurityGroup{},
 			},
 			expectedCount: 1,
 			checkResults: func(t *testing.T, results []types.ScanResult) {
@@ -166,17 +166,17 @@ func TestProcess(t *testing.T) {
 		{
 			name: "multiple VPCs with mixed subnets and SGs",
 			input: &VPCInfrastructure{
-				VPCs: []*ec2.Vpc{
-					{VpcId: aws.String("vpc-aaa"), CidrBlock: aws.String("10.0.0.0/16"), State: aws.String("available"), IsDefault: aws.Bool(false)},
-					{VpcId: aws.String("vpc-bbb"), CidrBlock: aws.String("10.1.0.0/16"), State: aws.String("available"), IsDefault: aws.Bool(true)},
+				VPCs: []ec2types.Vpc{
+					{VpcId: aws.String("vpc-aaa"), CidrBlock: aws.String("10.0.0.0/16"), State: ec2types.VpcStateAvailable, IsDefault: aws.Bool(false)},
+					{VpcId: aws.String("vpc-bbb"), CidrBlock: aws.String("10.1.0.0/16"), State: ec2types.VpcStateAvailable, IsDefault: aws.Bool(true)},
 				},
-				Subnets: []*ec2.Subnet{
+				Subnets: []ec2types.Subnet{
 					{SubnetId: aws.String("subnet-1"), VpcId: aws.String("vpc-aaa"), CidrBlock: aws.String("10.0.1.0/24"), AvailabilityZone: aws.String("us-east-1a")},
 					{SubnetId: aws.String("subnet-2"), VpcId: aws.String("vpc-aaa"), CidrBlock: aws.String("10.0.2.0/24"), AvailabilityZone: aws.String("us-east-1b")},
 					{SubnetId: aws.String("subnet-3"), VpcId: aws.String("vpc-bbb"), CidrBlock: aws.String("10.1.1.0/24"), AvailabilityZone: aws.String("us-east-1a")},
 				},
-				SecurityGroups: []*ec2.SecurityGroup{
-					{GroupId: aws.String("sg-1"), GroupName: aws.String("default"), VpcId: aws.String("vpc-aaa"), Description: aws.String("default"), IpPermissions: []*ec2.IpPermission{}, IpPermissionsEgress: []*ec2.IpPermission{}},
+				SecurityGroups: []ec2types.SecurityGroup{
+					{GroupId: aws.String("sg-1"), GroupName: aws.String("default"), VpcId: aws.String("vpc-aaa"), Description: aws.String("default"), IpPermissions: []ec2types.IpPermission{}, IpPermissionsEgress: []ec2types.IpPermission{}},
 				},
 			},
 			expectedCount: 6, // 2 VPCs + 3 subnets + 1 SG
@@ -200,9 +200,9 @@ func TestProcess(t *testing.T) {
 		{
 			name: "empty results",
 			input: &VPCInfrastructure{
-				VPCs:           []*ec2.Vpc{},
-				Subnets:        []*ec2.Subnet{},
-				SecurityGroups: []*ec2.SecurityGroup{},
+				VPCs:           []ec2types.Vpc{},
+				Subnets:        []ec2types.Subnet{},
+				SecurityGroups: []ec2types.SecurityGroup{},
 			},
 			expectedCount: 0,
 		},
@@ -227,11 +227,11 @@ func TestProcess(t *testing.T) {
 		{
 			name: "partial errors from subnet and SG enumeration",
 			input: &VPCInfrastructure{
-				VPCs: []*ec2.Vpc{
-					{VpcId: aws.String("vpc-partial"), CidrBlock: aws.String("10.0.0.0/16"), State: aws.String("available"), IsDefault: aws.Bool(false)},
+				VPCs: []ec2types.Vpc{
+					{VpcId: aws.String("vpc-partial"), CidrBlock: aws.String("10.0.0.0/16"), State: ec2types.VpcStateAvailable, IsDefault: aws.Bool(false)},
 				},
-				Subnets:        []*ec2.Subnet{},
-				SecurityGroups: []*ec2.SecurityGroup{},
+				Subnets:        []ec2types.Subnet{},
+				SecurityGroups: []ec2types.SecurityGroup{},
 				PartialErrors: []error{
 					fmt.Errorf("ec2:DescribeSubnets in us-east-1: AccessDeniedException"),
 					fmt.Errorf("ec2:DescribeSecurityGroups in us-east-1: AccessDeniedException"),
@@ -258,15 +258,15 @@ func TestProcess(t *testing.T) {
 		{
 			name: "nil field handling",
 			input: &VPCInfrastructure{
-				VPCs: []*ec2.Vpc{
+				VPCs: []ec2types.Vpc{
 					{
 						VpcId:     nil,
 						CidrBlock: nil,
-						State:     nil,
+						State:     "",
 						IsDefault: nil,
 					},
 				},
-				Subnets: []*ec2.Subnet{
+				Subnets: []ec2types.Subnet{
 					{
 						SubnetId:         nil,
 						VpcId:            nil,
@@ -274,7 +274,7 @@ func TestProcess(t *testing.T) {
 						AvailabilityZone: nil,
 					},
 				},
-				SecurityGroups: []*ec2.SecurityGroup{
+				SecurityGroups: []ec2types.SecurityGroup{
 					{
 						GroupId:             nil,
 						GroupName:           nil,

@@ -234,6 +234,28 @@ v2 normalized error text for missing replay fixture on restxml services.
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk11`
 green without regenerating it.
 
+## Bulk 12 golden (ec2, vpc)
+
+`replay-bulk12.json` is the v1 baseline for the twelfth bulk migration batch:
+`ec2:DescribeInstances` (with the user-data and Elastic IP follow-ups) and the
+`vpc` service's `ec2:DescribeVpcs` (VPCs, subnets and security groups). It is
+produced from the fictional fixtures in `bulk12/` (fixture dir
+`testdata/golden/bulk12`) with
+`awtest -replay <abs>/testdata/golden/bulk12 -services ec2 -quiet -format json`.
+The functional tests in the `ec2` and `vpc` packages additionally cover
+sparse resources, error text, NextToken pagination, the region loops and the
+absence of shared-region mutation (v1 `ec2` rewrote the shared session's
+region on every iteration; v2 builds a region-pinned client per iteration).
+
+The v2 migration left `replay-bulk12.json` unchanged. The v2 `ec2` module
+(pinned to v1.341.0, the newest release that needs no bump of the core or
+shared modules) kept `Vpc.IsDefault` a `*bool`, so no optional scalar became a
+plain value and the accepted "absent -> zero value" golden-difference class
+did not occur.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk12`
+green without regenerating it.
+
 ## Sample golden: accepted error-text change (restxml)
 
 accepted: v2 normalized error text for missing replay fixture on restxml

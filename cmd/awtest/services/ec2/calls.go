@@ -4,54 +4,55 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"time"
 )
 
 type EC2InstanceDetails struct {
-	Instance  *ec2.Instance
+	Instance  ec2types.Instance
 	UserData  string
 	ElasticIP string
-	Tags      []*ec2.Tag
+	Tags      []ec2types.Tag
 }
 
 var EC2Calls = []types.AWSService{
 	{
 		Name: "ec2:DescribeInstances",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allDetails []EC2InstanceDetails
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := ec2.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, region, ec2.NewFromConfig)
 				input := &ec2.DescribeInstancesInput{}
-				output, err := svc.DescribeInstancesWithContext(ctx, input)
+				output, err := svc.DescribeInstances(ctx, input)
 				if err != nil {
 					return nil, err
 				}
 				for _, reservation := range output.Reservations {
 					for _, instance := range reservation.Instances {
 						// Get user data
-						userData, err := getInstanceUserData(ctx, svc, *instance.InstanceId)
+						userData, err := getInstanceUserData(ctx, svc, aws.ToString(instance.InstanceId))
 						if err != nil {
-							userData = fmt.Sprintf("Error retrieving user data: %v", err)
+							userData = fmt.Sprintf("Error retrieving user data: %v", awsv2.Wrap(err))
 						}
 
 						// Get Elastic IP
 						elasticIP := ""
-						addressesOutput, err := svc.DescribeAddressesWithContext(ctx, &ec2.DescribeAddressesInput{
-							Filters: []*ec2.Filter{
+						addressesOutput, err := svc.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{
+							Filters: []ec2types.Filter{
 								{
 									Name:   aws.String("instance-id"),
-									Values: []*string{instance.InstanceId},
+									Values: []string{aws.ToString(instance.InstanceId)},
 								},
 							},
 						})
 						if err == nil && len(addressesOutput.Addresses) > 0 {
-							elasticIP = *addressesOutput.Addresses[0].PublicIp
+							elasticIP = aws.ToString(addressesOutput.Addresses[0].PublicIp)
 						}
 
 						// Store instance details with user data, Elastic IP, and tags
@@ -85,31 +86,21 @@ var EC2Calls = []types.AWSService{
 			if details, ok := output.([]EC2InstanceDetails); ok {
 				for _, detail := range details {
 					instance := detail.Instance
-					instanceID := ""
-					if instance.InstanceId != nil {
-						instanceID = *instance.InstanceId
-					}
-
-					ipAddress := ""
-					if instance.PublicIpAddress != nil {
-						ipAddress = *instance.PublicIpAddress
-					}
+					instanceID := aws.ToString(instance.InstanceId)
+					ipAddress := aws.ToString(instance.PublicIpAddress)
 
 					stateName := ""
-					if instance.State != nil && instance.State.Name != nil {
-						stateName = *instance.State.Name
+					if instance.State != nil {
+						stateName = string(instance.State.Name)
 					}
 
-					instanceType := ""
-					if instance.InstanceType != nil {
-						instanceType = *instance.InstanceType
-					}
+					instanceType := string(instance.InstanceType)
 
 					// Build details map
 					instanceDetails := map[string]interface{}{
-						"state":   stateName,
-						"type":    instanceType,
-						"ip":      ipAddress,
+						"state":      stateName,
+						"type":       instanceType,
+						"ip":         ipAddress,
 						"elastic_ip": detail.ElasticIP,
 						"user_data":  detail.UserData,
 					}
@@ -170,13 +161,13 @@ var EC2Calls = []types.AWSService{
 }
 
 // getInstanceUserData retrieves the user data for a specific EC2 instance.
-func getInstanceUserData(ctx context.Context, svc *ec2.EC2, instanceId string) (string, error) {
+func getInstanceUserData(ctx context.Context, svc *ec2.Client, instanceId string) (string, error) {
 	input := &ec2.DescribeInstanceAttributeInput{
 		InstanceId: aws.String(instanceId),
-		Attribute:  aws.String("userData"),
+		Attribute:  ec2types.InstanceAttributeNameUserData,
 	}
 
-	result, err := svc.DescribeInstanceAttributeWithContext(ctx, input)
+	result, err := svc.DescribeInstanceAttribute(ctx, input)
 	if err != nil {
 		return "", err
 	}

@@ -67,6 +67,7 @@ github.com/aws/aws-sdk-go-v2/aws
 github.com/aws/aws-sdk-go-v2/aws/arn
 github.com/aws/aws-sdk-go-v2/aws/defaults
 github.com/aws/aws-sdk-go-v2/aws/middleware
+github.com/aws/aws-sdk-go-v2/aws/protocol/ec2query
 github.com/aws/aws-sdk-go-v2/aws/protocol/query
 github.com/aws/aws-sdk-go-v2/aws/protocol/restjson
 github.com/aws/aws-sdk-go-v2/aws/protocol/xml
@@ -250,6 +251,11 @@ github.com/aws/aws-sdk-go-v2/service/dynamodb/internal/customizations
 github.com/aws/aws-sdk-go-v2/service/dynamodb/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/dynamodb/schemas
 github.com/aws/aws-sdk-go-v2/service/dynamodb/types
+# github.com/aws/aws-sdk-go-v2/service/ec2 v1.341.0
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/ec2
+github.com/aws/aws-sdk-go-v2/service/ec2/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/ec2/types
 # github.com/aws/aws-sdk-go-v2/service/ecr v1.56.0
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/ecr

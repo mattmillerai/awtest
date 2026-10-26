@@ -1,0 +1,108 @@
+[
+  {
+    "details": {
+      "elastic_ip": "198.51.100.7",
+      "ip": "203.0.113.10",
+      "state": "running",
+      "tags": {
+        "Env": "dev",
+        "Name": "web-1"
+      },
+      "type": "t3.micro",
+      "user_data": "hello\n"
+    },
+    "methodName": "ec2:DescribeInstances",
+    "resourceName": "i-0a1b2c3d4e5f60001",
+    "resourceType": "instance",
+    "serviceName": "EC2"
+  },
+  {
+    "details": {
+      "elastic_ip": "198.51.100.7",
+      "ip": "",
+      "state": "stopped",
+      "type": "m5.large",
+      "user_data": "hello\n"
+    },
+    "methodName": "ec2:DescribeInstances",
+    "resourceName": "i-0a1b2c3d4e5f60002",
+    "resourceType": "instance",
+    "serviceName": "EC2"
+  },
+  {
+    "details": {
+      "CidrBlock": "10.0.0.0/16",
+      "IsDefault": false,
+      "SecurityGroupCount": 1,
+      "State": "available",
+      "SubnetCount": 1,
+      "VpcId": "vpc-0a1b2c3d4e5f60001"
+    },
+    "methodName": "ec2:DescribeVpcs",
+    "resourceName": "vpc-0a1b2c3d4e5f60001",
+    "resourceType": "vpc",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {
+      "CidrBlock": "",
+      "IsDefault": false,
+      "SecurityGroupCount": 0,
+      "State": "",
+      "SubnetCount": 0,
+      "VpcId": "vpc-0a1b2c3d4e5f60002"
+    },
+    "methodName": "ec2:DescribeVpcs",
+    "resourceName": "vpc-0a1b2c3d4e5f60002",
+    "resourceType": "vpc",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {
+      "AvailabilityZone": "us-west-2a",
+      "CidrBlock": "10.0.1.0/24",
+      "VpcId": "vpc-0a1b2c3d4e5f60001"
+    },
+    "methodName": "ec2:DescribeSubnets",
+    "resourceName": "subnet-0a1b2c3d4e5f60001",
+    "resourceType": "subnet",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {
+      "AvailabilityZone": "",
+      "CidrBlock": "",
+      "VpcId": ""
+    },
+    "methodName": "ec2:DescribeSubnets",
+    "resourceName": "subnet-0a1b2c3d4e5f60002",
+    "resourceType": "subnet",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {
+      "Description": "Web tier",
+      "GroupName": "web-sg",
+      "InboundRules": 2,
+      "OutboundRules": 1,
+      "VpcId": "vpc-0a1b2c3d4e5f60001"
+    },
+    "methodName": "ec2:DescribeSecurityGroups",
+    "resourceName": "sg-0a1b2c3d4e5f60001",
+    "resourceType": "security-group",
+    "serviceName": "VPC"
+  },
+  {
+    "details": {
+      "Description": "",
+      "GroupName": "",
+      "InboundRules": 0,
+      "OutboundRules": 0,
+      "VpcId": ""
+    },
+    "methodName": "ec2:DescribeSecurityGroups",
+    "resourceName": "sg-0a1b2c3d4e5f60002",
+    "resourceType": "security-group",
+    "serviceName": "VPC"
+  }
+]

@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/directconnect"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/efs"
@@ -157,6 +158,10 @@ var v2EnvSuffix = map[string][]string{
 	"cloudfront":     {"CLOUDFRONT"},
 	"cloudwatch":     {"CLOUDWATCH"},
 	"cloudwatchlogs": {"CLOUDWATCH_LOGS", "CLOUDWATCH"},
+
+	// ec2 covers both ec2:DescribeInstances (ec2 service) and ec2:DescribeVpcs
+	// (vpc service), which share the ec2 module.
+	"ec2": {"EC2"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -229,6 +234,8 @@ var v2ServiceIDs = map[string][]string{
 	"cloudfront":     {cloudfront.ServiceID},
 	"cloudwatch":     {cloudwatch.ServiceID},
 	"cloudwatchlogs": {cloudwatchlogs.ServiceID, cloudwatch.ServiceID},
+
+	"ec2": {ec2.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

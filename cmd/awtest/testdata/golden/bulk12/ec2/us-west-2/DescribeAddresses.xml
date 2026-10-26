@@ -1,0 +1,1 @@
+<DescribeAddressesResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><requestId>r1</requestId><addressesSet><item><publicIp>198.51.100.7</publicIp><allocationId>eipalloc-0123456789abcdef0</allocationId><domain>vpc</domain></item></addressesSet></DescribeAddressesResponse>

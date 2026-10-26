@@ -1,0 +1,1 @@
+<DescribeSubnetsResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"><requestId>r1</requestId><subnetSet><item><subnetId>subnet-0a1b2c3d4e5f60001</subnetId><vpcId>vpc-0a1b2c3d4e5f60001</vpcId><cidrBlock>10.0.1.0/24</cidrBlock><availabilityZone>us-west-2a</availabilityZone></item><item><subnetId>subnet-0a1b2c3d4e5f60002</subnetId></item></subnetSet></DescribeSubnetsResponse>
