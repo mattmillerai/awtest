@@ -1,0 +1,1 @@
+{"TrainingJobSummaries":[{"TrainingJobName":"demo-training","TrainingJobArn":"arn:aws:sagemaker:us-west-2:123456789012:training-job/demo-training","TrainingJobStatus":"Completed"},{"TrainingJobName":"bare-training"}]}

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/organizations"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	orgtypes "github.com/aws/aws-sdk-go-v2/service/organizations/types"
 )
 
 func TestListAccountsProcess(t *testing.T) {
@@ -28,12 +28,12 @@ func TestListAccountsProcess(t *testing.T) {
 	}{
 		{
 			name: "valid accounts",
-			output: []*organizations.Account{
+			output: []orgtypes.Account{
 				{
 					Id:              aws.String("123456789012"),
 					Name:            aws.String("Production"),
 					Email:           aws.String("prod@example.com"),
-					Status:          aws.String("ACTIVE"),
+					Status:          orgtypes.AccountStatus("ACTIVE"),
 					Arn:             aws.String("arn:aws:organizations::111111111111:account/o-abc123/123456789012"),
 					JoinedTimestamp: &joinedTime,
 				},
@@ -41,7 +41,7 @@ func TestListAccountsProcess(t *testing.T) {
 					Id:     aws.String("987654321098"),
 					Name:   aws.String("Development"),
 					Email:  aws.String("dev@example.com"),
-					Status: aws.String("ACTIVE"),
+					Status: orgtypes.AccountStatus("ACTIVE"),
 					Arn:    aws.String("arn:aws:organizations::111111111111:account/o-abc123/987654321098"),
 				},
 			},
@@ -54,7 +54,7 @@ func TestListAccountsProcess(t *testing.T) {
 		},
 		{
 			name:    "empty results",
-			output:  []*organizations.Account{},
+			output:  []orgtypes.Account{},
 			wantLen: 0,
 		},
 		{
@@ -66,12 +66,12 @@ func TestListAccountsProcess(t *testing.T) {
 		},
 		{
 			name: "nil fields",
-			output: []*organizations.Account{
+			output: []orgtypes.Account{
 				{
 					Id:              nil,
 					Name:            nil,
 					Email:           nil,
-					Status:          nil,
+					Status:          "",
 					Arn:             nil,
 					JoinedTimestamp: nil,
 				},
@@ -278,7 +278,7 @@ func TestListPoliciesProcess(t *testing.T) {
 	}{
 		{
 			name: "valid SCPs",
-			output: []*organizations.PolicySummary{
+			output: []orgtypes.PolicySummary{
 				{
 					Id:   aws.String("p-abc12345"),
 					Name: aws.String("FullAWSAccess"),
@@ -297,7 +297,7 @@ func TestListPoliciesProcess(t *testing.T) {
 		},
 		{
 			name:    "empty policies",
-			output:  []*organizations.PolicySummary{},
+			output:  []orgtypes.PolicySummary{},
 			wantLen: 0,
 		},
 		{
@@ -309,7 +309,7 @@ func TestListPoliciesProcess(t *testing.T) {
 		},
 		{
 			name: "nil fields",
-			output: []*organizations.PolicySummary{
+			output: []orgtypes.PolicySummary{
 				{
 					Id:   nil,
 					Name: nil,

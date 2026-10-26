@@ -1,0 +1,1 @@
+{"Policies":[{"Id":"p-examplepol1","Arn":"arn:aws:organizations::123456789012:policy/o-exampleorg1/service_control_policy/p-examplepol1","Name":"DemoDenyLeaveOrg","Type":"SERVICE_CONTROL_POLICY"},{"Id":"p-FullAWSAccess"}]}

@@ -112,6 +112,15 @@
 //     ListStreamConsumers), guardduty (ListDetectors, GetFindings, ListFilters)
 //     and macie2 (ListClassificationJobs, ListFindings, DescribeBuckets),
 //     regional loops with manual token pagination that skip failing regions.
+//     Bulk 9 is migrated too: mediaconvert (ListQueues, ListJobs, ListPresets),
+//     neptune (DescribeDBClusters, DescribeDBInstances,
+//     DescribeDBClusterParameterGroups) and sagemaker (ListNotebookInstances,
+//     ListEndpoints, ListModels, ListTrainingJobs), regional loops with manual
+//     token pagination that skip failing regions; opensearch (ListDomainNames
+//     with batched DescribeDomains), whose first failing ListDomainNames ends
+//     the region loop; and organizations (ListAccounts, ListRoots with
+//     ListOrganizationalUnitsForParent, ListPolicies), a global service pinned
+//     to us-east-1.
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

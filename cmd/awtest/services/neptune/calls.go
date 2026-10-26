@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/neptune"
+	nptypes "github.com/aws/aws-sdk-go-v2/service/neptune/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/neptune"
 )
 
 type npCluster struct {
@@ -56,35 +57,14 @@ type npParameterGroup struct {
 	Region                      string
 }
 
-func extractCluster(cluster *neptune.DBCluster, region string) npCluster {
-	identifier := ""
-	if cluster.DBClusterIdentifier != nil {
-		identifier = *cluster.DBClusterIdentifier
-	}
-	arn := ""
-	if cluster.DBClusterArn != nil {
-		arn = *cluster.DBClusterArn
-	}
-	status := ""
-	if cluster.Status != nil {
-		status = *cluster.Status
-	}
-	engine := ""
-	if cluster.Engine != nil {
-		engine = *cluster.Engine
-	}
-	engineVersion := ""
-	if cluster.EngineVersion != nil {
-		engineVersion = *cluster.EngineVersion
-	}
-	endpoint := ""
-	if cluster.Endpoint != nil {
-		endpoint = *cluster.Endpoint
-	}
-	readerEndpoint := ""
-	if cluster.ReaderEndpoint != nil {
-		readerEndpoint = *cluster.ReaderEndpoint
-	}
+func extractCluster(cluster nptypes.DBCluster, region string) npCluster {
+	identifier := aws.ToString(cluster.DBClusterIdentifier)
+	arn := aws.ToString(cluster.DBClusterArn)
+	status := aws.ToString(cluster.Status)
+	engine := aws.ToString(cluster.Engine)
+	engineVersion := aws.ToString(cluster.EngineVersion)
+	endpoint := aws.ToString(cluster.Endpoint)
+	readerEndpoint := aws.ToString(cluster.ReaderEndpoint)
 	port := ""
 	if cluster.Port != nil {
 		port = fmt.Sprintf("%d", *cluster.Port)
@@ -97,10 +77,7 @@ func extractCluster(cluster *neptune.DBCluster, region string) npCluster {
 	if cluster.StorageEncrypted != nil {
 		storageEncrypted = fmt.Sprintf("%t", *cluster.StorageEncrypted)
 	}
-	kmsKeyId := ""
-	if cluster.KmsKeyId != nil {
-		kmsKeyId = *cluster.KmsKeyId
-	}
+	kmsKeyId := aws.ToString(cluster.KmsKeyId)
 	deletionProtection := ""
 	if cluster.DeletionProtection != nil {
 		deletionProtection = fmt.Sprintf("%t", *cluster.DeletionProtection)
@@ -109,10 +86,7 @@ func extractCluster(cluster *neptune.DBCluster, region string) npCluster {
 	if cluster.IAMDatabaseAuthenticationEnabled != nil {
 		iamAuth = fmt.Sprintf("%t", *cluster.IAMDatabaseAuthenticationEnabled)
 	}
-	parameterGroup := ""
-	if cluster.DBClusterParameterGroup != nil {
-		parameterGroup = *cluster.DBClusterParameterGroup
-	}
+	parameterGroup := aws.ToString(cluster.DBClusterParameterGroup)
 	createTime := ""
 	if cluster.ClusterCreateTime != nil {
 		createTime = cluster.ClusterCreateTime.Format(time.RFC3339)
@@ -137,49 +111,23 @@ func extractCluster(cluster *neptune.DBCluster, region string) npCluster {
 	}
 }
 
-func extractInstance(instance *neptune.DBInstance, region string) npInstance {
-	identifier := ""
-	if instance.DBInstanceIdentifier != nil {
-		identifier = *instance.DBInstanceIdentifier
-	}
-	arn := ""
-	if instance.DBInstanceArn != nil {
-		arn = *instance.DBInstanceArn
-	}
-	instanceClass := ""
-	if instance.DBInstanceClass != nil {
-		instanceClass = *instance.DBInstanceClass
-	}
-	engine := ""
-	if instance.Engine != nil {
-		engine = *instance.Engine
-	}
-	engineVersion := ""
-	if instance.EngineVersion != nil {
-		engineVersion = *instance.EngineVersion
-	}
-	status := ""
-	if instance.DBInstanceStatus != nil {
-		status = *instance.DBInstanceStatus
-	}
+func extractInstance(instance nptypes.DBInstance, region string) npInstance {
+	identifier := aws.ToString(instance.DBInstanceIdentifier)
+	arn := aws.ToString(instance.DBInstanceArn)
+	instanceClass := aws.ToString(instance.DBInstanceClass)
+	engine := aws.ToString(instance.Engine)
+	engineVersion := aws.ToString(instance.EngineVersion)
+	status := aws.ToString(instance.DBInstanceStatus)
 	endpointAddress := ""
 	endpointPort := ""
 	if instance.Endpoint != nil {
-		if instance.Endpoint.Address != nil {
-			endpointAddress = *instance.Endpoint.Address
-		}
+		endpointAddress = aws.ToString(instance.Endpoint.Address)
 		if instance.Endpoint.Port != nil {
 			endpointPort = fmt.Sprintf("%d", *instance.Endpoint.Port)
 		}
 	}
-	clusterIdentifier := ""
-	if instance.DBClusterIdentifier != nil {
-		clusterIdentifier = *instance.DBClusterIdentifier
-	}
-	az := ""
-	if instance.AvailabilityZone != nil {
-		az = *instance.AvailabilityZone
-	}
+	clusterIdentifier := aws.ToString(instance.DBClusterIdentifier)
+	az := aws.ToString(instance.AvailabilityZone)
 	publiclyAccessible := ""
 	if instance.PubliclyAccessible != nil {
 		publiclyAccessible = fmt.Sprintf("%t", *instance.PubliclyAccessible)
@@ -210,28 +158,12 @@ func extractInstance(instance *neptune.DBInstance, region string) npInstance {
 	}
 }
 
-func extractParameterGroup(pg *neptune.DBClusterParameterGroup, region string) npParameterGroup {
-	name := ""
-	if pg.DBClusterParameterGroupName != nil {
-		name = *pg.DBClusterParameterGroupName
-	}
-	arn := ""
-	if pg.DBClusterParameterGroupArn != nil {
-		arn = *pg.DBClusterParameterGroupArn
-	}
-	description := ""
-	if pg.Description != nil {
-		description = *pg.Description
-	}
-	family := ""
-	if pg.DBParameterGroupFamily != nil {
-		family = *pg.DBParameterGroupFamily
-	}
+func extractParameterGroup(pg nptypes.DBClusterParameterGroup, region string) npParameterGroup {
 	return npParameterGroup{
-		DBClusterParameterGroupName: name,
-		DBClusterParameterGroupArn:  arn,
-		Description:                 description,
-		DBParameterGroupFamily:      family,
+		DBClusterParameterGroupName: aws.ToString(pg.DBClusterParameterGroupName),
+		DBClusterParameterGroupArn:  aws.ToString(pg.DBClusterParameterGroupArn),
+		Description:                 aws.ToString(pg.Description),
+		DBParameterGroupFamily:      aws.ToString(pg.DBParameterGroupFamily),
 		Region:                      region,
 	}
 }
@@ -239,28 +171,26 @@ func extractParameterGroup(pg *neptune.DBClusterParameterGroup, region string) n
 var NeptuneCalls = []types.AWSService{
 	{
 		Name: "neptune:DescribeDBClusters",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allClusters []npCluster
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, neptune.NewFromConfig)
 				var marker *string
 				for {
 					input := &neptune.DescribeDBClustersInput{}
 					if marker != nil {
 						input.Marker = marker
 					}
-					output, err := svc.DescribeDBClustersWithContext(ctx, input)
+					output, err := svc.DescribeDBClusters(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "neptune:DescribeDBClusters", err)
 						break
 					}
 					for _, cluster := range output.DBClusters {
-						if cluster != nil {
-							allClusters = append(allClusters, extractCluster(cluster, region))
-						}
+						allClusters = append(allClusters, extractCluster(cluster, region))
 					}
 					if output.Marker == nil {
 						break
@@ -331,28 +261,26 @@ var NeptuneCalls = []types.AWSService{
 	},
 	{
 		Name: "neptune:DescribeDBInstances",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allInstances []npInstance
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, neptune.NewFromConfig)
 				var marker *string
 				for {
 					input := &neptune.DescribeDBInstancesInput{}
 					if marker != nil {
 						input.Marker = marker
 					}
-					output, err := svc.DescribeDBInstancesWithContext(ctx, input)
+					output, err := svc.DescribeDBInstances(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "neptune:DescribeDBInstances", err)
 						break
 					}
 					for _, instance := range output.DBInstances {
-						if instance != nil {
-							allInstances = append(allInstances, extractInstance(instance, region))
-						}
+						allInstances = append(allInstances, extractInstance(instance, region))
 					}
 					if output.Marker == nil {
 						break
@@ -421,28 +349,26 @@ var NeptuneCalls = []types.AWSService{
 	},
 	{
 		Name: "neptune:DescribeDBClusterParameterGroups",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allGroups []npParameterGroup
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := neptune.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, neptune.NewFromConfig)
 				var marker *string
 				for {
 					input := &neptune.DescribeDBClusterParameterGroupsInput{}
 					if marker != nil {
 						input.Marker = marker
 					}
-					output, err := svc.DescribeDBClusterParameterGroupsWithContext(ctx, input)
+					output, err := svc.DescribeDBClusterParameterGroups(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "neptune:DescribeDBClusterParameterGroups", err)
 						break
 					}
 					for _, pg := range output.DBClusterParameterGroups {
-						if pg != nil {
-							allGroups = append(allGroups, extractParameterGroup(pg, region))
-						}
+						allGroups = append(allGroups, extractParameterGroup(pg, region))
 					}
 					if output.Marker == nil {
 						break

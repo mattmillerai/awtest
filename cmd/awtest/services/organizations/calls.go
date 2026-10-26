@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/organizations"
+	orgtypes "github.com/aws/aws-sdk-go-v2/service/organizations/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/organizations"
 )
 
-var globalRegionConfig = &aws.Config{Region: aws.String("us-east-1")}
+// globalRegion is the region the Organizations endpoint lives in; v1 pinned
+// every client to it regardless of the configured region.
+const globalRegion = "us-east-1"
 
 type orgOU struct {
 	OUId     string
@@ -24,13 +27,13 @@ type orgOU struct {
 var OrganizationsCalls = []types.AWSService{
 	{
 		Name: "organizations:ListAccounts",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := organizations.New(sess, globalRegionConfig)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, globalRegion, organizations.NewFromConfig)
 
-			var allAccounts []*organizations.Account
+			var allAccounts []orgtypes.Account
 			input := &organizations.ListAccountsInput{}
 			for {
-				output, err := svc.ListAccountsWithContext(ctx, input)
+				output, err := svc.ListAccounts(ctx, input)
 				if err != nil {
 					return nil, err
 				}
@@ -57,37 +60,18 @@ var OrganizationsCalls = []types.AWSService{
 				}
 			}
 
-			accounts, ok := output.([]*organizations.Account)
+			accounts, ok := output.([]orgtypes.Account)
 			if !ok {
 				utils.HandleAWSError(debug, "organizations:ListAccounts", fmt.Errorf("unexpected output type %T", output))
 				return results
 			}
 
 			for _, account := range accounts {
-				accountId := ""
-				if account.Id != nil {
-					accountId = *account.Id
-				}
-
-				accountName := ""
-				if account.Name != nil {
-					accountName = *account.Name
-				}
-
-				accountEmail := ""
-				if account.Email != nil {
-					accountEmail = *account.Email
-				}
-
-				accountStatus := ""
-				if account.Status != nil {
-					accountStatus = *account.Status
-				}
-
-				accountArn := ""
-				if account.Arn != nil {
-					accountArn = *account.Arn
-				}
+				accountId := aws.ToString(account.Id)
+				accountName := aws.ToString(account.Name)
+				accountEmail := aws.ToString(account.Email)
+				accountStatus := string(account.Status)
+				accountArn := aws.ToString(account.Arn)
 
 				joinedTimestamp := ""
 				if account.JoinedTimestamp != nil {
@@ -118,8 +102,8 @@ var OrganizationsCalls = []types.AWSService{
 	},
 	{
 		Name: "organizations:ListOrganizationalUnits",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := organizations.New(sess, globalRegionConfig)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, globalRegion, organizations.NewFromConfig)
 
 			var allOUs []orgOU
 			var queue []string
@@ -127,7 +111,7 @@ var OrganizationsCalls = []types.AWSService{
 			// Step 1: Get roots
 			rootsInput := &organizations.ListRootsInput{}
 			for {
-				rootsOutput, err := svc.ListRootsWithContext(ctx, rootsInput)
+				rootsOutput, err := svc.ListRoots(ctx, rootsInput)
 				if err != nil {
 					return nil, err
 				}
@@ -151,7 +135,7 @@ var OrganizationsCalls = []types.AWSService{
 					ParentId: aws.String(parentId),
 				}
 				for {
-					ouOutput, err := svc.ListOrganizationalUnitsForParentWithContext(ctx, ouInput)
+					ouOutput, err := svc.ListOrganizationalUnitsForParent(ctx, ouInput)
 					if err != nil {
 						utils.HandleAWSError(false, "organizations:ListOrganizationalUnits", err)
 						break
@@ -162,18 +146,10 @@ var OrganizationsCalls = []types.AWSService{
 							ouId = *ou.Id
 							queue = append(queue, ouId)
 						}
-						ouName := ""
-						if ou.Name != nil {
-							ouName = *ou.Name
-						}
-						ouArn := ""
-						if ou.Arn != nil {
-							ouArn = *ou.Arn
-						}
 						allOUs = append(allOUs, orgOU{
 							OUId:     ouId,
-							OUName:   ouName,
-							OUArn:    ouArn,
+							OUName:   aws.ToString(ou.Name),
+							OUArn:    aws.ToString(ou.Arn),
 							ParentId: parentId,
 						})
 					}
@@ -229,15 +205,15 @@ var OrganizationsCalls = []types.AWSService{
 	},
 	{
 		Name: "organizations:ListPolicies",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := organizations.New(sess, globalRegionConfig)
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, globalRegion, organizations.NewFromConfig)
 
-			var allPolicies []*organizations.PolicySummary
+			var allPolicies []orgtypes.PolicySummary
 			input := &organizations.ListPoliciesInput{
-				Filter: aws.String("SERVICE_CONTROL_POLICY"),
+				Filter: orgtypes.PolicyTypeServiceControlPolicy,
 			}
 			for {
-				output, err := svc.ListPoliciesWithContext(ctx, input)
+				output, err := svc.ListPolicies(ctx, input)
 				if err != nil {
 					return nil, err
 				}
@@ -264,27 +240,16 @@ var OrganizationsCalls = []types.AWSService{
 				}
 			}
 
-			policies, ok := output.([]*organizations.PolicySummary)
+			policies, ok := output.([]orgtypes.PolicySummary)
 			if !ok {
 				utils.HandleAWSError(debug, "organizations:ListPolicies", fmt.Errorf("unexpected output type %T", output))
 				return results
 			}
 
 			for _, policy := range policies {
-				policyId := ""
-				if policy.Id != nil {
-					policyId = *policy.Id
-				}
-
-				policyName := ""
-				if policy.Name != nil {
-					policyName = *policy.Name
-				}
-
-				policyArn := ""
-				if policy.Arn != nil {
-					policyArn = *policy.Arn
-				}
+				policyId := aws.ToString(policy.Id)
+				policyName := aws.ToString(policy.Name)
+				policyArn := aws.ToString(policy.Arn)
 
 				results = append(results, types.ScanResult{
 					ServiceName:  "Organizations",

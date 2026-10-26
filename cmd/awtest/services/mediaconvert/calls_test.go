@@ -5,30 +5,30 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/mediaconvert"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	mctypes "github.com/aws/aws-sdk-go-v2/service/mediaconvert/types"
 )
 
 func TestListQueuesProcess(t *testing.T) {
 	process := MediaConvertCalls[0].Process
 
 	tests := []struct {
-		name                 string
-		output               interface{}
-		err                  error
-		wantLen              int
-		wantError            bool
-		wantResourceName     string
-		wantName             string
-		wantArn              string
-		wantStatus           string
-		wantType             string
-		wantPricingPlan      string
-		wantDescription      string
-		wantSubmittedJobs    string
-		wantProgressingJobs  string
-		wantCreatedAt        string
-		wantRegion           string
+		name                string
+		output              interface{}
+		err                 error
+		wantLen             int
+		wantError           bool
+		wantResourceName    string
+		wantName            string
+		wantArn             string
+		wantStatus          string
+		wantType            string
+		wantPricingPlan     string
+		wantDescription     string
+		wantSubmittedJobs   string
+		wantProgressingJobs string
+		wantCreatedAt       string
+		wantRegion          string
 	}{
 		{
 			name: "valid queues with full details",
@@ -58,18 +58,18 @@ func TestListQueuesProcess(t *testing.T) {
 					Region:               "us-west-2",
 				},
 			},
-			wantLen:              2,
-			wantResourceName:     "Default",
-			wantName:             "Default",
-			wantArn:              "arn:aws:mediaconvert:us-east-1:123456789012:queues/Default",
-			wantStatus:           "ACTIVE",
-			wantType:             "SYSTEM",
-			wantPricingPlan:      "ON_DEMAND",
-			wantDescription:      "Default queue",
-			wantSubmittedJobs:    "5",
-			wantProgressingJobs:  "2",
-			wantCreatedAt:        "2026-01-15T10:00:00Z",
-			wantRegion:           "us-east-1",
+			wantLen:             2,
+			wantResourceName:    "Default",
+			wantName:            "Default",
+			wantArn:             "arn:aws:mediaconvert:us-east-1:123456789012:queues/Default",
+			wantStatus:          "ACTIVE",
+			wantType:            "SYSTEM",
+			wantPricingPlan:     "ON_DEMAND",
+			wantDescription:     "Default queue",
+			wantSubmittedJobs:   "5",
+			wantProgressingJobs: "2",
+			wantCreatedAt:       "2026-01-15T10:00:00Z",
+			wantRegion:          "us-east-1",
 		},
 		{
 			name:    "empty results",
@@ -99,18 +99,18 @@ func TestListQueuesProcess(t *testing.T) {
 					Region:               "",
 				},
 			},
-			wantLen:              1,
-			wantResourceName:     "",
-			wantName:             "",
-			wantArn:              "",
-			wantStatus:           "",
-			wantType:             "",
-			wantPricingPlan:      "",
-			wantDescription:      "",
-			wantSubmittedJobs:    "",
-			wantProgressingJobs:  "",
-			wantCreatedAt:        "",
-			wantRegion:           "",
+			wantLen:             1,
+			wantResourceName:    "",
+			wantName:            "",
+			wantArn:             "",
+			wantStatus:          "",
+			wantType:            "",
+			wantPricingPlan:     "",
+			wantDescription:     "",
+			wantSubmittedJobs:   "",
+			wantProgressingJobs: "",
+			wantCreatedAt:       "",
+			wantRegion:          "",
 		},
 		{
 			name:    "type assertion failure",
@@ -631,31 +631,31 @@ func TestExtractQueue(t *testing.T) {
 	ts := time.Date(2026, 1, 15, 10, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name              string
-		input             *mediaconvert.Queue
-		region            string
-		wantName          string
-		wantArn           string
-		wantStatus        string
-		wantType          string
-		wantPricingPlan   string
-		wantDescription   string
-		wantSubmitted     string
-		wantProgressing   string
-		wantCreatedAt     string
-		wantRegion        string
+		name            string
+		input           mctypes.Queue
+		region          string
+		wantName        string
+		wantArn         string
+		wantStatus      string
+		wantType        string
+		wantPricingPlan string
+		wantDescription string
+		wantSubmitted   string
+		wantProgressing string
+		wantCreatedAt   string
+		wantRegion      string
 	}{
 		{
 			name: "all fields populated",
-			input: &mediaconvert.Queue{
+			input: mctypes.Queue{
 				Name:                 aws.String("Default"),
 				Arn:                  aws.String("arn:aws:mediaconvert:us-east-1:123456789012:queues/Default"),
-				Status:               aws.String("ACTIVE"),
-				Type:                 aws.String("SYSTEM"),
-				PricingPlan:          aws.String("ON_DEMAND"),
+				Status:               mctypes.QueueStatus("ACTIVE"),
+				Type:                 mctypes.Type("SYSTEM"),
+				PricingPlan:          mctypes.PricingPlan("ON_DEMAND"),
 				Description:          aws.String("Default queue"),
-				SubmittedJobsCount:   aws.Int64(5),
-				ProgressingJobsCount: aws.Int64(2),
+				SubmittedJobsCount:   aws.Int32(5),
+				ProgressingJobsCount: aws.Int32(2),
 				CreatedAt:            &ts,
 			},
 			region:          "us-east-1",
@@ -672,7 +672,7 @@ func TestExtractQueue(t *testing.T) {
 		},
 		{
 			name:            "all fields nil",
-			input:           &mediaconvert.Queue{},
+			input:           mctypes.Queue{},
 			region:          "eu-west-1",
 			wantName:        "",
 			wantArn:         "",
@@ -687,10 +687,10 @@ func TestExtractQueue(t *testing.T) {
 		},
 		{
 			name: "partial fields populated",
-			input: &mediaconvert.Queue{
+			input: mctypes.Queue{
 				Name:               aws.String("partial-queue"),
-				Status:             aws.String("PAUSED"),
-				SubmittedJobsCount: aws.Int64(0),
+				Status:             mctypes.QueueStatus("PAUSED"),
+				SubmittedJobsCount: aws.Int32(0),
 			},
 			region:          "us-west-2",
 			wantName:        "partial-queue",
@@ -748,7 +748,7 @@ func TestExtractJob(t *testing.T) {
 
 	tests := []struct {
 		name             string
-		input            *mediaconvert.Job
+		input            mctypes.Job
 		region           string
 		wantId           string
 		wantArn          string
@@ -763,15 +763,15 @@ func TestExtractJob(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &mediaconvert.Job{
+			input: mctypes.Job{
 				Id:           aws.String("1234567890123-abc123"),
 				Arn:          aws.String("arn:aws:mediaconvert:us-east-1:123456789012:jobs/1234567890123-abc123"),
-				Status:       aws.String("COMPLETE"),
+				Status:       mctypes.JobStatus("COMPLETE"),
 				Queue:        aws.String("arn:aws:mediaconvert:us-east-1:123456789012:queues/Default"),
 				Role:         aws.String("arn:aws:iam::123456789012:role/MediaConvertRole"),
 				JobTemplate:  aws.String("System-Generic_Hd_Mp4"),
 				CreatedAt:    &ts,
-				CurrentPhase: aws.String("UPLOADING"),
+				CurrentPhase: mctypes.JobPhase("UPLOADING"),
 				ErrorMessage: aws.String(""),
 			},
 			region:           "us-east-1",
@@ -788,7 +788,7 @@ func TestExtractJob(t *testing.T) {
 		},
 		{
 			name:             "all fields nil",
-			input:            &mediaconvert.Job{},
+			input:            mctypes.Job{},
 			region:           "eu-west-1",
 			wantId:           "",
 			wantArn:          "",
@@ -803,9 +803,9 @@ func TestExtractJob(t *testing.T) {
 		},
 		{
 			name: "partial fields - error job",
-			input: &mediaconvert.Job{
+			input: mctypes.Job{
 				Id:           aws.String("failed-job-id"),
-				Status:       aws.String("ERROR"),
+				Status:       mctypes.JobStatus("ERROR"),
 				ErrorMessage: aws.String("Input file not found"),
 			},
 			region:           "us-west-2",
@@ -864,7 +864,7 @@ func TestExtractPreset(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		input           *mediaconvert.Preset
+		input           mctypes.Preset
 		region          string
 		wantName        string
 		wantArn         string
@@ -876,11 +876,11 @@ func TestExtractPreset(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &mediaconvert.Preset{
+			input: mctypes.Preset{
 				Name:        aws.String("System-Generic_Hd_Mp4"),
 				Arn:         aws.String("arn:aws:mediaconvert:us-east-1:123456789012:presets/System-Generic_Hd_Mp4"),
 				Description: aws.String("Generic HD MP4 preset"),
-				Type:        aws.String("SYSTEM"),
+				Type:        mctypes.Type("SYSTEM"),
 				Category:    aws.String("VIDEO"),
 				CreatedAt:   &ts,
 			},
@@ -895,7 +895,7 @@ func TestExtractPreset(t *testing.T) {
 		},
 		{
 			name:            "all fields nil",
-			input:           &mediaconvert.Preset{},
+			input:           mctypes.Preset{},
 			region:          "eu-west-1",
 			wantName:        "",
 			wantArn:         "",
@@ -907,9 +907,9 @@ func TestExtractPreset(t *testing.T) {
 		},
 		{
 			name: "partial fields populated",
-			input: &mediaconvert.Preset{
+			input: mctypes.Preset{
 				Name:     aws.String("custom-preset"),
-				Type:     aws.String("CUSTOM"),
+				Type:     mctypes.Type("CUSTOM"),
 				Category: aws.String("AUDIO"),
 			},
 			region:          "us-west-2",

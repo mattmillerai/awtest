@@ -5,36 +5,36 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/neptune"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	nptypes "github.com/aws/aws-sdk-go-v2/service/neptune/types"
 )
 
 func TestDescribeDBClustersProcess(t *testing.T) {
 	process := NeptuneCalls[0].Process
 
 	tests := []struct {
-		name                     string
-		output                   interface{}
-		err                      error
-		wantLen                  int
-		wantError                bool
-		wantResourceName         string
-		wantDBClusterIdentifier  string
-		wantDBClusterArn         string
-		wantStatus               string
-		wantEngine               string
-		wantEngineVersion        string
-		wantEndpoint             string
-		wantReaderEndpoint       string
-		wantPort                 string
-		wantMultiAZ              string
-		wantStorageEncrypted     string
-		wantKmsKeyId             string
-		wantDeletionProtection   string
-		wantIAMAuth              string
-		wantParameterGroup       string
-		wantClusterCreateTime    string
-		wantRegion               string
+		name                    string
+		output                  interface{}
+		err                     error
+		wantLen                 int
+		wantError               bool
+		wantResourceName        string
+		wantDBClusterIdentifier string
+		wantDBClusterArn        string
+		wantStatus              string
+		wantEngine              string
+		wantEngineVersion       string
+		wantEndpoint            string
+		wantReaderEndpoint      string
+		wantPort                string
+		wantMultiAZ             string
+		wantStorageEncrypted    string
+		wantKmsKeyId            string
+		wantDeletionProtection  string
+		wantIAMAuth             string
+		wantParameterGroup      string
+		wantClusterCreateTime   string
+		wantRegion              string
 	}{
 		{
 			name: "valid clusters with full details",
@@ -76,24 +76,24 @@ func TestDescribeDBClustersProcess(t *testing.T) {
 					Region:                           "us-west-2",
 				},
 			},
-			wantLen:                  2,
-			wantResourceName:         "my-neptune-cluster",
-			wantDBClusterIdentifier:  "my-neptune-cluster",
-			wantDBClusterArn:         "arn:aws:rds:us-east-1:123456789012:cluster:my-neptune-cluster",
-			wantStatus:               "available",
-			wantEngine:               "neptune",
-			wantEngineVersion:        "1.2.0.2",
-			wantEndpoint:             "my-neptune-cluster.cluster-abc123.us-east-1.neptune.amazonaws.com",
-			wantReaderEndpoint:       "my-neptune-cluster.cluster-ro-abc123.us-east-1.neptune.amazonaws.com",
-			wantPort:                 "8182",
-			wantMultiAZ:              "true",
-			wantStorageEncrypted:     "true",
-			wantKmsKeyId:             "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
-			wantDeletionProtection:   "true",
-			wantIAMAuth:              "true",
-			wantParameterGroup:       "default.neptune1",
-			wantClusterCreateTime:    "2026-01-15T10:00:00Z",
-			wantRegion:               "us-east-1",
+			wantLen:                 2,
+			wantResourceName:        "my-neptune-cluster",
+			wantDBClusterIdentifier: "my-neptune-cluster",
+			wantDBClusterArn:        "arn:aws:rds:us-east-1:123456789012:cluster:my-neptune-cluster",
+			wantStatus:              "available",
+			wantEngine:              "neptune",
+			wantEngineVersion:       "1.2.0.2",
+			wantEndpoint:            "my-neptune-cluster.cluster-abc123.us-east-1.neptune.amazonaws.com",
+			wantReaderEndpoint:      "my-neptune-cluster.cluster-ro-abc123.us-east-1.neptune.amazonaws.com",
+			wantPort:                "8182",
+			wantMultiAZ:             "true",
+			wantStorageEncrypted:    "true",
+			wantKmsKeyId:            "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+			wantDeletionProtection:  "true",
+			wantIAMAuth:             "true",
+			wantParameterGroup:      "default.neptune1",
+			wantClusterCreateTime:   "2026-01-15T10:00:00Z",
+			wantRegion:              "us-east-1",
 		},
 		{
 			name:    "empty results",
@@ -129,24 +129,24 @@ func TestDescribeDBClustersProcess(t *testing.T) {
 					Region:                           "",
 				},
 			},
-			wantLen:                  1,
-			wantResourceName:         "",
-			wantDBClusterIdentifier:  "",
-			wantDBClusterArn:         "",
-			wantStatus:               "",
-			wantEngine:               "",
-			wantEngineVersion:        "",
-			wantEndpoint:             "",
-			wantReaderEndpoint:       "",
-			wantPort:                 "",
-			wantMultiAZ:              "",
-			wantStorageEncrypted:     "",
-			wantKmsKeyId:             "",
-			wantDeletionProtection:   "",
-			wantIAMAuth:              "",
-			wantParameterGroup:       "",
-			wantClusterCreateTime:    "",
-			wantRegion:               "",
+			wantLen:                 1,
+			wantResourceName:        "",
+			wantDBClusterIdentifier: "",
+			wantDBClusterArn:        "",
+			wantStatus:              "",
+			wantEngine:              "",
+			wantEngineVersion:       "",
+			wantEndpoint:            "",
+			wantReaderEndpoint:      "",
+			wantPort:                "",
+			wantMultiAZ:             "",
+			wantStorageEncrypted:    "",
+			wantKmsKeyId:            "",
+			wantDeletionProtection:  "",
+			wantIAMAuth:             "",
+			wantParameterGroup:      "",
+			wantClusterCreateTime:   "",
+			wantRegion:              "",
 		},
 		{
 			name:    "type assertion failure",
@@ -310,26 +310,26 @@ func TestDescribeDBInstancesProcess(t *testing.T) {
 	process := NeptuneCalls[1].Process
 
 	tests := []struct {
-		name                    string
-		output                  interface{}
-		err                     error
-		wantLen                 int
-		wantError               bool
-		wantResourceName        string
+		name                     string
+		output                   interface{}
+		err                      error
+		wantLen                  int
+		wantError                bool
+		wantResourceName         string
 		wantDBInstanceIdentifier string
-		wantDBInstanceArn       string
-		wantDBInstanceClass     string
-		wantEngine              string
-		wantEngineVersion       string
-		wantDBInstanceStatus    string
-		wantEndpointAddress     string
-		wantEndpointPort        string
-		wantDBClusterIdentifier string
-		wantAvailabilityZone    string
-		wantPubliclyAccessible  string
-		wantStorageEncrypted    string
-		wantAutoUpgrade         string
-		wantRegion              string
+		wantDBInstanceArn        string
+		wantDBInstanceClass      string
+		wantEngine               string
+		wantEngineVersion        string
+		wantDBInstanceStatus     string
+		wantEndpointAddress      string
+		wantEndpointPort         string
+		wantDBClusterIdentifier  string
+		wantAvailabilityZone     string
+		wantPubliclyAccessible   string
+		wantStorageEncrypted     string
+		wantAutoUpgrade          string
+		wantRegion               string
 	}{
 		{
 			name: "valid instances with full details",
@@ -736,7 +736,7 @@ func TestExtractCluster(t *testing.T) {
 
 	tests := []struct {
 		name                 string
-		input                *neptune.DBCluster
+		input                nptypes.DBCluster
 		region               string
 		wantIdentifier       string
 		wantArn              string
@@ -757,7 +757,7 @@ func TestExtractCluster(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &neptune.DBCluster{
+			input: nptypes.DBCluster{
 				DBClusterIdentifier:              aws.String("my-neptune-cluster"),
 				DBClusterArn:                     aws.String("arn:aws:rds:us-east-1:123456789012:cluster:my-neptune-cluster"),
 				Status:                           aws.String("available"),
@@ -765,7 +765,7 @@ func TestExtractCluster(t *testing.T) {
 				EngineVersion:                    aws.String("1.2.0.2"),
 				Endpoint:                         aws.String("my-neptune-cluster.cluster-abc123.us-east-1.neptune.amazonaws.com"),
 				ReaderEndpoint:                   aws.String("my-neptune-cluster.cluster-ro-abc123.us-east-1.neptune.amazonaws.com"),
-				Port:                             aws.Int64(8182),
+				Port:                             aws.Int32(8182),
 				MultiAZ:                          aws.Bool(true),
 				StorageEncrypted:                 aws.Bool(true),
 				KmsKeyId:                         aws.String("arn:aws:kms:us-east-1:123456789012:key/12345678"),
@@ -794,7 +794,7 @@ func TestExtractCluster(t *testing.T) {
 		},
 		{
 			name:                 "all fields nil",
-			input:                &neptune.DBCluster{},
+			input:                nptypes.DBCluster{},
 			region:               "eu-west-1",
 			wantIdentifier:       "",
 			wantArn:              "",
@@ -815,10 +815,10 @@ func TestExtractCluster(t *testing.T) {
 		},
 		{
 			name: "partial fields populated",
-			input: &neptune.DBCluster{
+			input: nptypes.DBCluster{
 				DBClusterIdentifier: aws.String("partial-cluster"),
 				Status:              aws.String("creating"),
-				Port:                aws.Int64(8182),
+				Port:                aws.Int32(8182),
 				MultiAZ:             aws.Bool(false),
 			},
 			region:               "us-west-2",
@@ -899,7 +899,7 @@ func TestExtractCluster(t *testing.T) {
 func TestExtractInstance(t *testing.T) {
 	tests := []struct {
 		name                 string
-		input                *neptune.DBInstance
+		input                nptypes.DBInstance
 		region               string
 		wantIdentifier       string
 		wantArn              string
@@ -918,16 +918,16 @@ func TestExtractInstance(t *testing.T) {
 	}{
 		{
 			name: "all fields populated with nested endpoint",
-			input: &neptune.DBInstance{
+			input: nptypes.DBInstance{
 				DBInstanceIdentifier: aws.String("my-instance-1"),
 				DBInstanceArn:        aws.String("arn:aws:rds:us-east-1:123456789012:db:my-instance-1"),
 				DBInstanceClass:      aws.String("db.r5.large"),
 				Engine:               aws.String("neptune"),
 				EngineVersion:        aws.String("1.2.0.2"),
 				DBInstanceStatus:     aws.String("available"),
-				Endpoint: &neptune.Endpoint{
+				Endpoint: &nptypes.Endpoint{
 					Address: aws.String("my-instance-1.abc123.us-east-1.neptune.amazonaws.com"),
-					Port:    aws.Int64(8182),
+					Port:    aws.Int32(8182),
 				},
 				DBClusterIdentifier:     aws.String("my-cluster"),
 				AvailabilityZone:        aws.String("us-east-1a"),
@@ -953,7 +953,7 @@ func TestExtractInstance(t *testing.T) {
 		},
 		{
 			name:                 "all fields nil",
-			input:                &neptune.DBInstance{},
+			input:                nptypes.DBInstance{},
 			region:               "eu-west-1",
 			wantIdentifier:       "",
 			wantArn:              "",
@@ -972,7 +972,7 @@ func TestExtractInstance(t *testing.T) {
 		},
 		{
 			name: "nil endpoint (endpoint struct is nil)",
-			input: &neptune.DBInstance{
+			input: nptypes.DBInstance{
 				DBInstanceIdentifier: aws.String("no-endpoint-instance"),
 				DBInstanceStatus:     aws.String("creating"),
 				Endpoint:             nil,
@@ -995,9 +995,9 @@ func TestExtractInstance(t *testing.T) {
 		},
 		{
 			name: "endpoint struct populated but address/port nil",
-			input: &neptune.DBInstance{
+			input: nptypes.DBInstance{
 				DBInstanceIdentifier: aws.String("partial-endpoint"),
-				Endpoint:             &neptune.Endpoint{},
+				Endpoint:             &nptypes.Endpoint{},
 			},
 			region:               "ap-southeast-1",
 			wantIdentifier:       "partial-endpoint",
@@ -1069,7 +1069,7 @@ func TestExtractInstance(t *testing.T) {
 func TestExtractParameterGroup(t *testing.T) {
 	tests := []struct {
 		name            string
-		input           *neptune.DBClusterParameterGroup
+		input           nptypes.DBClusterParameterGroup
 		region          string
 		wantName        string
 		wantArn         string
@@ -1079,7 +1079,7 @@ func TestExtractParameterGroup(t *testing.T) {
 	}{
 		{
 			name: "all fields populated",
-			input: &neptune.DBClusterParameterGroup{
+			input: nptypes.DBClusterParameterGroup{
 				DBClusterParameterGroupName: aws.String("default.neptune1"),
 				DBClusterParameterGroupArn:  aws.String("arn:aws:rds:us-east-1:123456789012:cluster-pg:default.neptune1"),
 				Description:                 aws.String("Default parameter group for neptune1"),
@@ -1094,7 +1094,7 @@ func TestExtractParameterGroup(t *testing.T) {
 		},
 		{
 			name:            "all fields nil",
-			input:           &neptune.DBClusterParameterGroup{},
+			input:           nptypes.DBClusterParameterGroup{},
 			region:          "eu-west-1",
 			wantName:        "",
 			wantArn:         "",
@@ -1104,7 +1104,7 @@ func TestExtractParameterGroup(t *testing.T) {
 		},
 		{
 			name: "partial fields populated",
-			input: &neptune.DBClusterParameterGroup{
+			input: nptypes.DBClusterParameterGroup{
 				DBClusterParameterGroupName: aws.String("custom-params"),
 				DBParameterGroupFamily:      aws.String("neptune1.2"),
 			},

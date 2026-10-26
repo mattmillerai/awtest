@@ -1,0 +1,1 @@
+{"NotebookInstances":[{"NotebookInstanceName":"demo-notebook","NotebookInstanceArn":"arn:aws:sagemaker:us-west-2:123456789012:notebook-instance/demo-notebook","NotebookInstanceStatus":"InService","InstanceType":"ml.t3.medium","Url":"demo-notebook.notebook.us-west-2.sagemaker.aws","DefaultCodeRepository":"demo-repo"},{"NotebookInstanceName":"bare-notebook"}]}

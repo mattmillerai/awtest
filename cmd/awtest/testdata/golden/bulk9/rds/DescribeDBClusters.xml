@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DescribeDBClustersResponse xmlns="http://rds.amazonaws.com/doc/2014-10-31/"><DescribeDBClustersResult><DBClusters/></DescribeDBClustersResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000001</RequestId></ResponseMetadata></DescribeDBClustersResponse>

@@ -1,0 +1,1 @@
+{"queues":[{"name":"demo-queue","arn":"arn:aws:mediaconvert:us-west-2:123456789012:queues/demo-queue","status":"ACTIVE","type":"CUSTOM","pricingPlan":"ON_DEMAND","description":"Fictional demo queue","submittedJobsCount":3,"progressingJobsCount":1},{"name":"bare-queue"}]}

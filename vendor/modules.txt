@@ -59,13 +59,8 @@ github.com/aws/aws-sdk-go/service/ivs
 github.com/aws/aws-sdk-go/service/ivschat
 github.com/aws/aws-sdk-go/service/ivsrealtime
 github.com/aws/aws-sdk-go/service/lambda
-github.com/aws/aws-sdk-go/service/mediaconvert
-github.com/aws/aws-sdk-go/service/neptune
-github.com/aws/aws-sdk-go/service/opensearchservice
-github.com/aws/aws-sdk-go/service/organizations
 github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
-github.com/aws/aws-sdk-go/service/sagemaker
 github.com/aws/aws-sdk-go/service/securityhub
 github.com/aws/aws-sdk-go/service/sns
 github.com/aws/aws-sdk-go/service/sqs
@@ -359,6 +354,31 @@ github.com/aws/aws-sdk-go-v2/service/lambda/types
 github.com/aws/aws-sdk-go-v2/service/macie2
 github.com/aws/aws-sdk-go-v2/service/macie2/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/macie2/types
+# github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.107.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/mediaconvert
+github.com/aws/aws-sdk-go-v2/service/mediaconvert/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/mediaconvert/schemas
+github.com/aws/aws-sdk-go-v2/service/mediaconvert/types
+# github.com/aws/aws-sdk-go-v2/service/neptune v1.53.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/neptune
+github.com/aws/aws-sdk-go-v2/service/neptune/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/neptune/types
+# github.com/aws/aws-sdk-go-v2/service/opensearch v1.86.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/opensearch
+github.com/aws/aws-sdk-go-v2/service/opensearch/document
+github.com/aws/aws-sdk-go-v2/service/opensearch/internal/document
+github.com/aws/aws-sdk-go-v2/service/opensearch/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/opensearch/schemas
+github.com/aws/aws-sdk-go-v2/service/opensearch/types
+# github.com/aws/aws-sdk-go-v2/service/organizations v1.62.2
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/organizations
+github.com/aws/aws-sdk-go-v2/service/organizations/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/organizations/schemas
+github.com/aws/aws-sdk-go-v2/service/organizations/types
 # github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/rds
@@ -382,6 +402,12 @@ github.com/aws/aws-sdk-go-v2/service/s3/internal/arn
 github.com/aws/aws-sdk-go-v2/service/s3/internal/customizations
 github.com/aws/aws-sdk-go-v2/service/s3/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/s3/types
+# github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/sagemaker
+github.com/aws/aws-sdk-go-v2/service/sagemaker/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas
+github.com/aws/aws-sdk-go-v2/service/sagemaker/types
 # github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/secretsmanager

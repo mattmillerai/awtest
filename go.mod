@@ -43,10 +43,15 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kms v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.59.5
+	github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.107.1
+	github.com/aws/aws-sdk-go-v2/service/neptune v1.53.5
+	github.com/aws/aws-sdk-go-v2/service/opensearch v1.86.1
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.62.2
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 	github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
+	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6
 	github.com/aws/aws-sdk-go-v2/service/ses v1.42.5
 	github.com/aws/aws-sdk-go-v2/service/sfn v1.52.1

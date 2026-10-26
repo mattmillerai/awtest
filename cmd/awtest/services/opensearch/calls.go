@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/opensearch"
+	ostypes "github.com/aws/aws-sdk-go-v2/service/opensearch/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/opensearchservice"
 )
 
 const describeDomainsBatchSize = 5
@@ -38,19 +39,19 @@ type osDomainEncryption struct {
 
 type regionDomains struct {
 	Region           string
-	DomainStatusList []*opensearchservice.DomainStatus
+	DomainStatusList []ostypes.DomainStatus
 }
 
 // describeDomainsByRegion lists all OpenSearch domains across regions and returns
-// their full DomainStatus details. Each Call function processes the results differently.
-func describeDomainsByRegion(ctx context.Context, sess *session.Session, methodName string) ([]regionDomains, error) {
+// their full DomainStatus details. Each CallV2 function processes the results differently.
+func describeDomainsByRegion(ctx context.Context, cfg aws.Config, methodName string) ([]regionDomains, error) {
 	var allRegionDomains []regionDomains
 	var lastErr error
 
 	for _, region := range types.RegionsFor(ctx) {
-		svc := opensearchservice.New(sess, &aws.Config{Region: aws.String(region)})
+		svc := awsv2.NewRegionalClient(cfg, region, opensearch.NewFromConfig)
 
-		listOutput, err := svc.ListDomainNamesWithContext(ctx, &opensearchservice.ListDomainNamesInput{})
+		listOutput, err := svc.ListDomainNames(ctx, &opensearch.ListDomainNamesInput{})
 		if err != nil {
 			lastErr = err
 			utils.HandleAWSError(false, methodName, err)
@@ -61,14 +62,14 @@ func describeDomainsByRegion(ctx context.Context, sess *session.Session, methodN
 			continue
 		}
 
-		var domainNames []*string
+		var domainNames []string
 		for _, d := range listOutput.DomainNames {
 			if d.DomainName != nil {
-				domainNames = append(domainNames, d.DomainName)
+				domainNames = append(domainNames, *d.DomainName)
 			}
 		}
 
-		var regionStatuses []*opensearchservice.DomainStatus
+		var regionStatuses []ostypes.DomainStatus
 		for i := 0; i < len(domainNames); i += describeDomainsBatchSize {
 			end := i + describeDomainsBatchSize
 			if end > len(domainNames) {
@@ -76,7 +77,7 @@ func describeDomainsByRegion(ctx context.Context, sess *session.Session, methodN
 			}
 			batch := domainNames[i:end]
 
-			descOutput, err := svc.DescribeDomainsWithContext(ctx, &opensearchservice.DescribeDomainsInput{
+			descOutput, err := svc.DescribeDomains(ctx, &opensearch.DescribeDomainsInput{
 				DomainNames: batch,
 			})
 			if err != nil {
@@ -107,8 +108,8 @@ func describeDomainsByRegion(ctx context.Context, sess *session.Session, methodN
 var OpenSearchCalls = []types.AWSService{
 	{
 		Name: "opensearch:ListDomains",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			regionResults, err := describeDomainsByRegion(ctx, sess, "opensearch:ListDomains")
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			regionResults, err := describeDomainsByRegion(ctx, cfg, "opensearch:ListDomains")
 			if err != nil {
 				return nil, err
 			}
@@ -129,10 +130,8 @@ var OpenSearchCalls = []types.AWSService{
 					endpoint := ""
 					if ds.Endpoint != nil {
 						endpoint = *ds.Endpoint
-					} else if ds.Endpoints != nil {
-						if vpcEndpoint, ok := ds.Endpoints["vpc"]; ok && vpcEndpoint != nil {
-							endpoint = *vpcEndpoint
-						}
+					} else if vpcEndpoint, ok := ds.Endpoints["vpc"]; ok {
+						endpoint = vpcEndpoint
 					}
 
 					engineVersion := ""
@@ -198,8 +197,8 @@ var OpenSearchCalls = []types.AWSService{
 	},
 	{
 		Name: "opensearch:DescribeDomainAccessPolicies",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			regionResults, err := describeDomainsByRegion(ctx, sess, "opensearch:DescribeDomainAccessPolicies")
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			regionResults, err := describeDomainsByRegion(ctx, cfg, "opensearch:DescribeDomainAccessPolicies")
 			if err != nil {
 				return nil, err
 			}
@@ -270,8 +269,8 @@ var OpenSearchCalls = []types.AWSService{
 	},
 	{
 		Name: "opensearch:DescribeDomainEncryption",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			regionResults, err := describeDomainsByRegion(ctx, sess, "opensearch:DescribeDomainEncryption")
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			regionResults, err := describeDomainsByRegion(ctx, cfg, "opensearch:DescribeDomainEncryption")
 			if err != nil {
 				return nil, err
 			}

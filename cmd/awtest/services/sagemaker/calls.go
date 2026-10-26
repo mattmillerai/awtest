@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sagemaker"
 )
 
 type smNotebook struct {
@@ -51,21 +51,21 @@ type smTrainingJob struct {
 var SageMakerCalls = []types.AWSService{
 	{
 		Name: "sagemaker:ListNotebookInstances",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allNotebooks []smNotebook
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, sagemaker.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &sagemaker.ListNotebookInstancesInput{
-						MaxResults: aws.Int64(100),
+						MaxResults: aws.Int32(100),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListNotebookInstancesWithContext(ctx, input)
+					output, err := svc.ListNotebookInstances(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "sagemaker:ListNotebookInstances", err)
@@ -73,48 +73,18 @@ var SageMakerCalls = []types.AWSService{
 					}
 
 					for _, nb := range output.NotebookInstances {
-						name := ""
-						if nb.NotebookInstanceName != nil {
-							name = *nb.NotebookInstanceName
-						}
-
-						arn := ""
-						if nb.NotebookInstanceArn != nil {
-							arn = *nb.NotebookInstanceArn
-						}
-
-						status := ""
-						if nb.NotebookInstanceStatus != nil {
-							status = *nb.NotebookInstanceStatus
-						}
-
-						instanceType := ""
-						if nb.InstanceType != nil {
-							instanceType = *nb.InstanceType
-						}
-
-						url := ""
-						if nb.Url != nil {
-							url = *nb.Url
-						}
-
-						defaultCodeRepo := ""
-						if nb.DefaultCodeRepository != nil {
-							defaultCodeRepo = *nb.DefaultCodeRepository
-						}
-
 						lastModified := ""
 						if nb.LastModifiedTime != nil {
 							lastModified = nb.LastModifiedTime.Format(time.RFC3339)
 						}
 
 						allNotebooks = append(allNotebooks, smNotebook{
-							Name:                  name,
-							Arn:                   arn,
-							Status:                status,
-							InstanceType:           instanceType,
-							URL:                   url,
-							DefaultCodeRepository: defaultCodeRepo,
+							Name:                  aws.ToString(nb.NotebookInstanceName),
+							Arn:                   aws.ToString(nb.NotebookInstanceArn),
+							Status:                string(nb.NotebookInstanceStatus),
+							InstanceType:          string(nb.InstanceType),
+							URL:                   aws.ToString(nb.Url),
+							DefaultCodeRepository: aws.ToString(nb.DefaultCodeRepository),
 							LastModifiedTime:      lastModified,
 							Region:                region,
 						})
@@ -163,7 +133,7 @@ var SageMakerCalls = []types.AWSService{
 						"Name":                  nb.Name,
 						"Arn":                   nb.Arn,
 						"Status":                nb.Status,
-						"InstanceType":           nb.InstanceType,
+						"InstanceType":          nb.InstanceType,
 						"URL":                   nb.URL,
 						"DefaultCodeRepository": nb.DefaultCodeRepository,
 						"LastModifiedTime":      nb.LastModifiedTime,
@@ -181,21 +151,21 @@ var SageMakerCalls = []types.AWSService{
 	},
 	{
 		Name: "sagemaker:ListEndpoints",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allEndpoints []smEndpoint
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, sagemaker.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &sagemaker.ListEndpointsInput{
-						MaxResults: aws.Int64(100),
+						MaxResults: aws.Int32(100),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListEndpointsWithContext(ctx, input)
+					output, err := svc.ListEndpoints(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "sagemaker:ListEndpoints", err)
@@ -203,21 +173,6 @@ var SageMakerCalls = []types.AWSService{
 					}
 
 					for _, ep := range output.Endpoints {
-						name := ""
-						if ep.EndpointName != nil {
-							name = *ep.EndpointName
-						}
-
-						arn := ""
-						if ep.EndpointArn != nil {
-							arn = *ep.EndpointArn
-						}
-
-						status := ""
-						if ep.EndpointStatus != nil {
-							status = *ep.EndpointStatus
-						}
-
 						creationTime := ""
 						if ep.CreationTime != nil {
 							creationTime = ep.CreationTime.Format(time.RFC3339)
@@ -229,9 +184,9 @@ var SageMakerCalls = []types.AWSService{
 						}
 
 						allEndpoints = append(allEndpoints, smEndpoint{
-							Name:             name,
-							Arn:              arn,
-							Status:           status,
+							Name:             aws.ToString(ep.EndpointName),
+							Arn:              aws.ToString(ep.EndpointArn),
+							Status:           string(ep.EndpointStatus),
 							CreationTime:     creationTime,
 							LastModifiedTime: lastModified,
 							Region:           region,
@@ -297,21 +252,21 @@ var SageMakerCalls = []types.AWSService{
 	},
 	{
 		Name: "sagemaker:ListModels",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allModels []smModel
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, sagemaker.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &sagemaker.ListModelsInput{
-						MaxResults: aws.Int64(100),
+						MaxResults: aws.Int32(100),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListModelsWithContext(ctx, input)
+					output, err := svc.ListModels(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "sagemaker:ListModels", err)
@@ -319,24 +274,14 @@ var SageMakerCalls = []types.AWSService{
 					}
 
 					for _, m := range output.Models {
-						name := ""
-						if m.ModelName != nil {
-							name = *m.ModelName
-						}
-
-						arn := ""
-						if m.ModelArn != nil {
-							arn = *m.ModelArn
-						}
-
 						creationTime := ""
 						if m.CreationTime != nil {
 							creationTime = m.CreationTime.Format(time.RFC3339)
 						}
 
 						allModels = append(allModels, smModel{
-							Name:         name,
-							Arn:          arn,
+							Name:         aws.ToString(m.ModelName),
+							Arn:          aws.ToString(m.ModelArn),
 							CreationTime: creationTime,
 							Region:       region,
 						})
@@ -399,21 +344,21 @@ var SageMakerCalls = []types.AWSService{
 	},
 	{
 		Name: "sagemaker:ListTrainingJobs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allJobs []smTrainingJob
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := sagemaker.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, sagemaker.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &sagemaker.ListTrainingJobsInput{
-						MaxResults: aws.Int64(100),
+						MaxResults: aws.Int32(100),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListTrainingJobsWithContext(ctx, input)
+					output, err := svc.ListTrainingJobs(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "sagemaker:ListTrainingJobs", err)
@@ -421,21 +366,6 @@ var SageMakerCalls = []types.AWSService{
 					}
 
 					for _, job := range output.TrainingJobSummaries {
-						name := ""
-						if job.TrainingJobName != nil {
-							name = *job.TrainingJobName
-						}
-
-						arn := ""
-						if job.TrainingJobArn != nil {
-							arn = *job.TrainingJobArn
-						}
-
-						status := ""
-						if job.TrainingJobStatus != nil {
-							status = *job.TrainingJobStatus
-						}
-
 						creationTime := ""
 						if job.CreationTime != nil {
 							creationTime = job.CreationTime.Format(time.RFC3339)
@@ -447,9 +377,9 @@ var SageMakerCalls = []types.AWSService{
 						}
 
 						allJobs = append(allJobs, smTrainingJob{
-							Name:             name,
-							Arn:              arn,
-							Status:           status,
+							Name:             aws.ToString(job.TrainingJobName),
+							Arn:              aws.ToString(job.TrainingJobArn),
+							Status:           string(job.TrainingJobStatus),
 							CreationTime:     creationTime,
 							LastModifiedTime: lastModified,
 							Region:           region,

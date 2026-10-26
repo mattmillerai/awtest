@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DescribeDBClusterParameterGroupsResponse xmlns="http://rds.amazonaws.com/doc/2014-10-31/"><DescribeDBClusterParameterGroupsResult><DBClusterParameterGroups/></DescribeDBClusterParameterGroupsResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000003</RequestId></ResponseMetadata></DescribeDBClusterParameterGroupsResponse>

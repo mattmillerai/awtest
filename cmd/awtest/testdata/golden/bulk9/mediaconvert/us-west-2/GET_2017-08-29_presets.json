@@ -1,0 +1,1 @@
+{"presets":[{"name":"demo-preset","arn":"arn:aws:mediaconvert:us-west-2:123456789012:presets/demo-preset","description":"Fictional preset","type":"CUSTOM","category":"demo","settings":{}},{"name":"bare-preset"}]}

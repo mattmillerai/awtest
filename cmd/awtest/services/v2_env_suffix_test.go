@@ -38,10 +38,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/macie2"
+	"github.com/aws/aws-sdk-go-v2/service/mediaconvert"
+	"github.com/aws/aws-sdk-go-v2/service/neptune"
+	"github.com/aws/aws-sdk-go-v2/service/opensearch"
+	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/redshift"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
@@ -127,6 +132,12 @@ var v2EnvSuffix = map[string][]string{
 	"kinesis":       {"KINESIS"},
 	"guardduty":     {"GUARDDUTY"},
 	"macie2":        {"MACIE2"},
+
+	"mediaconvert":  {"MEDIACONVERT"},
+	"neptune":       {"NEPTUNE"},
+	"opensearch":    {"OPENSEARCH"},
+	"organizations": {"ORGANIZATIONS"},
+	"sagemaker":     {"SAGEMAKER"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -183,6 +194,12 @@ var v2ServiceIDs = map[string][]string{
 	"kinesis":       {kinesis.ServiceID},
 	"guardduty":     {guardduty.ServiceID},
 	"macie2":        {macie2.ServiceID},
+
+	"mediaconvert":  {mediaconvert.ServiceID},
+	"neptune":       {neptune.ServiceID},
+	"opensearch":    {opensearch.ServiceID},
+	"organizations": {organizations.ServiceID},
+	"sagemaker":     {sagemaker.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

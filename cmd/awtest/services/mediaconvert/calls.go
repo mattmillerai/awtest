@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/mediaconvert"
+	mctypes "github.com/aws/aws-sdk-go-v2/service/mediaconvert/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/mediaconvert"
 )
 
 type mcQueue struct {
@@ -48,31 +49,7 @@ type mcPreset struct {
 	Region      string
 }
 
-func extractQueue(queue *mediaconvert.Queue, region string) mcQueue {
-	name := ""
-	if queue.Name != nil {
-		name = *queue.Name
-	}
-	arn := ""
-	if queue.Arn != nil {
-		arn = *queue.Arn
-	}
-	status := ""
-	if queue.Status != nil {
-		status = *queue.Status
-	}
-	queueType := ""
-	if queue.Type != nil {
-		queueType = *queue.Type
-	}
-	pricingPlan := ""
-	if queue.PricingPlan != nil {
-		pricingPlan = *queue.PricingPlan
-	}
-	description := ""
-	if queue.Description != nil {
-		description = *queue.Description
-	}
+func extractQueue(queue mctypes.Queue, region string) mcQueue {
 	submittedJobs := ""
 	if queue.SubmittedJobsCount != nil {
 		submittedJobs = fmt.Sprintf("%d", *queue.SubmittedJobsCount)
@@ -86,12 +63,12 @@ func extractQueue(queue *mediaconvert.Queue, region string) mcQueue {
 		createdAt = queue.CreatedAt.Format(time.RFC3339)
 	}
 	return mcQueue{
-		Name:                 name,
-		Arn:                  arn,
-		Status:               status,
-		Type:                 queueType,
-		PricingPlan:          pricingPlan,
-		Description:          description,
+		Name:                 aws.ToString(queue.Name),
+		Arn:                  aws.ToString(queue.Arn),
+		Status:               string(queue.Status),
+		Type:                 string(queue.Type),
+		PricingPlan:          string(queue.PricingPlan),
+		Description:          aws.ToString(queue.Description),
 		SubmittedJobsCount:   submittedJobs,
 		ProgressingJobsCount: progressingJobs,
 		CreatedAt:            createdAt,
@@ -99,88 +76,36 @@ func extractQueue(queue *mediaconvert.Queue, region string) mcQueue {
 	}
 }
 
-func extractJob(job *mediaconvert.Job, region string) mcJob {
-	id := ""
-	if job.Id != nil {
-		id = *job.Id
-	}
-	arn := ""
-	if job.Arn != nil {
-		arn = *job.Arn
-	}
-	status := ""
-	if job.Status != nil {
-		status = *job.Status
-	}
-	queue := ""
-	if job.Queue != nil {
-		queue = *job.Queue
-	}
-	role := ""
-	if job.Role != nil {
-		role = *job.Role
-	}
-	jobTemplate := ""
-	if job.JobTemplate != nil {
-		jobTemplate = *job.JobTemplate
-	}
+func extractJob(job mctypes.Job, region string) mcJob {
 	createdAt := ""
 	if job.CreatedAt != nil {
 		createdAt = job.CreatedAt.Format(time.RFC3339)
 	}
-	currentPhase := ""
-	if job.CurrentPhase != nil {
-		currentPhase = *job.CurrentPhase
-	}
-	errorMessage := ""
-	if job.ErrorMessage != nil {
-		errorMessage = *job.ErrorMessage
-	}
 	return mcJob{
-		Id:           id,
-		Arn:          arn,
-		Status:       status,
-		Queue:        queue,
-		Role:         role,
-		JobTemplate:  jobTemplate,
+		Id:           aws.ToString(job.Id),
+		Arn:          aws.ToString(job.Arn),
+		Status:       string(job.Status),
+		Queue:        aws.ToString(job.Queue),
+		Role:         aws.ToString(job.Role),
+		JobTemplate:  aws.ToString(job.JobTemplate),
 		CreatedAt:    createdAt,
-		CurrentPhase: currentPhase,
-		ErrorMessage: errorMessage,
+		CurrentPhase: string(job.CurrentPhase),
+		ErrorMessage: aws.ToString(job.ErrorMessage),
 		Region:       region,
 	}
 }
 
-func extractPreset(preset *mediaconvert.Preset, region string) mcPreset {
-	name := ""
-	if preset.Name != nil {
-		name = *preset.Name
-	}
-	arn := ""
-	if preset.Arn != nil {
-		arn = *preset.Arn
-	}
-	description := ""
-	if preset.Description != nil {
-		description = *preset.Description
-	}
-	presetType := ""
-	if preset.Type != nil {
-		presetType = *preset.Type
-	}
-	category := ""
-	if preset.Category != nil {
-		category = *preset.Category
-	}
+func extractPreset(preset mctypes.Preset, region string) mcPreset {
 	createdAt := ""
 	if preset.CreatedAt != nil {
 		createdAt = preset.CreatedAt.Format(time.RFC3339)
 	}
 	return mcPreset{
-		Name:        name,
-		Arn:         arn,
-		Description: description,
-		Type:        presetType,
-		Category:    category,
+		Name:        aws.ToString(preset.Name),
+		Arn:         aws.ToString(preset.Arn),
+		Description: aws.ToString(preset.Description),
+		Type:        string(preset.Type),
+		Category:    aws.ToString(preset.Category),
 		CreatedAt:   createdAt,
 		Region:      region,
 	}
@@ -189,30 +114,28 @@ func extractPreset(preset *mediaconvert.Preset, region string) mcPreset {
 var MediaConvertCalls = []types.AWSService{
 	{
 		Name: "mediaconvert:ListQueues",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allQueues []mcQueue
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, mediaconvert.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &mediaconvert.ListQueuesInput{
-						MaxResults: aws.Int64(20),
+						MaxResults: aws.Int32(20),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListQueuesWithContext(ctx, input)
+					output, err := svc.ListQueues(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "mediaconvert:ListQueues", err)
 						break
 					}
 					for _, queue := range output.Queues {
-						if queue != nil {
-							allQueues = append(allQueues, extractQueue(queue, region))
-						}
+						allQueues = append(allQueues, extractQueue(queue, region))
 					}
 					if output.NextToken == nil {
 						break
@@ -277,30 +200,28 @@ var MediaConvertCalls = []types.AWSService{
 	},
 	{
 		Name: "mediaconvert:ListJobs",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allJobs []mcJob
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, mediaconvert.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &mediaconvert.ListJobsInput{
-						MaxResults: aws.Int64(20),
+						MaxResults: aws.Int32(20),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListJobsWithContext(ctx, input)
+					output, err := svc.ListJobs(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "mediaconvert:ListJobs", err)
 						break
 					}
 					for _, job := range output.Jobs {
-						if job != nil {
-							allJobs = append(allJobs, extractJob(job, region))
-						}
+						allJobs = append(allJobs, extractJob(job, region))
 					}
 					if output.NextToken == nil {
 						break
@@ -365,30 +286,28 @@ var MediaConvertCalls = []types.AWSService{
 	},
 	{
 		Name: "mediaconvert:ListPresets",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allPresets []mcPreset
 			var lastErr error
 
 			for _, region := range types.RegionsFor(ctx) {
-				svc := mediaconvert.New(sess, &aws.Config{Region: aws.String(region)})
+				svc := awsv2.NewRegionalClient(cfg, region, mediaconvert.NewFromConfig)
 				var nextToken *string
 				for {
 					input := &mediaconvert.ListPresetsInput{
-						MaxResults: aws.Int64(20),
+						MaxResults: aws.Int32(20),
 					}
 					if nextToken != nil {
 						input.NextToken = nextToken
 					}
-					output, err := svc.ListPresetsWithContext(ctx, input)
+					output, err := svc.ListPresets(ctx, input)
 					if err != nil {
 						lastErr = err
 						utils.HandleAWSError(false, "mediaconvert:ListPresets", err)
 						break
 					}
 					for _, preset := range output.Presets {
-						if preset != nil {
-							allPresets = append(allPresets, extractPreset(preset, region))
-						}
+						allPresets = append(allPresets, extractPreset(preset, region))
 					}
 					if output.NextToken == nil {
 						break

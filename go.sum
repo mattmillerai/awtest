@@ -94,6 +94,14 @@ github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1 h1:MyNiblvXWwktvifreUHZDkmW
 github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1/go.mod h1:GZ1UAuKbyxBdaRNbhKbAobG2VcWrEg5YmgWstJA3sl8=
 github.com/aws/aws-sdk-go-v2/service/macie2 v1.59.5 h1:EsRPrEA75Eum4vHwV1tyWPqkmnQE2+OwoDWUnPdv96w=
 github.com/aws/aws-sdk-go-v2/service/macie2 v1.59.5/go.mod h1:PqQ8Symg7TpwJDMA1AkQQEURDCuwP1LOltBo8wXx1sw=
+github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.107.1 h1:7bSP+8/AqjxeThu9hlDNOPuO654juZU/6G+Wu6Rfzzg=
+github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.107.1/go.mod h1:VzvPEG4joe1T9qgTqWZZw/dtJ8xGD3BdoVHYp/UUYbY=
+github.com/aws/aws-sdk-go-v2/service/neptune v1.53.5 h1:lgXIFTXqk27EzHWa4koTAicyGWhWsLBcApmEo9aoP+Y=
+github.com/aws/aws-sdk-go-v2/service/neptune v1.53.5/go.mod h1:d/3XAHIotuxNiK7e8DdWAkBEJK07zT51sCSoUJTJtcM=
+github.com/aws/aws-sdk-go-v2/service/opensearch v1.86.1 h1:4LCvvK7Q24njciGg6HqM3ZhvIVg1G+nWHGO4DM3MPyk=
+github.com/aws/aws-sdk-go-v2/service/opensearch v1.86.1/go.mod h1:JI43wzbN4bXJUdLLVVPdhbFZGu4W3VeZvckEML5YDuA=
+github.com/aws/aws-sdk-go-v2/service/organizations v1.62.2 h1:X5tj7X0DVjs3BuFLeRXilnjMYur9KANyhsFnLFeZkD8=
+github.com/aws/aws-sdk-go-v2/service/organizations v1.62.2/go.mod h1:NeeqgmO9OuZqxYS2QhN1gP5xsuWnbQRx1nmKeHyxELA=
 github.com/aws/aws-sdk-go-v2/service/rds v1.131.1 h1:CAVL+rJiNapbZawRFDJFMHsk3Uya5Mag/GMYJVFvNho=
 github.com/aws/aws-sdk-go-v2/service/rds v1.131.1/go.mod h1:bwRf0/l6BSF8mxv9fpK7An4QBB7D//vwkWdNgNgFRh4=
 github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5 h1:6VtHsknZo5gB741YFpd0/y7eT2OVxqMihll7jiexXcM=
@@ -102,6 +110,8 @@ github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0 h1:zhYB5nJAkfA25vgoPv7Z
 github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0/go.mod h1:cbSeLOXhRCnTdT2nShBjBXSho0IE/e/FPMBL59DT6OM=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3 h1:NyeuyXkZL476uoAowNActm4XJO1QPKf7aassgXHpiqA=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3/go.mod h1:GfoBeKMDJecgRUsGf/0RGdx0NJAh81ObTd922h8pQys=
+github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2 h1:x2Q56fxrHV3eDciLqMMFHvWoYzV/HGVKfEIxTmBXNQc=
+github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2/go.mod h1:DVZ8QRMUfV85MqG3JhhG01GnMIq5eEfngiIPIQMUkMY=
 github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6 h1:WfhFrAv8P+XJkojaC0UPvS0D0cfc98hE0BLp+1UeJS0=
 github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6/go.mod h1:L6eQ1rn7qA3+uKNjHK1Fb9vCh9F+OiXjSvE5j4s+fe0=
 github.com/aws/aws-sdk-go-v2/service/ses v1.42.5 h1:wr7za0G0S/3SHYNwm+Qohk6p2oi69yKhE+WD8vCyJ5I=

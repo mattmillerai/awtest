@@ -1,0 +1,1 @@
+{"Endpoints":[{"EndpointName":"demo-endpoint","EndpointArn":"arn:aws:sagemaker:us-west-2:123456789012:endpoint/demo-endpoint","EndpointStatus":"InService"},{"EndpointName":"bare-endpoint"}]}

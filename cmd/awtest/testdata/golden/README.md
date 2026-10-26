@@ -169,6 +169,24 @@ values still print `""`.)
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk8`
 green without regenerating it.
 
+## Bulk 9 golden (mediaconvert, neptune, opensearch, organizations, sagemaker)
+
+`replay-bulk9.json` is the v1 baseline for the ninth bulk migration batch:
+the mediaconvert, neptune, opensearch, organizations and sagemaker list and
+describe calls. It is produced from the fictional fixtures in `bulk9/`
+(fixture dir `testdata/golden/bulk9`) with
+`awtest -replay <abs>/testdata/golden/bulk9 -services mediaconvert,neptune,opensearch,organizations,sagemaker -quiet -format json`.
+The functional tests in each service package additionally cover populated and
+sparse `details`, error text, pagination and the region loop.
+
+There is no v1 -> v2 difference for this batch: every optional scalar the
+services read (the mediaconvert queue job counts, the neptune ports and
+booleans, the opensearch encryption flags) is still a pointer in the v2 types,
+so absent values keep printing `""`, and `replay-bulk9.json` is unchanged.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk9`
+green without regenerating it.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

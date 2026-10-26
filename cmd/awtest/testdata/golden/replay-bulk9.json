@@ -1,0 +1,480 @@
+[
+  {
+    "details": {
+      "Arn": "arn:aws:mediaconvert:us-west-2:123456789012:queues/demo-queue",
+      "CreatedAt": "",
+      "Description": "Fictional demo queue",
+      "Name": "demo-queue",
+      "PricingPlan": "ON_DEMAND",
+      "ProgressingJobsCount": "1",
+      "Region": "us-west-2",
+      "Status": "ACTIVE",
+      "SubmittedJobsCount": "3",
+      "Type": "CUSTOM"
+    },
+    "methodName": "mediaconvert:ListQueues",
+    "resourceName": "demo-queue",
+    "resourceType": "queue",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreatedAt": "",
+      "Description": "",
+      "Name": "bare-queue",
+      "PricingPlan": "",
+      "ProgressingJobsCount": "",
+      "Region": "us-west-2",
+      "Status": "",
+      "SubmittedJobsCount": "",
+      "Type": ""
+    },
+    "methodName": "mediaconvert:ListQueues",
+    "resourceName": "bare-queue",
+    "resourceType": "queue",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:mediaconvert:us-west-2:123456789012:jobs/1111111111111-abc123",
+      "CreatedAt": "",
+      "CurrentPhase": "PROBING",
+      "ErrorMessage": "Fictional input not found",
+      "Id": "1111111111111-abc123",
+      "JobTemplate": "demo-template",
+      "Queue": "arn:aws:mediaconvert:us-west-2:123456789012:queues/demo-queue",
+      "Region": "us-west-2",
+      "Role": "arn:aws:iam::123456789012:role/demo-mediaconvert-role",
+      "Status": "ERROR"
+    },
+    "methodName": "mediaconvert:ListJobs",
+    "resourceName": "1111111111111-abc123",
+    "resourceType": "job",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreatedAt": "",
+      "CurrentPhase": "",
+      "ErrorMessage": "",
+      "Id": "2222222222222-def456",
+      "JobTemplate": "",
+      "Queue": "",
+      "Region": "us-west-2",
+      "Role": "",
+      "Status": "COMPLETE"
+    },
+    "methodName": "mediaconvert:ListJobs",
+    "resourceName": "2222222222222-def456",
+    "resourceType": "job",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:mediaconvert:us-west-2:123456789012:presets/demo-preset",
+      "Category": "demo",
+      "CreatedAt": "",
+      "Description": "Fictional preset",
+      "Name": "demo-preset",
+      "Region": "us-west-2",
+      "Type": "CUSTOM"
+    },
+    "methodName": "mediaconvert:ListPresets",
+    "resourceName": "demo-preset",
+    "resourceType": "preset",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "Category": "",
+      "CreatedAt": "",
+      "Description": "",
+      "Name": "bare-preset",
+      "Region": "us-west-2",
+      "Type": ""
+    },
+    "methodName": "mediaconvert:ListPresets",
+    "resourceName": "bare-preset",
+    "resourceType": "preset",
+    "serviceName": "MediaConvert"
+  },
+  {
+    "details": {
+      "ClusterCreateTime": "",
+      "DBClusterArn": "arn:aws:rds:us-west-2:123456789012:cluster:demo-graph",
+      "DBClusterIdentifier": "demo-graph",
+      "DBClusterParameterGroup": "demo-cluster-params",
+      "DeletionProtection": "false",
+      "Endpoint": "demo-graph.cluster-abc123.us-west-2.neptune.amazonaws.com",
+      "Engine": "neptune",
+      "EngineVersion": "1.2.1.0",
+      "IAMDatabaseAuthenticationEnabled": "true",
+      "KmsKeyId": "arn:aws:kms:us-west-2:123456789012:key/11111111-2222-3333-4444-555555555555",
+      "MultiAZ": "true",
+      "Port": "8182",
+      "ReaderEndpoint": "demo-graph.cluster-ro-abc123.us-west-2.neptune.amazonaws.com",
+      "Region": "us-west-2",
+      "Status": "available",
+      "StorageEncrypted": "true"
+    },
+    "methodName": "neptune:DescribeDBClusters",
+    "resourceName": "demo-graph",
+    "resourceType": "db-cluster",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "ClusterCreateTime": "",
+      "DBClusterArn": "",
+      "DBClusterIdentifier": "bare-graph",
+      "DBClusterParameterGroup": "",
+      "DeletionProtection": "",
+      "Endpoint": "",
+      "Engine": "",
+      "EngineVersion": "",
+      "IAMDatabaseAuthenticationEnabled": "",
+      "KmsKeyId": "",
+      "MultiAZ": "",
+      "Port": "",
+      "ReaderEndpoint": "",
+      "Region": "us-west-2",
+      "Status": "",
+      "StorageEncrypted": ""
+    },
+    "methodName": "neptune:DescribeDBClusters",
+    "resourceName": "bare-graph",
+    "resourceType": "db-cluster",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "AutoMinorVersionUpgrade": "true",
+      "AvailabilityZone": "us-west-2a",
+      "DBClusterIdentifier": "demo-graph",
+      "DBInstanceArn": "arn:aws:rds:us-west-2:123456789012:db:demo-graph-1",
+      "DBInstanceClass": "db.r5.large",
+      "DBInstanceIdentifier": "demo-graph-1",
+      "DBInstanceStatus": "available",
+      "EndpointAddress": "demo-graph-1.abc123.us-west-2.neptune.amazonaws.com",
+      "EndpointPort": "8182",
+      "Engine": "neptune",
+      "EngineVersion": "1.2.1.0",
+      "PubliclyAccessible": "false",
+      "Region": "us-west-2",
+      "StorageEncrypted": "true"
+    },
+    "methodName": "neptune:DescribeDBInstances",
+    "resourceName": "demo-graph-1",
+    "resourceType": "db-instance",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "AutoMinorVersionUpgrade": "",
+      "AvailabilityZone": "",
+      "DBClusterIdentifier": "",
+      "DBInstanceArn": "",
+      "DBInstanceClass": "",
+      "DBInstanceIdentifier": "bare-graph-1",
+      "DBInstanceStatus": "",
+      "EndpointAddress": "",
+      "EndpointPort": "",
+      "Engine": "",
+      "EngineVersion": "",
+      "PubliclyAccessible": "",
+      "Region": "us-west-2",
+      "StorageEncrypted": ""
+    },
+    "methodName": "neptune:DescribeDBInstances",
+    "resourceName": "bare-graph-1",
+    "resourceType": "db-instance",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "DBClusterParameterGroupArn": "arn:aws:rds:us-west-2:123456789012:cluster-pg:demo-cluster-params",
+      "DBClusterParameterGroupName": "demo-cluster-params",
+      "DBParameterGroupFamily": "neptune1.2",
+      "Description": "Fictional parameter group",
+      "Region": "us-west-2"
+    },
+    "methodName": "neptune:DescribeDBClusterParameterGroups",
+    "resourceName": "demo-cluster-params",
+    "resourceType": "db-cluster-parameter-group",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "DBClusterParameterGroupArn": "",
+      "DBClusterParameterGroupName": "bare-params",
+      "DBParameterGroupFamily": "",
+      "Description": "",
+      "Region": "us-west-2"
+    },
+    "methodName": "neptune:DescribeDBClusterParameterGroups",
+    "resourceName": "bare-params",
+    "resourceType": "db-cluster-parameter-group",
+    "serviceName": "Neptune"
+  },
+  {
+    "details": {
+      "ARN": "arn:aws:es:us-west-2:123456789012:domain/demo-search",
+      "Endpoint": "search-demo-search-abc123.us-west-2.es.amazonaws.com",
+      "EngineVersion": "OpenSearch_2.11",
+      "Name": "demo-search",
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:ListDomains",
+    "resourceName": "demo-search",
+    "resourceType": "domain",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "ARN": "arn:aws:es:us-west-2:123456789012:domain/vpc-search",
+      "Endpoint": "vpc-vpc-search-def456.us-west-2.es.amazonaws.com",
+      "EngineVersion": "OpenSearch_1.3",
+      "Name": "vpc-search",
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:ListDomains",
+    "resourceName": "vpc-search",
+    "resourceType": "domain",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "ARN": "arn:aws:es:us-west-2:123456789012:domain/bare-search",
+      "Endpoint": "",
+      "EngineVersion": "",
+      "Name": "bare-search",
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:ListDomains",
+    "resourceName": "bare-search",
+    "resourceType": "domain",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "AccessPolicy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"es:*\",\"Resource\":\"arn:aws:es:us-west-2:123456789012:domain/demo-search/*\"}]}",
+      "DomainName": "demo-search",
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:DescribeDomainAccessPolicies",
+    "resourceName": "demo-search",
+    "resourceType": "access-policy",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "DomainName": "demo-search",
+      "EncryptionAtRestEnabled": true,
+      "KmsKeyId": "arn:aws:kms:us-west-2:123456789012:key/11111111-2222-3333-4444-555555555555",
+      "NodeToNodeEncryptionEnabled": true,
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:DescribeDomainEncryption",
+    "resourceName": "demo-search",
+    "resourceType": "encryption-config",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "DomainName": "vpc-search",
+      "EncryptionAtRestEnabled": false,
+      "KmsKeyId": "",
+      "NodeToNodeEncryptionEnabled": false,
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:DescribeDomainEncryption",
+    "resourceName": "vpc-search",
+    "resourceType": "encryption-config",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "DomainName": "bare-search",
+      "EncryptionAtRestEnabled": false,
+      "KmsKeyId": "",
+      "NodeToNodeEncryptionEnabled": false,
+      "Region": "us-west-2"
+    },
+    "methodName": "opensearch:DescribeDomainEncryption",
+    "resourceName": "bare-search",
+    "resourceType": "encryption-config",
+    "serviceName": "OpenSearch"
+  },
+  {
+    "details": {
+      "AccountId": "123456789012",
+      "Arn": "arn:aws:organizations::123456789012:account/o-exampleorg1/123456789012",
+      "Email": "admin@example.com",
+      "JoinedTimestamp": "",
+      "Status": "ACTIVE"
+    },
+    "methodName": "organizations:ListAccounts",
+    "resourceName": "demo-management",
+    "resourceType": "account",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {
+      "AccountId": "210987654321",
+      "Arn": "",
+      "Email": "",
+      "JoinedTimestamp": "",
+      "Status": ""
+    },
+    "methodName": "organizations:ListAccounts",
+    "resourceName": "bare-account",
+    "resourceType": "account",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:organizations::123456789012:ou/o-exampleorg1/ou-ab12-workload",
+      "OUId": "",
+      "ParentId": "r-ab12"
+    },
+    "methodName": "organizations:ListOrganizationalUnits",
+    "resourceName": "Workloads",
+    "resourceType": "organizational-unit",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:organizations::123456789012:policy/o-exampleorg1/service_control_policy/p-examplepol1",
+      "PolicyId": "p-examplepol1"
+    },
+    "methodName": "organizations:ListPolicies",
+    "resourceName": "DemoDenyLeaveOrg",
+    "resourceType": "service-control-policy",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "PolicyId": "p-FullAWSAccess"
+    },
+    "methodName": "organizations:ListPolicies",
+    "resourceName": "",
+    "resourceType": "service-control-policy",
+    "serviceName": "Organizations"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:sagemaker:us-west-2:123456789012:notebook-instance/demo-notebook",
+      "DefaultCodeRepository": "demo-repo",
+      "InstanceType": "ml.t3.medium",
+      "LastModifiedTime": "",
+      "Name": "demo-notebook",
+      "Region": "us-west-2",
+      "Status": "InService",
+      "URL": "demo-notebook.notebook.us-west-2.sagemaker.aws"
+    },
+    "methodName": "sagemaker:ListNotebookInstances",
+    "resourceName": "demo-notebook",
+    "resourceType": "notebook-instance",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "DefaultCodeRepository": "",
+      "InstanceType": "",
+      "LastModifiedTime": "",
+      "Name": "bare-notebook",
+      "Region": "us-west-2",
+      "Status": "",
+      "URL": ""
+    },
+    "methodName": "sagemaker:ListNotebookInstances",
+    "resourceName": "bare-notebook",
+    "resourceType": "notebook-instance",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:sagemaker:us-west-2:123456789012:endpoint/demo-endpoint",
+      "CreationTime": "",
+      "LastModifiedTime": "",
+      "Name": "demo-endpoint",
+      "Region": "us-west-2",
+      "Status": "InService"
+    },
+    "methodName": "sagemaker:ListEndpoints",
+    "resourceName": "demo-endpoint",
+    "resourceType": "endpoint",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreationTime": "",
+      "LastModifiedTime": "",
+      "Name": "bare-endpoint",
+      "Region": "us-west-2",
+      "Status": ""
+    },
+    "methodName": "sagemaker:ListEndpoints",
+    "resourceName": "bare-endpoint",
+    "resourceType": "endpoint",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:sagemaker:us-west-2:123456789012:model/demo-model",
+      "CreationTime": "",
+      "Name": "demo-model",
+      "Region": "us-west-2"
+    },
+    "methodName": "sagemaker:ListModels",
+    "resourceName": "demo-model",
+    "resourceType": "model",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreationTime": "",
+      "Name": "bare-model",
+      "Region": "us-west-2"
+    },
+    "methodName": "sagemaker:ListModels",
+    "resourceName": "bare-model",
+    "resourceType": "model",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:sagemaker:us-west-2:123456789012:training-job/demo-training",
+      "CreationTime": "",
+      "LastModifiedTime": "",
+      "Name": "demo-training",
+      "Region": "us-west-2",
+      "Status": "Completed"
+    },
+    "methodName": "sagemaker:ListTrainingJobs",
+    "resourceName": "demo-training",
+    "resourceType": "training-job",
+    "serviceName": "SageMaker"
+  },
+  {
+    "details": {
+      "Arn": "",
+      "CreationTime": "",
+      "LastModifiedTime": "",
+      "Name": "bare-training",
+      "Region": "us-west-2",
+      "Status": ""
+    },
+    "methodName": "sagemaker:ListTrainingJobs",
+    "resourceName": "bare-training",
+    "resourceType": "training-job",
+    "serviceName": "SageMaker"
+  }
+]
