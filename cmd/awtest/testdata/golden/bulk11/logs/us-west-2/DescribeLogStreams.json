@@ -1,0 +1,1 @@
+{"logStreams":[{"logStreamName":"2024/01/01/latest-aaaabbbbccccdddd","arn":"arn:aws:logs:us-west-2:123456789012:log-group:/aws/lambda/orders-handler:log-stream:2024/01/01/latest-aaaabbbbccccdddd","storedBytes":512},{"logStreamName":"2024/01/02/latest-eeeeffff00001111"}]}

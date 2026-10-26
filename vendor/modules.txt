@@ -22,7 +22,6 @@ github.com/aws/aws-sdk-go/aws/request
 github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/internal/context
-github.com/aws/aws-sdk-go/internal/encoding/gzip
 github.com/aws/aws-sdk-go/internal/ini
 github.com/aws/aws-sdk-go/internal/s3shared
 github.com/aws/aws-sdk-go/internal/s3shared/arn
@@ -47,9 +46,6 @@ github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restjson
 github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
-github.com/aws/aws-sdk-go/service/cloudfront
-github.com/aws/aws-sdk-go/service/cloudwatch
-github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/ec2
 github.com/aws/aws-sdk-go/service/eventbridge
@@ -58,7 +54,6 @@ github.com/aws/aws-sdk-go/service/ivs
 github.com/aws/aws-sdk-go/service/ivschat
 github.com/aws/aws-sdk-go/service/ivsrealtime
 github.com/aws/aws-sdk-go/service/lambda
-github.com/aws/aws-sdk-go/service/route53
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sqs
 github.com/aws/aws-sdk-go/service/sso
@@ -176,12 +171,28 @@ github.com/aws/aws-sdk-go-v2/service/batch/types
 github.com/aws/aws-sdk-go-v2/service/cloudformation
 github.com/aws/aws-sdk-go-v2/service/cloudformation/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cloudformation/types
+# github.com/aws/aws-sdk-go-v2/service/cloudfront v1.75.1
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cloudfront
+github.com/aws/aws-sdk-go-v2/service/cloudfront/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cloudfront/types
 # github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.6
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/cloudtrail
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas
 github.com/aws/aws-sdk-go-v2/service/cloudtrail/types
+# github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.52.8
+## explicit; go 1.23
+github.com/aws/aws-sdk-go-v2/service/cloudwatch
+github.com/aws/aws-sdk-go-v2/service/cloudwatch/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cloudwatch/types
+# github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.89.3
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas
+github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types
 # github.com/aws/aws-sdk-go-v2/service/codebuild v1.78.6
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/codebuild
@@ -399,6 +410,12 @@ github.com/aws/aws-sdk-go-v2/service/rekognition
 github.com/aws/aws-sdk-go-v2/service/rekognition/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/rekognition/schemas
 github.com/aws/aws-sdk-go-v2/service/rekognition/types
+# github.com/aws/aws-sdk-go-v2/service/route53 v1.70.5
+## explicit; go 1.24
+github.com/aws/aws-sdk-go-v2/service/route53
+github.com/aws/aws-sdk-go-v2/service/route53/internal/customizations
+github.com/aws/aws-sdk-go-v2/service/route53/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/route53/types
 # github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 ## explicit; go 1.24
 github.com/aws/aws-sdk-go-v2/service/s3

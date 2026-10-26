@@ -127,6 +127,11 @@
 //     GetDomainNames) and sns (ListTopics with GetTopicAttributes in each
 //     topic's region), regional loops; and iam (ListUsers, ListRoles,
 //     ListGroups, ListPolicies, with v2 paginators where v1 paginated), global.
+//     Bulk 11 is migrated too: route53 (ListHostedZones, ListHealthChecks,
+//     global, single calls), cloudfront (ListDistributions, one call per scoped
+//     region) and cloudwatch (DescribeAlarms, ListMetrics on the cloudwatch
+//     module, pinned to v1.52.8 because later releases speak CBOR RPC v2, plus
+//     cloudwatchlogs DescribeLogGroups/DescribeLogStreams with paginators).
 //     Every other service is still v1.
 //   - Callers never invoke either field directly; they use
 //     types.AWSService.Invoke. For a CallV2 service it takes the aws.Config

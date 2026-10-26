@@ -2,19 +2,21 @@ package route53
 
 import (
 	"context"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/route53"
-	"time"
 )
 
 var Route53Calls = []types.AWSService{
 	{
 		Name: "route53:ListHostedZones",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := route53.New(sess)
-			output, err := svc.ListHostedZonesWithContext(ctx, &route53.ListHostedZonesInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", route53.NewFromConfig)
+			output, err := svc.ListHostedZones(ctx, &route53.ListHostedZonesInput{})
 
 			if err != nil {
 				return nil, err
@@ -39,10 +41,7 @@ var Route53Calls = []types.AWSService{
 
 			if zones, ok := output.(*route53.ListHostedZonesOutput); ok {
 				for _, zone := range zones.HostedZones {
-					zoneName := ""
-					if zone.Name != nil {
-						zoneName = *zone.Name
-					}
+					zoneName := aws.ToString(zone.Name)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "Route53",
@@ -62,9 +61,9 @@ var Route53Calls = []types.AWSService{
 	},
 	{
 		Name: "route53:ListHealthChecks",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			svc := route53.New(sess)
-			output, err := svc.ListHealthChecksWithContext(ctx, &route53.ListHealthChecksInput{})
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			svc := awsv2.NewRegionalClient(cfg, "", route53.NewFromConfig)
+			output, err := svc.ListHealthChecks(ctx, &route53.ListHealthChecksInput{})
 
 			if err != nil {
 				return nil, err
@@ -89,8 +88,8 @@ var Route53Calls = []types.AWSService{
 			if checks, ok := output.(*route53.ListHealthChecksOutput); ok {
 				for _, check := range checks.HealthChecks {
 					ipAddr := ""
-					if check.HealthCheckConfig != nil && check.HealthCheckConfig.IPAddress != nil {
-						ipAddr = *check.HealthCheckConfig.IPAddress
+					if check.HealthCheckConfig != nil {
+						ipAddr = aws.ToString(check.HealthCheckConfig.IPAddress)
 					}
 
 					results = append(results, types.ScanResult{

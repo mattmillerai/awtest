@@ -1,0 +1,1 @@
+<ListMetricsResponse xmlns="http://monitoring.amazonaws.com/doc/2010-08-01/"><ListMetricsResult><Metrics/></ListMetricsResult><ResponseMetadata><RequestId>r1</RequestId></ResponseMetadata></ListMetricsResponse>

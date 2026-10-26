@@ -210,6 +210,39 @@ else in the golden changed. (`attachment_count` and the role
 Migration PRs for these services must keep `TestGoldenReplaySample/bulk10`
 green without regenerating it.
 
+## Bulk 11 golden (route53, cloudfront, cloudwatch)
+
+`replay-bulk11.json` is the v1 baseline for the eleventh bulk migration batch:
+`route53:ListHostedZones`, `route53:ListHealthChecks`,
+`cloudfront:ListDistributions` (with its origins), `cloudwatch:DescribeAlarms`,
+`cloudwatchlogs:DescribeLogGroupsAndStreams` and `cloudwatchlogs:ListMetrics`.
+It is produced from the fictional fixtures in `bulk11/` (fixture dir
+`testdata/golden/bulk11`) with
+`awtest -replay <abs>/testdata/golden/bulk11 -services route53,cloudfront,cloudwatch -quiet -format json`.
+The functional tests in each service package additionally cover sparse
+resources, error text, the log group/stream pagination and the region loops.
+
+The v2 migration left `replay-bulk11.json` unchanged. The `cloudwatch` module
+is pinned to v1.52.8, the newest release that still speaks the AWS query
+protocol; v1.53.0 and later use smithy RPC v2 CBOR, which the replay server
+fixtures (query/XML) cannot answer. `cloudwatchlogs` is pinned to v1.89.3 so
+that no shared module (`aws/protocol/eventstream`) is bumped.
+
+Accepted v1 -> v2 difference (in `replay-sample.json`, see below): accepted:
+v2 normalized error text for missing replay fixture on restxml services.
+
+Migration PRs for these services must keep `TestGoldenReplaySample/bulk11`
+green without regenerating it.
+
+## Sample golden: accepted error-text change (restxml)
+
+accepted: v2 normalized error text for missing replay fixture on restxml
+services. In `replay-sample.json` the errors of `cloudfront:ListDistributions`,
+`route53:ListHostedZones` and `route53:ListHealthChecks` were `": "` in v1 (the
+REST-XML replay response without a fixture could not be parsed) and are
+`"UnknownError: UnknownError"` after the v2 migration. Exactly those three
+`error` lines were edited by hand; the file was not regenerated.
+
 ## Known v1 quirks
 
 `normalizeGolden` also strips the JSON-protocol v1 error struct dump

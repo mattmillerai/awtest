@@ -26,6 +26,7 @@ const (
 	goldenBulk8Path  = "testdata/golden/replay-bulk8.json"
 	goldenBulk9Path  = "testdata/golden/replay-bulk9.json"
 	goldenBulk10Path = "testdata/golden/replay-bulk10.json"
+	goldenBulk11Path = "testdata/golden/replay-bulk11.json"
 )
 
 // v1TransportSuffix is the aws-sdk-go v1 error noise the v2 migration drops.
@@ -247,6 +248,10 @@ func TestGoldenReplaySample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	bulk11Dir, err := filepath.Abs("testdata/golden/bulk11")
+	if err != nil {
+		t.Fatal(err)
+	}
 	cases := []struct {
 		name       string
 		args       []string
@@ -275,6 +280,8 @@ func TestGoldenReplaySample(t *testing.T) {
 		{"bulk9", []string{"-replay", bulk9Dir, "-services", "mediaconvert,neptune,opensearch,organizations,sagemaker", "-quiet", "-format", "json"}, goldenBulk9Path},
 		// Prefixes: securityhub, apigateway, sns, iam; none occurs inside another prefix.
 		{"bulk10", []string{"-replay", bulk10Dir, "-services", "securityhub,apigateway,sns,iam", "-quiet", "-format", "json"}, goldenBulk10Path},
+		// Prefixes: route53, cloudfront, cloudwatch, cloudwatchlogs ("cloudwatch" selects both CloudWatch services); none occurs inside another prefix.
+		{"bulk11", []string{"-replay", bulk11Dir, "-services", "route53,cloudfront,cloudwatch", "-quiet", "-format", "json"}, goldenBulk11Path},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

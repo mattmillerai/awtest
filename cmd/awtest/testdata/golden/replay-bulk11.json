@@ -1,0 +1,135 @@
+[
+  {
+    "details": {},
+    "methodName": "cloudfront:ListDistributions",
+    "resourceName": "E1EXAMPLE0001",
+    "resourceType": "distribution",
+    "serviceName": "CloudFront"
+  },
+  {
+    "details": {},
+    "methodName": "cloudfront:ListOrigins",
+    "resourceName": "web-origin-1",
+    "resourceType": "origin",
+    "serviceName": "CloudFront"
+  },
+  {
+    "details": {},
+    "methodName": "cloudfront:ListOrigins",
+    "resourceName": "s3-origin-2",
+    "resourceType": "origin",
+    "serviceName": "CloudFront"
+  },
+  {
+    "details": {},
+    "methodName": "cloudfront:ListDistributions",
+    "resourceName": "E1EXAMPLE0002",
+    "resourceType": "distribution",
+    "serviceName": "CloudFront"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatch:DescribeAlarms",
+    "resourceName": "high-cpu-web-fleet",
+    "resourceType": "alarm",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatch:DescribeAlarms",
+    "resourceName": "queue-depth-orders",
+    "resourceType": "alarm",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "/aws/lambda/orders-handler",
+    "resourceType": "log-group",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "2024/01/01/latest-aaaabbbbccccdddd",
+    "resourceType": "log-stream",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "2024/01/02/latest-eeeeffff00001111",
+    "resourceType": "log-stream",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "/app/web/second-group",
+    "resourceType": "log-group",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "2024/01/01/latest-aaaabbbbccccdddd",
+    "resourceType": "log-stream",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:DescribeLogGroupsAndStreams",
+    "resourceName": "2024/01/02/latest-eeeeffff00001111",
+    "resourceType": "log-stream",
+    "serviceName": "CloudWatchLogs"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:ListMetrics",
+    "resourceName": "CPUUtilization",
+    "resourceType": "metric",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "methodName": "cloudwatchlogs:ListMetrics",
+    "resourceName": "NumberOfMessagesSent",
+    "resourceType": "metric",
+    "serviceName": "CloudWatch"
+  },
+  {
+    "details": {},
+    "methodName": "route53:ListHostedZones",
+    "resourceName": "example-corp.test.",
+    "resourceType": "hosted-zone",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "methodName": "route53:ListHostedZones",
+    "resourceName": "",
+    "resourceType": "hosted-zone",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "methodName": "route53:ListHealthChecks",
+    "resourceName": "192.0.2.10",
+    "resourceType": "health-check",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "methodName": "route53:ListHealthChecks",
+    "resourceName": "",
+    "resourceType": "health-check",
+    "serviceName": "Route53"
+  },
+  {
+    "details": {},
+    "methodName": "route53:ListHealthChecks",
+    "resourceName": "",
+    "resourceType": "health-check",
+    "serviceName": "Route53"
+  }
+]

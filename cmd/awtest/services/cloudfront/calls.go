@@ -3,38 +3,46 @@ package cloudfront
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
+	cftypes "github.com/aws/aws-sdk-go-v2/service/cloudfront/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudfront"
-	"time"
 )
 
 type DistributionWithOrigins struct {
-	Distribution *cloudfront.DistributionSummary
-	Origins      []*cloudfront.Origin
+	Distribution cftypes.DistributionSummary
+	Origins      []cftypes.Origin
 	Region       string
 }
 
 var CloudFrontCalls = []types.AWSService{
 	{
 		Name: "cloudfront:ListDistributions",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allDistributionsWithOrigins []DistributionWithOrigins
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := cloudfront.New(regionSess)
-				distributionsOutput, err := svc.ListDistributionsWithContext(ctx, &cloudfront.ListDistributionsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, cloudfront.NewFromConfig)
+				distributionsOutput, err := svc.ListDistributions(ctx, &cloudfront.ListDistributionsInput{})
 				if err != nil {
 					return nil, err
 				}
 
+				if distributionsOutput.DistributionList == nil {
+					continue
+				}
 				for _, distribution := range distributionsOutput.DistributionList.Items {
+					var origins []cftypes.Origin
+					if distribution.Origins != nil {
+						origins = distribution.Origins.Items
+					}
 					distributionWithOrigins := DistributionWithOrigins{
 						Distribution: distribution,
-						Origins:      distribution.Origins.Items,
+						Origins:      origins,
 						Region:       region,
 					}
 					allDistributionsWithOrigins = append(allDistributionsWithOrigins, distributionWithOrigins)
@@ -60,7 +68,7 @@ var CloudFrontCalls = []types.AWSService{
 			if distributionsWithOrigins, ok := output.([]DistributionWithOrigins); ok {
 				for _, distributionWithOrigins := range distributionsWithOrigins {
 					fmt.Println()
-					distributionID := *distributionWithOrigins.Distribution.Id
+					distributionID := aws.ToString(distributionWithOrigins.Distribution.Id)
 					utils.PrintResult(debug, "", "cloudfront:ListDistributions", fmt.Sprintf("Found Distribution: %s", distributionID), nil)
 
 					results = append(results, types.ScanResult{
@@ -74,13 +82,14 @@ var CloudFrontCalls = []types.AWSService{
 
 					if len(distributionWithOrigins.Origins) > 0 {
 						for _, origin := range distributionWithOrigins.Origins {
-							utils.PrintResult(debug, "", "cloudfront:ListOrigins", fmt.Sprintf("Found Origin: %s (%s)", *origin.Id, distributionID), nil)
+							originID := aws.ToString(origin.Id)
+							utils.PrintResult(debug, "", "cloudfront:ListOrigins", fmt.Sprintf("Found Origin: %s (%s)", originID, distributionID), nil)
 
 							results = append(results, types.ScanResult{
 								ServiceName:  "CloudFront",
 								MethodName:   "cloudfront:ListOrigins",
 								ResourceType: "origin",
-								ResourceName: *origin.Id,
+								ResourceName: originID,
 								Details:      map[string]interface{}{},
 								Timestamp:    time.Now(),
 							})

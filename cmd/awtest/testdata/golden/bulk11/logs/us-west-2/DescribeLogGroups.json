@@ -1,0 +1,1 @@
+{"logGroups":[{"logGroupName":"/aws/lambda/orders-handler","arn":"arn:aws:logs:us-west-2:123456789012:log-group:/aws/lambda/orders-handler:*","storedBytes":1024,"retentionInDays":14},{"logGroupName":"/app/web/second-group","arn":"arn:aws:logs:us-west-2:123456789012:log-group:/app/web/second-group:*"}]}

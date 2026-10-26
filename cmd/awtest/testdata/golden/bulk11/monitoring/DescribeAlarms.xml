@@ -1,0 +1,1 @@
+<DescribeAlarmsResponse xmlns="http://monitoring.amazonaws.com/doc/2010-08-01/"><DescribeAlarmsResult><MetricAlarms/><CompositeAlarms/></DescribeAlarmsResult><ResponseMetadata><RequestId>r1</RequestId></ResponseMetadata></DescribeAlarmsResponse>

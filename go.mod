@@ -17,7 +17,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/backup v1.69.3
 	github.com/aws/aws-sdk-go-v2/service/batch v1.78.5
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.2
+	github.com/aws/aws-sdk-go-v2/service/cloudfront v1.75.1
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.6
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.52.8
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.89.3
 	github.com/aws/aws-sdk-go-v2/service/codebuild v1.78.6
 	github.com/aws/aws-sdk-go-v2/service/codecommit v1.44.1
 	github.com/aws/aws-sdk-go-v2/service/codedeploy v1.46.1
@@ -51,6 +54,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 	github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/rekognition v1.62.0
+	github.com/aws/aws-sdk-go-v2/service/route53 v1.70.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.284.2
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6

@@ -131,7 +131,7 @@
   },
   {
     "details": {},
-    "error": ": ",
+    "error": "UnknownError: UnknownError",
     "methodName": "cloudfront:ListDistributions",
     "resourceName": "",
     "resourceType": "",
@@ -909,7 +909,7 @@
   },
   {
     "details": {},
-    "error": ": ",
+    "error": "UnknownError: UnknownError",
     "methodName": "route53:ListHostedZones",
     "resourceName": "",
     "resourceType": "",
@@ -917,7 +917,7 @@
   },
   {
     "details": {},
-    "error": ": ",
+    "error": "UnknownError: UnknownError",
     "methodName": "route53:ListHealthChecks",
     "resourceName": "",
     "resourceType": "",

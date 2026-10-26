@@ -3,29 +3,31 @@ package cloudwatch
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	cwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	logstypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
+	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 	"github.com/mattmillerai/awtest/cmd/awtest/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
-	"time"
 )
 
 type LogGroupWithStreams struct {
-	LogGroup   *cloudwatchlogs.LogGroup
-	LogStreams []*cloudwatchlogs.LogStream
+	LogGroup   logstypes.LogGroup
+	LogStreams []logstypes.LogStream
 }
 
 var CloudwatchCalls = []types.AWSService{
 	{
 		Name: "cloudwatch:DescribeAlarms",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allAlarms []*cloudwatch.MetricAlarm
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allAlarms []cwtypes.MetricAlarm
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := cloudwatch.New(sess)
-				output, err := svc.DescribeAlarmsWithContext(ctx, &cloudwatch.DescribeAlarmsInput{})
+				svc := awsv2.NewRegionalClient(cfg, region, cloudwatch.NewFromConfig)
+				output, err := svc.DescribeAlarms(ctx, &cloudwatch.DescribeAlarmsInput{})
 				if err != nil {
 					return nil, err
 				}
@@ -47,15 +49,16 @@ var CloudwatchCalls = []types.AWSService{
 					},
 				}
 			}
-			if alarms, ok := output.([]*cloudwatch.MetricAlarm); ok {
+			if alarms, ok := output.([]cwtypes.MetricAlarm); ok {
 				for _, alarm := range alarms {
-					utils.PrintResult(debug, "", "cloudwatch:DescribeAlarms", fmt.Sprintf("CloudWatch alarm: %s", utils.ColorizeItem(*alarm.AlarmName)), nil)
+					alarmName := aws.ToString(alarm.AlarmName)
+					utils.PrintResult(debug, "", "cloudwatch:DescribeAlarms", fmt.Sprintf("CloudWatch alarm: %s", utils.ColorizeItem(alarmName)), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "CloudWatch",
 						MethodName:   "cloudwatch:DescribeAlarms",
 						ResourceType: "alarm",
-						ResourceName: *alarm.AlarmName,
+						ResourceName: alarmName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})
@@ -67,28 +70,35 @@ var CloudwatchCalls = []types.AWSService{
 	},
 	{
 		Name: "cloudwatchlogs:DescribeLogGroupsAndStreams",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
 			var allLogGroupsWithStreams []*LogGroupWithStreams
 
 			for _, region := range types.RegionsFor(ctx) {
-				regionSess := sess.Copy(&aws.Config{Region: aws.String(region)})
-				svc := cloudwatchlogs.New(regionSess)
+				svc := awsv2.NewRegionalClient(cfg, region, cloudwatchlogs.NewFromConfig)
 
 				// Describe Log Groups
-				input := &cloudwatchlogs.DescribeLogGroupsInput{}
-				err := svc.DescribeLogGroupsPagesWithContext(ctx, input, func(output *cloudwatchlogs.DescribeLogGroupsOutput, lastPage bool) bool {
+				groupPages := cloudwatchlogs.NewDescribeLogGroupsPaginator(svc, &cloudwatchlogs.DescribeLogGroupsInput{})
+			pages:
+				for groupPages.HasMorePages() {
+					output, err := groupPages.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
 					for _, logGroup := range output.LogGroups {
 						// Describe Log Streams for each Log Group
 						streamInput := &cloudwatchlogs.DescribeLogStreamsInput{
 							LogGroupName: logGroup.LogGroupName,
 						}
-						var logStreams []*cloudwatchlogs.LogStream
-						err := svc.DescribeLogStreamsPagesWithContext(ctx, streamInput, func(streamOutput *cloudwatchlogs.DescribeLogStreamsOutput, lastPage bool) bool {
+						var logStreams []logstypes.LogStream
+						streamPages := cloudwatchlogs.NewDescribeLogStreamsPaginator(svc, streamInput)
+						for streamPages.HasMorePages() {
+							streamOutput, err := streamPages.NextPage(ctx)
+							if err != nil {
+								// v1 stopped paging log groups here without
+								// reporting the error.
+								break pages
+							}
 							logStreams = append(logStreams, streamOutput.LogStreams...)
-							return true // continue paging
-						})
-						if err != nil {
-							return false
 						}
 
 						allLogGroupsWithStreams = append(allLogGroupsWithStreams, &LogGroupWithStreams{
@@ -96,10 +106,6 @@ var CloudwatchCalls = []types.AWSService{
 							LogStreams: logStreams,
 						})
 					}
-					return true // continue paging
-				})
-				if err != nil {
-					return nil, err
 				}
 			}
 
@@ -124,29 +130,31 @@ var CloudwatchCalls = []types.AWSService{
 					utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", "No log groups found.", nil)
 				} else {
 					for _, lgws := range logGroupsWithStreams {
+						logGroupName := aws.ToString(lgws.LogGroup.LogGroupName)
 						// Print the Log Group
-						utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("Found Log Group: %s", *lgws.LogGroup.LogGroupName), nil)
+						utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("Found Log Group: %s", logGroupName), nil)
 
 						results = append(results, types.ScanResult{
 							ServiceName:  "CloudWatchLogs",
 							MethodName:   "cloudwatchlogs:DescribeLogGroupsAndStreams",
 							ResourceType: "log-group",
-							ResourceName: *lgws.LogGroup.LogGroupName,
+							ResourceName: logGroupName,
 							Details:      map[string]interface{}{},
 							Timestamp:    time.Now(),
 						})
 
 						// Check if there are any Log Streams
 						if len(lgws.LogStreams) > 0 {
-							utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("  Log Streams for %s:", *lgws.LogGroup.LogGroupName), nil)
+							utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("  Log Streams for %s:", logGroupName), nil)
 							for _, logStream := range lgws.LogStreams {
-								utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("    - Log Stream: %s", *logStream.LogStreamName), nil)
+								logStreamName := aws.ToString(logStream.LogStreamName)
+								utils.PrintResult(debug, "", "cloudwatchlogs:DescribeLogGroupsAndStreams", fmt.Sprintf("    - Log Stream: %s", logStreamName), nil)
 
 								results = append(results, types.ScanResult{
 									ServiceName:  "CloudWatchLogs",
 									MethodName:   "cloudwatchlogs:DescribeLogGroupsAndStreams",
 									ResourceType: "log-stream",
-									ResourceName: *logStream.LogStreamName,
+									ResourceName: logStreamName,
 									Details:      map[string]interface{}{},
 									Timestamp:    time.Now(),
 								})
@@ -163,13 +171,12 @@ var CloudwatchCalls = []types.AWSService{
 	},
 	{
 		Name: "cloudwatchlogs:ListMetrics",
-		Call: func(ctx context.Context, sess *session.Session) (interface{}, error) {
-			var allMetrics []*cloudwatch.Metric
+		CallV2: func(ctx context.Context, cfg aws.Config) (interface{}, error) {
+			var allMetrics []cwtypes.Metric
 			for _, region := range types.RegionsFor(ctx) {
-				sess.Config.Region = aws.String(region)
-				svc := cloudwatch.New(sess)
+				svc := awsv2.NewRegionalClient(cfg, region, cloudwatch.NewFromConfig)
 				input := &cloudwatch.ListMetricsInput{}
-				output, err := svc.ListMetricsWithContext(ctx, input)
+				output, err := svc.ListMetrics(ctx, input)
 				if err != nil {
 					return nil, err
 				}
@@ -191,15 +198,16 @@ var CloudwatchCalls = []types.AWSService{
 					},
 				}
 			}
-			if metrics, ok := output.([]*cloudwatch.Metric); ok {
+			if metrics, ok := output.([]cwtypes.Metric); ok {
 				for _, metric := range metrics {
-					utils.PrintResult(debug, "", "cloudwatchlogs:ListMetrics", fmt.Sprintf("Found Metric: %s", *metric.MetricName), nil)
+					metricName := aws.ToString(metric.MetricName)
+					utils.PrintResult(debug, "", "cloudwatchlogs:ListMetrics", fmt.Sprintf("Found Metric: %s", metricName), nil)
 
 					results = append(results, types.ScanResult{
 						ServiceName:  "CloudWatch",
 						MethodName:   "cloudwatchlogs:ListMetrics",
 						ResourceType: "metric",
-						ResourceName: *metric.MetricName,
+						ResourceName: metricName,
 						Details:      map[string]interface{}{},
 						Timestamp:    time.Now(),
 					})

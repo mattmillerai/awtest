@@ -12,7 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/backup"
 	"github.com/aws/aws-sdk-go-v2/service/batch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild"
 	"github.com/aws/aws-sdk-go-v2/service/codecommit"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy"
@@ -46,6 +49,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/redshift"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition"
+	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
@@ -146,6 +150,13 @@ var v2EnvSuffix = map[string][]string{
 	"apigateway":  {"API_GATEWAY"},
 	"sns":         {"SNS"},
 	"iam":         {"IAM"},
+
+	// The cloudwatchlogs prefix covers cloudwatchlogs:DescribeLogGroupsAndStreams
+	// (CloudWatch Logs client) and cloudwatchlogs:ListMetrics (CloudWatch client).
+	"route53":        {"ROUTE_53"},
+	"cloudfront":     {"CLOUDFRONT"},
+	"cloudwatch":     {"CLOUDWATCH"},
+	"cloudwatchlogs": {"CLOUDWATCH_LOGS", "CLOUDWATCH"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -213,6 +224,11 @@ var v2ServiceIDs = map[string][]string{
 	"apigateway":  {apigateway.ServiceID},
 	"sns":         {sns.ServiceID},
 	"iam":         {iam.ServiceID},
+
+	"route53":        {route53.ServiceID},
+	"cloudfront":     {cloudfront.ServiceID},
+	"cloudwatch":     {cloudwatch.ServiceID},
+	"cloudwatchlogs": {cloudwatchlogs.ServiceID, cloudwatch.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>
