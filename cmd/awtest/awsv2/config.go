@@ -145,6 +145,8 @@ func LoadConfig(ctx context.Context, opts Options) (aws.Config, error) {
 		return aws.Config{}, err
 	}
 	clearLegacyResolvers(&cfg)
+	// See bodyShieldClient: avoids a net/http write-loop race with smithy-go.
+	cfg.HTTPClient = shieldHTTPClient(cfg.HTTPClient)
 	// Surface the policy on the config; clients cap their retryer to it.
 	cfg.RetryMaxAttempts = maxAttempts(opts)
 
