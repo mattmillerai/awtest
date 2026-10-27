@@ -4,9 +4,7 @@ package acm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/acm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/acm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/aws/smithy-go/ptr"
 )
@@ -58,18 +56,6 @@ type RemoveTagsFromCertificateInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsFromCertificateInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RemoveTagsFromCertificateRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsFromCertificateInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CertificateArn != nil {
-		s.WriteString(schemas.RemoveTagsFromCertificateRequest_CertificateArn, *v.CertificateArn)
-	}
-	serializeTagList(s, schemas.RemoveTagsFromCertificateRequest_Tags, v.Tags)
-}
 func (in *RemoveTagsFromCertificateInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ServiceType = ptr.String("ACM")
@@ -82,26 +68,13 @@ type RemoveTagsFromCertificateOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsFromCertificateOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsFromCertificateOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RemoveTagsFromCertificateOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRemoveTagsFromCertificateMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTagsFromCertificate, schemas.RemoveTagsFromCertificateRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRemoveTagsFromCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTagsFromCertificate, schemas.RemoveTagsFromCertificateRequest, nil), output: &RemoveTagsFromCertificateOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRemoveTagsFromCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

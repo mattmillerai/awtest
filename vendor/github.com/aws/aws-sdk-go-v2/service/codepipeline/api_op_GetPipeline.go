@@ -4,9 +4,7 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type GetPipelineInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPipelineInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPipelineInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPipelineInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.GetPipelineInput_name, *v.Name)
-	}
-	if v.Version != nil {
-		s.WriteInt32(schemas.GetPipelineInput_version, *v.Version)
-	}
-}
-
 // Represents the output of a GetPipeline action.
 type GetPipelineOutput struct {
 
@@ -75,45 +58,19 @@ type GetPipelineOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPipelineOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPipelineOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPipelineOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Metadata != nil {
-		s.WriteStruct(schemas.GetPipelineOutput_metadata)
-		v.Metadata.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.Pipeline != nil {
-		s.WriteStruct(schemas.GetPipelineOutput_pipeline)
-		v.Pipeline.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetPipelineOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetPipelineOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetPipelineOutput_metadata:
-			v.Metadata = &types.PipelineMetadata{}
-			return v.Metadata.Deserialize(d)
-		case schemas.GetPipelineOutput_pipeline:
-			v.Pipeline = &types.PipelineDeclaration{}
-			return v.Pipeline.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetPipelineMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPipeline, schemas.GetPipelineInput, schemas.GetPipelineOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetPipeline{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPipeline, schemas.GetPipelineInput, schemas.GetPipelineOutput), output: &GetPipelineOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetPipeline{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

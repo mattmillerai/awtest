@@ -5,9 +5,7 @@ package sagemaker
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,26 +45,6 @@ type RetryPipelineExecutionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RetryPipelineExecutionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RetryPipelineExecutionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RetryPipelineExecutionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientRequestToken != nil {
-		s.WriteString(schemas.RetryPipelineExecutionRequest_ClientRequestToken, *v.ClientRequestToken)
-	}
-	if v.ParallelismConfiguration != nil {
-		s.WriteStruct(schemas.RetryPipelineExecutionRequest_ParallelismConfiguration)
-		v.ParallelismConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.PipelineExecutionArn != nil {
-		s.WriteString(schemas.RetryPipelineExecutionRequest_PipelineExecutionArn, *v.PipelineExecutionArn)
-	}
-}
-
 type RetryPipelineExecutionOutput struct {
 
 	// The Amazon Resource Name (ARN) of the pipeline execution.
@@ -78,32 +56,13 @@ type RetryPipelineExecutionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RetryPipelineExecutionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RetryPipelineExecutionResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RetryPipelineExecutionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PipelineExecutionArn != nil {
-		s.WriteString(schemas.RetryPipelineExecutionResponse_PipelineExecutionArn, *v.PipelineExecutionArn)
-	}
-}
-func (v *RetryPipelineExecutionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.RetryPipelineExecutionResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.RetryPipelineExecutionResponse_PipelineExecutionArn:
-			v.PipelineExecutionArn = new(string)
-			return d.ReadString(schemas.RetryPipelineExecutionResponse_PipelineExecutionArn, v.PipelineExecutionArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRetryPipelineExecutionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RetryPipelineExecution, schemas.RetryPipelineExecutionRequest, schemas.RetryPipelineExecutionResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRetryPipelineExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RetryPipelineExecution, schemas.RetryPipelineExecutionRequest, schemas.RetryPipelineExecutionResponse), output: &RetryPipelineExecutionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRetryPipelineExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -5,9 +5,7 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glacier/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -53,21 +51,6 @@ type GetVaultAccessPolicyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetVaultAccessPolicyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetVaultAccessPolicyInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetVaultAccessPolicyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.GetVaultAccessPolicyInput_accountId, *v.AccountId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.GetVaultAccessPolicyInput_vaultName, *v.VaultName)
-	}
-}
-
 // Output for GetVaultAccessPolicy.
 type GetVaultAccessPolicyOutput struct {
 
@@ -80,34 +63,13 @@ type GetVaultAccessPolicyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetVaultAccessPolicyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetVaultAccessPolicyOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetVaultAccessPolicyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Policy != nil {
-		s.WriteStruct(schemas.GetVaultAccessPolicyOutput_policy)
-		v.Policy.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetVaultAccessPolicyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetVaultAccessPolicyOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetVaultAccessPolicyOutput_policy:
-			v.Policy = &types.VaultAccessPolicy{}
-			return v.Policy.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetVaultAccessPolicyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetVaultAccessPolicy, schemas.GetVaultAccessPolicyInput, schemas.GetVaultAccessPolicyOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetVaultAccessPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetVaultAccessPolicy, schemas.GetVaultAccessPolicyInput, schemas.GetVaultAccessPolicyOutput), output: &GetVaultAccessPolicyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetVaultAccessPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

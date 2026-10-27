@@ -4,9 +4,7 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -49,24 +47,6 @@ type UpdateReportGroupInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateReportGroupInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateReportGroupInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateReportGroupInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Arn != nil {
-		s.WriteString(schemas.UpdateReportGroupInput_arn, *v.Arn)
-	}
-	if v.ExportConfig != nil {
-		s.WriteStruct(schemas.UpdateReportGroupInput_exportConfig)
-		v.ExportConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagList(s, schemas.UpdateReportGroupInput_tags, v.Tags)
-}
-
 type UpdateReportGroupOutput struct {
 
 	//  Information about the updated report group.
@@ -78,37 +58,19 @@ type UpdateReportGroupOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateReportGroupOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateReportGroupOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateReportGroupOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ReportGroup != nil {
-		s.WriteStruct(schemas.UpdateReportGroupOutput_reportGroup)
-		v.ReportGroup.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *UpdateReportGroupOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateReportGroupOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateReportGroupOutput_reportGroup:
-			v.ReportGroup = &types.ReportGroup{}
-			return v.ReportGroup.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateReportGroupMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateReportGroup, schemas.UpdateReportGroupInput, schemas.UpdateReportGroupOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateReportGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateReportGroup, schemas.UpdateReportGroupInput, schemas.UpdateReportGroupOutput), output: &UpdateReportGroupOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateReportGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

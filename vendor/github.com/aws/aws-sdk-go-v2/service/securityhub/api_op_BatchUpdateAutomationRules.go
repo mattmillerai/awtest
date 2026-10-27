@@ -4,9 +4,7 @@ package securityhub
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/securityhub/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,16 +37,6 @@ type BatchUpdateAutomationRulesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchUpdateAutomationRulesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchUpdateAutomationRulesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchUpdateAutomationRulesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeUpdateAutomationRulesRequestItemsList(s, schemas.BatchUpdateAutomationRulesRequest_UpdateAutomationRulesRequestItems, v.UpdateAutomationRulesRequestItems)
-}
-
 type BatchUpdateAutomationRulesOutput struct {
 
 	//  A list of properly processed rule ARNs.
@@ -64,32 +52,13 @@ type BatchUpdateAutomationRulesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchUpdateAutomationRulesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchUpdateAutomationRulesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchUpdateAutomationRulesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAutomationRulesArnsList(s, schemas.BatchUpdateAutomationRulesResponse_ProcessedAutomationRules, v.ProcessedAutomationRules)
-	serializeUnprocessedAutomationRulesList(s, schemas.BatchUpdateAutomationRulesResponse_UnprocessedAutomationRules, v.UnprocessedAutomationRules)
-}
-func (v *BatchUpdateAutomationRulesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.BatchUpdateAutomationRulesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.BatchUpdateAutomationRulesResponse_ProcessedAutomationRules:
-			return deserializeAutomationRulesArnsList(d, schemas.BatchUpdateAutomationRulesResponse_ProcessedAutomationRules, &v.ProcessedAutomationRules)
-		case schemas.BatchUpdateAutomationRulesResponse_UnprocessedAutomationRules:
-			return deserializeUnprocessedAutomationRulesList(d, schemas.BatchUpdateAutomationRulesResponse_UnprocessedAutomationRules, &v.UnprocessedAutomationRules)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationBatchUpdateAutomationRulesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchUpdateAutomationRules, schemas.BatchUpdateAutomationRulesRequest, schemas.BatchUpdateAutomationRulesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpBatchUpdateAutomationRules{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchUpdateAutomationRules, schemas.BatchUpdateAutomationRulesRequest, schemas.BatchUpdateAutomationRulesResponse), output: &BatchUpdateAutomationRulesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpBatchUpdateAutomationRules{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

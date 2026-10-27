@@ -4,8 +4,6 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -83,21 +81,6 @@ type DisassociateKmsKeyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateKmsKeyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateKmsKeyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateKmsKeyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LogGroupName != nil {
-		s.WriteString(schemas.DisassociateKmsKeyRequest_logGroupName, *v.LogGroupName)
-	}
-	if v.ResourceIdentifier != nil {
-		s.WriteString(schemas.DisassociateKmsKeyRequest_resourceIdentifier, *v.ResourceIdentifier)
-	}
-}
-
 type DisassociateKmsKeyOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -105,26 +88,13 @@ type DisassociateKmsKeyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateKmsKeyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateKmsKeyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DisassociateKmsKeyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateKmsKeyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateKmsKey, schemas.DisassociateKmsKeyRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDisassociateKmsKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateKmsKey, schemas.DisassociateKmsKeyRequest, nil), output: &DisassociateKmsKeyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDisassociateKmsKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

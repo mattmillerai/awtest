@@ -5,9 +5,7 @@ package organizations
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/organizations/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -62,12 +60,9 @@ type ListAccountsWithInvalidEffectivePolicyInput struct {
 	//
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]
 	//
-	// [GUARDDUTY_POLICY]
-	//
 	// [AISERVICES_OPT_OUT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_ai-opt-out.html
 	// [BEDROCK_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_bedrock.html
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_network_security_director.html
-	// [GUARDDUTY_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_guardduty.html
 	// [UPGRADE_ROLLOUT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_upgrade_rollout.html
 	// [SECURITYHUB_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_security_hub.html
 	// [BACKUP_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_backup.html
@@ -92,24 +87,6 @@ type ListAccountsWithInvalidEffectivePolicyInput struct {
 	NextToken *string
 
 	noSmithyDocumentSerde
-}
-
-func (v *ListAccountsWithInvalidEffectivePolicyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListAccountsWithInvalidEffectivePolicyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListAccountsWithInvalidEffectivePolicyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListAccountsWithInvalidEffectivePolicyRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListAccountsWithInvalidEffectivePolicyRequest_NextToken, *v.NextToken)
-	}
-	if v.PolicyType != "" {
-		s.WriteString(schemas.ListAccountsWithInvalidEffectivePolicyRequest_PolicyType, string(v.PolicyType))
-	}
 }
 
 type ListAccountsWithInvalidEffectivePolicyOutput struct {
@@ -148,12 +125,9 @@ type ListAccountsWithInvalidEffectivePolicyOutput struct {
 	//
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]
 	//
-	// [GUARDDUTY_POLICY]
-	//
 	// [AISERVICES_OPT_OUT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_ai-opt-out.html
 	// [BEDROCK_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_bedrock.html
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_network_security_director.html
-	// [GUARDDUTY_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_guardduty.html
 	// [UPGRADE_ROLLOUT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_upgrade_rollout.html
 	// [SECURITYHUB_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_security_hub.html
 	// [BACKUP_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_backup.html
@@ -170,45 +144,13 @@ type ListAccountsWithInvalidEffectivePolicyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListAccountsWithInvalidEffectivePolicyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListAccountsWithInvalidEffectivePolicyResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListAccountsWithInvalidEffectivePolicyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAccounts(s, schemas.ListAccountsWithInvalidEffectivePolicyResponse_Accounts, v.Accounts)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListAccountsWithInvalidEffectivePolicyResponse_NextToken, *v.NextToken)
-	}
-	if v.PolicyType != "" {
-		s.WriteString(schemas.ListAccountsWithInvalidEffectivePolicyResponse_PolicyType, string(v.PolicyType))
-	}
-}
-func (v *ListAccountsWithInvalidEffectivePolicyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListAccountsWithInvalidEffectivePolicyResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListAccountsWithInvalidEffectivePolicyResponse_Accounts:
-			return deserializeAccounts(d, schemas.ListAccountsWithInvalidEffectivePolicyResponse_Accounts, &v.Accounts)
-		case schemas.ListAccountsWithInvalidEffectivePolicyResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListAccountsWithInvalidEffectivePolicyResponse_NextToken, v.NextToken)
-		case schemas.ListAccountsWithInvalidEffectivePolicyResponse_PolicyType:
-			var ev string
-			if err := d.ReadString(schemas.ListAccountsWithInvalidEffectivePolicyResponse_PolicyType, &ev); err != nil {
-				return err
-			}
-			v.PolicyType = types.EffectivePolicyType(ev)
-			return nil
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListAccountsWithInvalidEffectivePolicyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListAccountsWithInvalidEffectivePolicy, schemas.ListAccountsWithInvalidEffectivePolicyRequest, schemas.ListAccountsWithInvalidEffectivePolicyResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListAccountsWithInvalidEffectivePolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListAccountsWithInvalidEffectivePolicy, schemas.ListAccountsWithInvalidEffectivePolicyRequest, schemas.ListAccountsWithInvalidEffectivePolicyResponse), output: &ListAccountsWithInvalidEffectivePolicyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListAccountsWithInvalidEffectivePolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -59,15 +57,6 @@ type UpdateIdentityProviderInput struct {
 	//
 	// This member is required.
 	UserPoolId *string
-
-	// A mapping between the authentication context class reference (ACR) levels of
-	// your user pool and the ACR values of the external OpenID Connect (OIDC) identity
-	// provider (IdP). This mapping has the same behavior as it does when you create an
-	// identity provider. Only OIDC IdPs support ACR mapping.
-	//
-	// Setting AcrMapping is available in all feature plans. It isn't restricted to
-	// the Essentials or Plus feature plan.
-	AcrMapping map[string]string
 
 	// A mapping of IdP attributes to standard and custom user pool attributes.
 	// Specify a user pool attribute as the key of the key-value pair, and the IdP
@@ -181,25 +170,6 @@ type UpdateIdentityProviderInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateIdentityProviderInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateIdentityProviderRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateIdentityProviderInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAcrMappingType(s, schemas.UpdateIdentityProviderRequest_AcrMapping, v.AcrMapping)
-	serializeAttributeMappingType(s, schemas.UpdateIdentityProviderRequest_AttributeMapping, v.AttributeMapping)
-	serializeIdpIdentifiersListType(s, schemas.UpdateIdentityProviderRequest_IdpIdentifiers, v.IdpIdentifiers)
-	serializeProviderDetailsType(s, schemas.UpdateIdentityProviderRequest_ProviderDetails, v.ProviderDetails)
-	if v.ProviderName != nil {
-		s.WriteString(schemas.UpdateIdentityProviderRequest_ProviderName, *v.ProviderName)
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.UpdateIdentityProviderRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type UpdateIdentityProviderOutput struct {
 
 	// The identity provider details.
@@ -213,34 +183,13 @@ type UpdateIdentityProviderOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateIdentityProviderOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateIdentityProviderResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateIdentityProviderOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.IdentityProvider != nil {
-		s.WriteStruct(schemas.UpdateIdentityProviderResponse_IdentityProvider)
-		v.IdentityProvider.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *UpdateIdentityProviderOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateIdentityProviderResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateIdentityProviderResponse_IdentityProvider:
-			v.IdentityProvider = &types.IdentityProviderType{}
-			return v.IdentityProvider.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateIdentityProviderMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateIdentityProvider, schemas.UpdateIdentityProviderRequest, schemas.UpdateIdentityProviderResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateIdentityProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateIdentityProvider, schemas.UpdateIdentityProviderRequest, schemas.UpdateIdentityProviderResponse), output: &UpdateIdentityProviderOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateIdentityProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

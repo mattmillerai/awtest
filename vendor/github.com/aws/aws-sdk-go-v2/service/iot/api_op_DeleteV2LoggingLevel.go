@@ -4,9 +4,7 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -37,28 +35,12 @@ type DeleteV2LoggingLevelInput struct {
 	// This member is required.
 	TargetName *string
 
-	// The type of resource for which you are configuring logging. Must be DEFAULT ,
-	// THING_GROUP , CLIENT_ID , SOURCE_IP , or PRINCIPAL_ID .
+	// The type of resource for which you are configuring logging. Must be THING_Group .
 	//
 	// This member is required.
 	TargetType types.LogTargetType
 
 	noSmithyDocumentSerde
-}
-
-func (v *DeleteV2LoggingLevelInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteV2LoggingLevelRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteV2LoggingLevelInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TargetName != nil {
-		s.WriteString(schemas.DeleteV2LoggingLevelRequest_targetName, *v.TargetName)
-	}
-	if v.TargetType != "" {
-		s.WriteString(schemas.DeleteV2LoggingLevelRequest_targetType, string(v.TargetType))
-	}
 }
 
 type DeleteV2LoggingLevelOutput struct {
@@ -68,26 +50,13 @@ type DeleteV2LoggingLevelOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteV2LoggingLevelOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteV2LoggingLevelOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteV2LoggingLevelOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteV2LoggingLevelMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteV2LoggingLevel, schemas.DeleteV2LoggingLevelRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteV2LoggingLevel{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteV2LoggingLevel, schemas.DeleteV2LoggingLevelRequest, nil), output: &DeleteV2LoggingLevelOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteV2LoggingLevel{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

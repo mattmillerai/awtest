@@ -4,9 +4,7 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -53,20 +51,6 @@ type CreateOpsMetadataInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateOpsMetadataInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateOpsMetadataRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateOpsMetadataInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeMetadataMap(s, schemas.CreateOpsMetadataRequest_Metadata, v.Metadata)
-	if v.ResourceId != nil {
-		s.WriteString(schemas.CreateOpsMetadataRequest_ResourceId, *v.ResourceId)
-	}
-	serializeTagList(s, schemas.CreateOpsMetadataRequest_Tags, v.Tags)
-}
-
 type CreateOpsMetadataOutput struct {
 
 	// The Amazon Resource Name (ARN) of the OpsMetadata Object or blob created by the
@@ -79,32 +63,13 @@ type CreateOpsMetadataOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateOpsMetadataOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateOpsMetadataResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateOpsMetadataOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.OpsMetadataArn != nil {
-		s.WriteString(schemas.CreateOpsMetadataResult_OpsMetadataArn, *v.OpsMetadataArn)
-	}
-}
-func (v *CreateOpsMetadataOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateOpsMetadataResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateOpsMetadataResult_OpsMetadataArn:
-			v.OpsMetadataArn = new(string)
-			return d.ReadString(schemas.CreateOpsMetadataResult_OpsMetadataArn, v.OpsMetadataArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateOpsMetadataMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateOpsMetadata, schemas.CreateOpsMetadataRequest, schemas.CreateOpsMetadataResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateOpsMetadata{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateOpsMetadata, schemas.CreateOpsMetadataRequest, schemas.CreateOpsMetadataResult), output: &CreateOpsMetadataOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateOpsMetadata{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

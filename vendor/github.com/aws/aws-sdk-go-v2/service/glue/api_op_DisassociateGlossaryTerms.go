@@ -5,8 +5,6 @@ package glue
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,28 +53,6 @@ type DisassociateGlossaryTermsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateGlossaryTermsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateGlossaryTermsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateGlossaryTermsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AssetIdentifier != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsRequest_AssetIdentifier, *v.AssetIdentifier)
-	}
-	if v.ClientToken != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsRequest_ClientToken, *v.ClientToken)
-	}
-	serializeGlossaryTermIdList(s, schemas.DisassociateGlossaryTermsRequest_GlossaryTermIdentifiers, v.GlossaryTermIdentifiers)
-	if v.ItemIdentifier != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsRequest_ItemIdentifier, *v.ItemIdentifier)
-	}
-	if v.IterableFormName != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsRequest_IterableFormName, *v.IterableFormName)
-	}
-}
-
 type DisassociateGlossaryTermsOutput struct {
 
 	// The unique identifier of the asset.
@@ -97,47 +73,13 @@ type DisassociateGlossaryTermsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateGlossaryTermsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateGlossaryTermsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateGlossaryTermsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AssetIdentifier != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsResponse_AssetIdentifier, *v.AssetIdentifier)
-	}
-	serializeGlossaryTermIdList(s, schemas.DisassociateGlossaryTermsResponse_GlossaryTerms, v.GlossaryTerms)
-	if v.ItemIdentifier != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsResponse_ItemIdentifier, *v.ItemIdentifier)
-	}
-	if v.IterableFormName != nil {
-		s.WriteString(schemas.DisassociateGlossaryTermsResponse_IterableFormName, *v.IterableFormName)
-	}
-}
-func (v *DisassociateGlossaryTermsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DisassociateGlossaryTermsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DisassociateGlossaryTermsResponse_AssetIdentifier:
-			v.AssetIdentifier = new(string)
-			return d.ReadString(schemas.DisassociateGlossaryTermsResponse_AssetIdentifier, v.AssetIdentifier)
-		case schemas.DisassociateGlossaryTermsResponse_GlossaryTerms:
-			return deserializeGlossaryTermIdList(d, schemas.DisassociateGlossaryTermsResponse_GlossaryTerms, &v.GlossaryTerms)
-		case schemas.DisassociateGlossaryTermsResponse_ItemIdentifier:
-			v.ItemIdentifier = new(string)
-			return d.ReadString(schemas.DisassociateGlossaryTermsResponse_ItemIdentifier, v.ItemIdentifier)
-		case schemas.DisassociateGlossaryTermsResponse_IterableFormName:
-			v.IterableFormName = new(string)
-			return d.ReadString(schemas.DisassociateGlossaryTermsResponse_IterableFormName, v.IterableFormName)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateGlossaryTermsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateGlossaryTerms, schemas.DisassociateGlossaryTermsRequest, schemas.DisassociateGlossaryTermsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDisassociateGlossaryTerms{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateGlossaryTerms, schemas.DisassociateGlossaryTermsRequest, schemas.DisassociateGlossaryTermsResponse), output: &DisassociateGlossaryTermsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDisassociateGlossaryTerms{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

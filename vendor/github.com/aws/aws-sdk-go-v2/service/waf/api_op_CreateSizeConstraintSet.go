@@ -4,9 +4,7 @@ package waf
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/waf/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/waf/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -73,21 +71,6 @@ type CreateSizeConstraintSetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateSizeConstraintSetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateSizeConstraintSetRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateSizeConstraintSetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChangeToken != nil {
-		s.WriteString(schemas.CreateSizeConstraintSetRequest_ChangeToken, *v.ChangeToken)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.CreateSizeConstraintSetRequest_Name, *v.Name)
-	}
-}
-
 type CreateSizeConstraintSetOutput struct {
 
 	// The ChangeToken that you used to submit the CreateSizeConstraintSet request.
@@ -104,40 +87,13 @@ type CreateSizeConstraintSetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateSizeConstraintSetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateSizeConstraintSetResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateSizeConstraintSetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChangeToken != nil {
-		s.WriteString(schemas.CreateSizeConstraintSetResponse_ChangeToken, *v.ChangeToken)
-	}
-	if v.SizeConstraintSet != nil {
-		s.WriteStruct(schemas.CreateSizeConstraintSetResponse_SizeConstraintSet)
-		v.SizeConstraintSet.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *CreateSizeConstraintSetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateSizeConstraintSetResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateSizeConstraintSetResponse_ChangeToken:
-			v.ChangeToken = new(string)
-			return d.ReadString(schemas.CreateSizeConstraintSetResponse_ChangeToken, v.ChangeToken)
-		case schemas.CreateSizeConstraintSetResponse_SizeConstraintSet:
-			v.SizeConstraintSet = &types.SizeConstraintSet{}
-			return v.SizeConstraintSet.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateSizeConstraintSetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateSizeConstraintSet, schemas.CreateSizeConstraintSetRequest, schemas.CreateSizeConstraintSetResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateSizeConstraintSet{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateSizeConstraintSet, schemas.CreateSizeConstraintSetRequest, schemas.CreateSizeConstraintSetResponse), output: &CreateSizeConstraintSetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateSizeConstraintSet{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

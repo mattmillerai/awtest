@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -112,28 +110,6 @@ type AdminLinkProviderForUserInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AdminLinkProviderForUserInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AdminLinkProviderForUserRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AdminLinkProviderForUserInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DestinationUser != nil {
-		s.WriteStruct(schemas.AdminLinkProviderForUserRequest_DestinationUser)
-		v.DestinationUser.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.SourceUser != nil {
-		s.WriteStruct(schemas.AdminLinkProviderForUserRequest_SourceUser)
-		v.SourceUser.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.AdminLinkProviderForUserRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type AdminLinkProviderForUserOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -141,26 +117,13 @@ type AdminLinkProviderForUserOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AdminLinkProviderForUserOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AdminLinkProviderForUserResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AdminLinkProviderForUserOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AdminLinkProviderForUserOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.AdminLinkProviderForUserResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAdminLinkProviderForUserMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AdminLinkProviderForUser, schemas.AdminLinkProviderForUserRequest, schemas.AdminLinkProviderForUserResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpAdminLinkProviderForUser{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AdminLinkProviderForUser, schemas.AdminLinkProviderForUserRequest, schemas.AdminLinkProviderForUserResponse), output: &AdminLinkProviderForUserOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpAdminLinkProviderForUser{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

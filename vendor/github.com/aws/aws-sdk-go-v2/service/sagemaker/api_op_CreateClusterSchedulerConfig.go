@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,9 +33,7 @@ type CreateClusterSchedulerConfigInput struct {
 	// This member is required.
 	ClusterArn *string
 
-	// The name for the cluster policy. The name must be unique within the SageMaker
-	// AI HyperPod cluster specified by ClusterArn . You can use the same name in other
-	// clusters within a Region or across Regions.
+	// Name for the cluster policy.
 	//
 	// This member is required.
 	Name *string
@@ -54,30 +50,6 @@ type CreateClusterSchedulerConfigInput struct {
 	Tags []types.Tag
 
 	noSmithyDocumentSerde
-}
-
-func (v *CreateClusterSchedulerConfigInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateClusterSchedulerConfigRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateClusterSchedulerConfigInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterArn != nil {
-		s.WriteString(schemas.CreateClusterSchedulerConfigRequest_ClusterArn, *v.ClusterArn)
-	}
-	if v.Description != nil {
-		s.WriteString(schemas.CreateClusterSchedulerConfigRequest_Description, *v.Description)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.CreateClusterSchedulerConfigRequest_Name, *v.Name)
-	}
-	if v.SchedulerConfig != nil {
-		s.WriteStruct(schemas.CreateClusterSchedulerConfigRequest_SchedulerConfig)
-		v.SchedulerConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagList(s, schemas.CreateClusterSchedulerConfigRequest_Tags, v.Tags)
 }
 
 type CreateClusterSchedulerConfigOutput struct {
@@ -98,38 +70,13 @@ type CreateClusterSchedulerConfigOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateClusterSchedulerConfigOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateClusterSchedulerConfigResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateClusterSchedulerConfigOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterSchedulerConfigArn != nil {
-		s.WriteString(schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigArn, *v.ClusterSchedulerConfigArn)
-	}
-	if v.ClusterSchedulerConfigId != nil {
-		s.WriteString(schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigId, *v.ClusterSchedulerConfigId)
-	}
-}
-func (v *CreateClusterSchedulerConfigOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateClusterSchedulerConfigResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigArn:
-			v.ClusterSchedulerConfigArn = new(string)
-			return d.ReadString(schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigArn, v.ClusterSchedulerConfigArn)
-		case schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigId:
-			v.ClusterSchedulerConfigId = new(string)
-			return d.ReadString(schemas.CreateClusterSchedulerConfigResponse_ClusterSchedulerConfigId, v.ClusterSchedulerConfigId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateClusterSchedulerConfigMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateClusterSchedulerConfig, schemas.CreateClusterSchedulerConfigRequest, schemas.CreateClusterSchedulerConfigResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateClusterSchedulerConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateClusterSchedulerConfig, schemas.CreateClusterSchedulerConfigRequest, schemas.CreateClusterSchedulerConfigResponse), output: &CreateClusterSchedulerConfigOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateClusterSchedulerConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

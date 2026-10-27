@@ -4,8 +4,6 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type InvalidateProjectCacheInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InvalidateProjectCacheInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InvalidateProjectCacheInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InvalidateProjectCacheInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ProjectName != nil {
-		s.WriteString(schemas.InvalidateProjectCacheInput_projectName, *v.ProjectName)
-	}
-}
-
 type InvalidateProjectCacheOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,29 +40,19 @@ type InvalidateProjectCacheOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InvalidateProjectCacheOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InvalidateProjectCacheOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InvalidateProjectCacheOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *InvalidateProjectCacheOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.InvalidateProjectCacheOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationInvalidateProjectCacheMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InvalidateProjectCache, schemas.InvalidateProjectCacheInput, schemas.InvalidateProjectCacheOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpInvalidateProjectCache{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InvalidateProjectCache, schemas.InvalidateProjectCacheInput, schemas.InvalidateProjectCacheOutput), output: &InvalidateProjectCacheOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpInvalidateProjectCache{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

@@ -4,8 +4,6 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,19 +42,6 @@ type TagResourceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TagResourceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TagResourceInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TagResourceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ResourceArn != nil {
-		s.WriteString(schemas.TagResourceInput_resourceArn, *v.ResourceArn)
-	}
-	serializeTagsMap(s, schemas.TagResourceInput_tags, v.Tags)
-}
-
 type TagResourceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,29 +49,19 @@ type TagResourceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TagResourceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TagResourceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *TagResourceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationTagResourceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TagResource, schemas.TagResourceInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpTagResource{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TagResource, schemas.TagResourceInput, nil), output: &TagResourceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpTagResource{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type GetDashboardUrlInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDashboardUrlInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDashboardUrlRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDashboardUrlInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RequestOrigin != nil {
-		s.WriteString(schemas.GetDashboardUrlRequest_RequestOrigin, *v.RequestOrigin)
-	}
-	if v.ResourceId != nil {
-		s.WriteString(schemas.GetDashboardUrlRequest_ResourceId, *v.ResourceId)
-	}
-	if v.ResourceType != "" {
-		s.WriteString(schemas.GetDashboardUrlRequest_ResourceType, string(v.ResourceType))
-	}
-}
-
 type GetDashboardUrlOutput struct {
 
 	// The URL for the Spark monitoring dashboard.
@@ -75,32 +55,13 @@ type GetDashboardUrlOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDashboardUrlOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDashboardUrlResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDashboardUrlOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Url != nil {
-		s.WriteString(schemas.GetDashboardUrlResponse_Url, *v.Url)
-	}
-}
-func (v *GetDashboardUrlOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetDashboardUrlResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetDashboardUrlResponse_Url:
-			v.Url = new(string)
-			return d.ReadString(schemas.GetDashboardUrlResponse_Url, v.Url)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetDashboardUrlMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDashboardUrl, schemas.GetDashboardUrlRequest, schemas.GetDashboardUrlResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetDashboardUrl{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDashboardUrl, schemas.GetDashboardUrlRequest, schemas.GetDashboardUrlResponse), output: &GetDashboardUrlOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetDashboardUrl{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

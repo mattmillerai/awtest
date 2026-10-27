@@ -4,8 +4,6 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type ListGitHubAccountTokenNamesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListGitHubAccountTokenNamesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListGitHubAccountTokenNamesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListGitHubAccountTokenNamesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListGitHubAccountTokenNamesInput_nextToken, *v.NextToken)
-	}
-}
-
 // Represents the output of a ListGitHubAccountTokenNames operation.
 type ListGitHubAccountTokenNamesOutput struct {
 
@@ -64,35 +50,13 @@ type ListGitHubAccountTokenNamesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListGitHubAccountTokenNamesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListGitHubAccountTokenNamesOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListGitHubAccountTokenNamesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListGitHubAccountTokenNamesOutput_nextToken, *v.NextToken)
-	}
-	serializeGitHubAccountTokenNameList(s, schemas.ListGitHubAccountTokenNamesOutput_tokenNameList, v.TokenNameList)
-}
-func (v *ListGitHubAccountTokenNamesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListGitHubAccountTokenNamesOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListGitHubAccountTokenNamesOutput_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListGitHubAccountTokenNamesOutput_nextToken, v.NextToken)
-		case schemas.ListGitHubAccountTokenNamesOutput_tokenNameList:
-			return deserializeGitHubAccountTokenNameList(d, schemas.ListGitHubAccountTokenNamesOutput_tokenNameList, &v.TokenNameList)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListGitHubAccountTokenNamesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListGitHubAccountTokenNames, schemas.ListGitHubAccountTokenNamesInput, schemas.ListGitHubAccountTokenNamesOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListGitHubAccountTokenNames{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListGitHubAccountTokenNames, schemas.ListGitHubAccountTokenNamesInput, schemas.ListGitHubAccountTokenNamesOutput), output: &ListGitHubAccountTokenNamesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListGitHubAccountTokenNames{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

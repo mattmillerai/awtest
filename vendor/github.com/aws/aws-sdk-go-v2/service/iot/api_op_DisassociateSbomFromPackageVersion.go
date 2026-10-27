@@ -5,8 +5,6 @@ package iot
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -51,24 +49,6 @@ type DisassociateSbomFromPackageVersionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateSbomFromPackageVersionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateSbomFromPackageVersionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateSbomFromPackageVersionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientToken != nil {
-		s.WriteString(schemas.DisassociateSbomFromPackageVersionRequest_clientToken, *v.ClientToken)
-	}
-	if v.PackageName != nil {
-		s.WriteString(schemas.DisassociateSbomFromPackageVersionRequest_packageName, *v.PackageName)
-	}
-	if v.VersionName != nil {
-		s.WriteString(schemas.DisassociateSbomFromPackageVersionRequest_versionName, *v.VersionName)
-	}
-}
-
 type DisassociateSbomFromPackageVersionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -76,26 +56,13 @@ type DisassociateSbomFromPackageVersionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateSbomFromPackageVersionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateSbomFromPackageVersionResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateSbomFromPackageVersionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DisassociateSbomFromPackageVersionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DisassociateSbomFromPackageVersionResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateSbomFromPackageVersionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateSbomFromPackageVersion, schemas.DisassociateSbomFromPackageVersionRequest, schemas.DisassociateSbomFromPackageVersionResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDisassociateSbomFromPackageVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateSbomFromPackageVersion, schemas.DisassociateSbomFromPackageVersionRequest, schemas.DisassociateSbomFromPackageVersionResponse), output: &DisassociateSbomFromPackageVersionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDisassociateSbomFromPackageVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

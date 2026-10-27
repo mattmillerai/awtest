@@ -4,8 +4,6 @@ package backup
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type DeleteRestoreTestingPlanInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRestoreTestingPlanInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteRestoreTestingPlanInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRestoreTestingPlanInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RestoreTestingPlanName != nil {
-		s.WriteString(schemas.DeleteRestoreTestingPlanInput_RestoreTestingPlanName, *v.RestoreTestingPlanName)
-	}
-}
-
 type DeleteRestoreTestingPlanOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -57,26 +43,13 @@ type DeleteRestoreTestingPlanOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRestoreTestingPlanOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRestoreTestingPlanOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteRestoreTestingPlanOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteRestoreTestingPlanMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRestoreTestingPlan, schemas.DeleteRestoreTestingPlanInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteRestoreTestingPlan{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRestoreTestingPlan, schemas.DeleteRestoreTestingPlanInput, nil), output: &DeleteRestoreTestingPlanOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteRestoreTestingPlan{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

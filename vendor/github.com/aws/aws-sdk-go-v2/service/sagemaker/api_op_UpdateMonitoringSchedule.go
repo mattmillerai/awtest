@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,23 +41,6 @@ type UpdateMonitoringScheduleInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateMonitoringScheduleInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateMonitoringScheduleRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateMonitoringScheduleInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MonitoringScheduleConfig != nil {
-		s.WriteStruct(schemas.UpdateMonitoringScheduleRequest_MonitoringScheduleConfig)
-		v.MonitoringScheduleConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.MonitoringScheduleName != nil {
-		s.WriteString(schemas.UpdateMonitoringScheduleRequest_MonitoringScheduleName, *v.MonitoringScheduleName)
-	}
-}
-
 type UpdateMonitoringScheduleOutput struct {
 
 	// The Amazon Resource Name (ARN) of the monitoring schedule.
@@ -73,32 +54,13 @@ type UpdateMonitoringScheduleOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateMonitoringScheduleOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateMonitoringScheduleResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateMonitoringScheduleOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MonitoringScheduleArn != nil {
-		s.WriteString(schemas.UpdateMonitoringScheduleResponse_MonitoringScheduleArn, *v.MonitoringScheduleArn)
-	}
-}
-func (v *UpdateMonitoringScheduleOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateMonitoringScheduleResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateMonitoringScheduleResponse_MonitoringScheduleArn:
-			v.MonitoringScheduleArn = new(string)
-			return d.ReadString(schemas.UpdateMonitoringScheduleResponse_MonitoringScheduleArn, v.MonitoringScheduleArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateMonitoringScheduleMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateMonitoringSchedule, schemas.UpdateMonitoringScheduleRequest, schemas.UpdateMonitoringScheduleResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateMonitoringSchedule{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateMonitoringSchedule, schemas.UpdateMonitoringScheduleRequest, schemas.UpdateMonitoringScheduleResponse), output: &UpdateMonitoringScheduleOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateMonitoringSchedule{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

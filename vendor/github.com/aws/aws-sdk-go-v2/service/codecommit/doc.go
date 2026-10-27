@@ -3,9 +3,10 @@
 // Package codecommit provides the API client, operations, and parameter types for
 // AWS CodeCommit.
 //
-// CodeCommit This is the CodeCommit API Reference. This reference provides
-// descriptions of the operations and data types for CodeCommit API along with
-// usage examples.
+// # CodeCommit
+//
+// This is the CodeCommit API Reference. This reference provides descriptions of
+// the operations and data types for CodeCommit API along with usage examples.
 //
 // You can use the CodeCommit API to work with the following objects:
 //
@@ -66,10 +67,6 @@
 // GetBlob
 //   - , which returns the base-64 encoded content of an individual Git blob
 //     object in a repository.
-//
-// GetBlobDifferences
-//   - , which returns a structured, line-level diff between two blob versions in
-//     a repository, with optional surrounding context lines.
 //
 // GetFile
 //   - , which returns the base-64 encoded content of a specified file.

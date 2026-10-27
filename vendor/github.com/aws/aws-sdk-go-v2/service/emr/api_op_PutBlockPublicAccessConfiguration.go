@@ -4,9 +4,7 @@ package emr
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/emr/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/emr/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -54,20 +52,6 @@ type PutBlockPublicAccessConfigurationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutBlockPublicAccessConfigurationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutBlockPublicAccessConfigurationInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutBlockPublicAccessConfigurationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BlockPublicAccessConfiguration != nil {
-		s.WriteStruct(schemas.PutBlockPublicAccessConfigurationInput_BlockPublicAccessConfiguration)
-		v.BlockPublicAccessConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type PutBlockPublicAccessConfigurationOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -75,26 +59,13 @@ type PutBlockPublicAccessConfigurationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutBlockPublicAccessConfigurationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutBlockPublicAccessConfigurationOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutBlockPublicAccessConfigurationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *PutBlockPublicAccessConfigurationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutBlockPublicAccessConfigurationOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutBlockPublicAccessConfigurationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutBlockPublicAccessConfiguration, schemas.PutBlockPublicAccessConfigurationInput, schemas.PutBlockPublicAccessConfigurationOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutBlockPublicAccessConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutBlockPublicAccessConfiguration, schemas.PutBlockPublicAccessConfigurationInput, schemas.PutBlockPublicAccessConfigurationOutput), output: &PutBlockPublicAccessConfigurationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutBlockPublicAccessConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

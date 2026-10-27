@@ -4,8 +4,6 @@ package transcribe
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/transcribe/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type DeleteVocabularyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteVocabularyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteVocabularyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteVocabularyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.VocabularyName != nil {
-		s.WriteString(schemas.DeleteVocabularyRequest_VocabularyName, *v.VocabularyName)
-	}
-}
-
 type DeleteVocabularyOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -57,26 +43,13 @@ type DeleteVocabularyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteVocabularyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteVocabularyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteVocabularyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteVocabularyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteVocabulary, schemas.DeleteVocabularyRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteVocabulary{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteVocabulary, schemas.DeleteVocabularyRequest, nil), output: &DeleteVocabularyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteVocabulary{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

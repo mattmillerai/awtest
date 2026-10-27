@@ -4,9 +4,7 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,16 +34,6 @@ type BatchGetSandboxesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetSandboxesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetSandboxesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetSandboxesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeSandboxIds(s, schemas.BatchGetSandboxesInput_ids, v.Ids)
-}
-
 type BatchGetSandboxesOutput struct {
 
 	// Information about the requested sandboxes.
@@ -60,35 +48,19 @@ type BatchGetSandboxesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetSandboxesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetSandboxesOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetSandboxesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeSandboxes(s, schemas.BatchGetSandboxesOutput_sandboxes, v.Sandboxes)
-	serializeSandboxIds(s, schemas.BatchGetSandboxesOutput_sandboxesNotFound, v.SandboxesNotFound)
-}
-func (v *BatchGetSandboxesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.BatchGetSandboxesOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.BatchGetSandboxesOutput_sandboxes:
-			return deserializeSandboxes(d, schemas.BatchGetSandboxesOutput_sandboxes, &v.Sandboxes)
-		case schemas.BatchGetSandboxesOutput_sandboxesNotFound:
-			return deserializeSandboxIds(d, schemas.BatchGetSandboxesOutput_sandboxesNotFound, &v.SandboxesNotFound)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationBatchGetSandboxesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetSandboxes, schemas.BatchGetSandboxesInput, schemas.BatchGetSandboxesOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpBatchGetSandboxes{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetSandboxes, schemas.BatchGetSandboxesInput, schemas.BatchGetSandboxesOutput), output: &BatchGetSandboxesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpBatchGetSandboxes{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

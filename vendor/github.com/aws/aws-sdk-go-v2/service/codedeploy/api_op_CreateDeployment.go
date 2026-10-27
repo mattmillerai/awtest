@@ -4,9 +4,7 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,34 +48,14 @@ type CreateDeploymentInput struct {
 	// The name of the deployment group.
 	DeploymentGroupName *string
 
-	// The type of deployment to create. Valid values are:
-	//
-	//   - STANDARD : Deploys the specified revision. This is the default behavior if
-	//   deploymentMode is not specified.
-	//
-	//   - RESTART : Restarts the application on the target instances using the
-	//   revision from the deployment group's last successful deployment, without
-	//   downloading a new revision. RESTART is supported only for EC2/On-premises
-	//   in-place deployments.
-	//
-	// When deploymentMode is RESTART , the following apply:
-	//
-	//   - The call is rejected for Amazon ECS and Lambda deployments.
-	//
-	//   - The revision parameter (including its s3Location and gitHubLocation ) must
-	//   not be specified, and is rejected if provided. The revision is resolved by the
-	//   service from the deployment group's last successful deployment.
-	//
-	//   - The updateOutdatedInstancesOnly parameter must not be set to true , and is
-	//   rejected if provided.
+	// The deployment mode to use for the deployment. When set to STANDARD (the
+	// default), the deployment runs the standard set of deployment lifecycle events.
+	// When set to RESTART, an EC2/On-premises in-place deployment runs a shortened set
+	// of lifecycle events to quickly restart the application on the target instances.
 	DeploymentMode types.DeploymentMode
 
 	// A comment about the deployment.
 	Description *string
-
-	// Options that control how CodeDeploy manages Amazon EC2 Auto Scaling groups
-	// during a deployment.
-	Ec2DeploymentOptions *types.EC2DeploymentOptions
 
 	// Information about how CodeDeploy handles files that already exist in a
 	// deployment target location but weren't part of the previous successful
@@ -148,64 +126,6 @@ type CreateDeploymentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateDeploymentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateDeploymentInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateDeploymentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApplicationName != nil {
-		s.WriteString(schemas.CreateDeploymentInput_applicationName, *v.ApplicationName)
-	}
-	if v.AutoRollbackConfiguration != nil {
-		s.WriteStruct(schemas.CreateDeploymentInput_autoRollbackConfiguration)
-		v.AutoRollbackConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.DeploymentConfigName != nil {
-		s.WriteString(schemas.CreateDeploymentInput_deploymentConfigName, *v.DeploymentConfigName)
-	}
-	if v.DeploymentGroupName != nil {
-		s.WriteString(schemas.CreateDeploymentInput_deploymentGroupName, *v.DeploymentGroupName)
-	}
-	if v.DeploymentMode != "" {
-		s.WriteString(schemas.CreateDeploymentInput_deploymentMode, string(v.DeploymentMode))
-	}
-	if v.Description != nil {
-		s.WriteString(schemas.CreateDeploymentInput_description, *v.Description)
-	}
-	if v.Ec2DeploymentOptions != nil {
-		s.WriteStruct(schemas.CreateDeploymentInput_ec2DeploymentOptions)
-		v.Ec2DeploymentOptions.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.FileExistsBehavior != "" {
-		s.WriteString(schemas.CreateDeploymentInput_fileExistsBehavior, string(v.FileExistsBehavior))
-	}
-	if v.IgnoreApplicationStopFailures != false {
-		s.WriteBool(schemas.CreateDeploymentInput_ignoreApplicationStopFailures, v.IgnoreApplicationStopFailures)
-	}
-	if v.OverrideAlarmConfiguration != nil {
-		s.WriteStruct(schemas.CreateDeploymentInput_overrideAlarmConfiguration)
-		v.OverrideAlarmConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.Revision != nil {
-		s.WriteStruct(schemas.CreateDeploymentInput_revision)
-		v.Revision.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.TargetInstances != nil {
-		s.WriteStruct(schemas.CreateDeploymentInput_targetInstances)
-		v.TargetInstances.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.UpdateOutdatedInstancesOnly != false {
-		s.WriteBool(schemas.CreateDeploymentInput_updateOutdatedInstancesOnly, v.UpdateOutdatedInstancesOnly)
-	}
-}
-
 // Represents the output of a CreateDeployment operation.
 type CreateDeploymentOutput struct {
 
@@ -218,32 +138,13 @@ type CreateDeploymentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateDeploymentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateDeploymentOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateDeploymentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeploymentId != nil {
-		s.WriteString(schemas.CreateDeploymentOutput_deploymentId, *v.DeploymentId)
-	}
-}
-func (v *CreateDeploymentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateDeploymentOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateDeploymentOutput_deploymentId:
-			v.DeploymentId = new(string)
-			return d.ReadString(schemas.CreateDeploymentOutput_deploymentId, v.DeploymentId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateDeploymentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateDeployment, schemas.CreateDeploymentInput, schemas.CreateDeploymentOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateDeployment{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateDeployment, schemas.CreateDeploymentInput, schemas.CreateDeploymentOutput), output: &CreateDeploymentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateDeployment{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

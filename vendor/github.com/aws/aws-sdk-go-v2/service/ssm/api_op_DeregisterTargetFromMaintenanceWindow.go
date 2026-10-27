@@ -4,8 +4,6 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,24 +43,6 @@ type DeregisterTargetFromMaintenanceWindowInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeregisterTargetFromMaintenanceWindowInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeregisterTargetFromMaintenanceWindowRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeregisterTargetFromMaintenanceWindowInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Safe != nil {
-		s.WriteBool(schemas.DeregisterTargetFromMaintenanceWindowRequest_Safe, *v.Safe)
-	}
-	if v.WindowId != nil {
-		s.WriteString(schemas.DeregisterTargetFromMaintenanceWindowRequest_WindowId, *v.WindowId)
-	}
-	if v.WindowTargetId != nil {
-		s.WriteString(schemas.DeregisterTargetFromMaintenanceWindowRequest_WindowTargetId, *v.WindowTargetId)
-	}
-}
-
 type DeregisterTargetFromMaintenanceWindowOutput struct {
 
 	// The ID of the maintenance window the target was removed from.
@@ -77,38 +57,13 @@ type DeregisterTargetFromMaintenanceWindowOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeregisterTargetFromMaintenanceWindowOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeregisterTargetFromMaintenanceWindowResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeregisterTargetFromMaintenanceWindowOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.WindowId != nil {
-		s.WriteString(schemas.DeregisterTargetFromMaintenanceWindowResult_WindowId, *v.WindowId)
-	}
-	if v.WindowTargetId != nil {
-		s.WriteString(schemas.DeregisterTargetFromMaintenanceWindowResult_WindowTargetId, *v.WindowTargetId)
-	}
-}
-func (v *DeregisterTargetFromMaintenanceWindowOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeregisterTargetFromMaintenanceWindowResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeregisterTargetFromMaintenanceWindowResult_WindowId:
-			v.WindowId = new(string)
-			return d.ReadString(schemas.DeregisterTargetFromMaintenanceWindowResult_WindowId, v.WindowId)
-		case schemas.DeregisterTargetFromMaintenanceWindowResult_WindowTargetId:
-			v.WindowTargetId = new(string)
-			return d.ReadString(schemas.DeregisterTargetFromMaintenanceWindowResult_WindowTargetId, v.WindowTargetId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeregisterTargetFromMaintenanceWindowMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeregisterTargetFromMaintenanceWindow, schemas.DeregisterTargetFromMaintenanceWindowRequest, schemas.DeregisterTargetFromMaintenanceWindowResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeregisterTargetFromMaintenanceWindow{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeregisterTargetFromMaintenanceWindow, schemas.DeregisterTargetFromMaintenanceWindowRequest, schemas.DeregisterTargetFromMaintenanceWindowResult), output: &DeregisterTargetFromMaintenanceWindowOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeregisterTargetFromMaintenanceWindow{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

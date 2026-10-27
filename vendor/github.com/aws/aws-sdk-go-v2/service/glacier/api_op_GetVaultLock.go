@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -66,21 +64,6 @@ type GetVaultLockInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetVaultLockInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetVaultLockInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetVaultLockInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.GetVaultLockInput_accountId, *v.AccountId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.GetVaultLockInput_vaultName, *v.VaultName)
-	}
-}
-
 // Contains the Amazon Glacier response to your request.
 type GetVaultLockOutput struct {
 
@@ -103,50 +86,13 @@ type GetVaultLockOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetVaultLockOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetVaultLockOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetVaultLockOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CreationDate != nil {
-		s.WriteString(schemas.GetVaultLockOutput_CreationDate, *v.CreationDate)
-	}
-	if v.ExpirationDate != nil {
-		s.WriteString(schemas.GetVaultLockOutput_ExpirationDate, *v.ExpirationDate)
-	}
-	if v.Policy != nil {
-		s.WriteString(schemas.GetVaultLockOutput_Policy, *v.Policy)
-	}
-	if v.State != nil {
-		s.WriteString(schemas.GetVaultLockOutput_State, *v.State)
-	}
-}
-func (v *GetVaultLockOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetVaultLockOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetVaultLockOutput_CreationDate:
-			v.CreationDate = new(string)
-			return d.ReadString(schemas.GetVaultLockOutput_CreationDate, v.CreationDate)
-		case schemas.GetVaultLockOutput_ExpirationDate:
-			v.ExpirationDate = new(string)
-			return d.ReadString(schemas.GetVaultLockOutput_ExpirationDate, v.ExpirationDate)
-		case schemas.GetVaultLockOutput_Policy:
-			v.Policy = new(string)
-			return d.ReadString(schemas.GetVaultLockOutput_Policy, v.Policy)
-		case schemas.GetVaultLockOutput_State:
-			v.State = new(string)
-			return d.ReadString(schemas.GetVaultLockOutput_State, v.State)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetVaultLockMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetVaultLock, schemas.GetVaultLockInput, schemas.GetVaultLockOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetVaultLock{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetVaultLock, schemas.GetVaultLockInput, schemas.GetVaultLockOutput), output: &GetVaultLockOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetVaultLock{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

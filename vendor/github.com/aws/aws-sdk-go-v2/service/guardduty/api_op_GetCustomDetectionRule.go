@@ -4,9 +4,7 @@ package guardduty
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/guardduty/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/guardduty/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -37,18 +35,6 @@ type GetCustomDetectionRuleInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetCustomDetectionRuleInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetCustomDetectionRuleRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetCustomDetectionRuleInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RuleId != nil {
-		s.WriteString(schemas.GetCustomDetectionRuleRequest_RuleId, *v.RuleId)
-	}
-}
-
 type GetCustomDetectionRuleOutput struct {
 
 	// The details of the custom detection rule.
@@ -62,34 +48,13 @@ type GetCustomDetectionRuleOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetCustomDetectionRuleOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetCustomDetectionRuleResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetCustomDetectionRuleOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Rule != nil {
-		s.WriteStruct(schemas.GetCustomDetectionRuleResponse_Rule)
-		v.Rule.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetCustomDetectionRuleOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetCustomDetectionRuleResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetCustomDetectionRuleResponse_Rule:
-			v.Rule = &types.RuleDetail{}
-			return v.Rule.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetCustomDetectionRuleMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetCustomDetectionRule, schemas.GetCustomDetectionRuleRequest, schemas.GetCustomDetectionRuleResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetCustomDetectionRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetCustomDetectionRule, schemas.GetCustomDetectionRuleRequest, schemas.GetCustomDetectionRuleResponse), output: &GetCustomDetectionRuleOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetCustomDetectionRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

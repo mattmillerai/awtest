@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -76,24 +74,6 @@ type DeleteArchiveInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteArchiveInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteArchiveInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteArchiveInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.DeleteArchiveInput_accountId, *v.AccountId)
-	}
-	if v.ArchiveId != nil {
-		s.WriteString(schemas.DeleteArchiveInput_archiveId, *v.ArchiveId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.DeleteArchiveInput_vaultName, *v.VaultName)
-	}
-}
-
 type DeleteArchiveOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -101,26 +81,13 @@ type DeleteArchiveOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteArchiveOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteArchiveOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteArchiveOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteArchiveMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteArchive, schemas.DeleteArchiveInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteArchive{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteArchive, schemas.DeleteArchiveInput, nil), output: &DeleteArchiveOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteArchive{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

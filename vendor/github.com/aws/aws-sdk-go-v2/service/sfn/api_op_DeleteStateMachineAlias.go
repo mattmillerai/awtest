@@ -4,8 +4,6 @@ package sfn
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sfn/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -51,18 +49,6 @@ type DeleteStateMachineAliasInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteStateMachineAliasInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteStateMachineAliasInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteStateMachineAliasInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.StateMachineAliasArn != nil {
-		s.WriteString(schemas.DeleteStateMachineAliasInput_stateMachineAliasArn, *v.StateMachineAliasArn)
-	}
-}
-
 type DeleteStateMachineAliasOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -70,26 +56,13 @@ type DeleteStateMachineAliasOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteStateMachineAliasOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteStateMachineAliasOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteStateMachineAliasOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteStateMachineAliasOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteStateMachineAliasOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteStateMachineAliasMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteStateMachineAlias, schemas.DeleteStateMachineAliasInput, schemas.DeleteStateMachineAliasOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpDeleteStateMachineAlias{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteStateMachineAlias, schemas.DeleteStateMachineAliasInput, schemas.DeleteStateMachineAliasOutput), output: &DeleteStateMachineAliasOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpDeleteStateMachineAlias{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

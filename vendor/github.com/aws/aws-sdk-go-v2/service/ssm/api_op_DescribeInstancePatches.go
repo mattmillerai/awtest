@@ -5,9 +5,7 @@ package ssm
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -71,25 +69,6 @@ type DescribeInstancePatchesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeInstancePatchesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeInstancePatchesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeInstancePatchesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializePatchOrchestratorFilterList(s, schemas.DescribeInstancePatchesRequest_Filters, v.Filters)
-	if v.InstanceId != nil {
-		s.WriteString(schemas.DescribeInstancePatchesRequest_InstanceId, *v.InstanceId)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.DescribeInstancePatchesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.DescribeInstancePatchesRequest_NextToken, *v.NextToken)
-	}
-}
-
 type DescribeInstancePatchesOutput struct {
 
 	// The token to use when requesting the next set of items. If there are no
@@ -119,35 +98,13 @@ type DescribeInstancePatchesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeInstancePatchesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeInstancePatchesResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeInstancePatchesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.DescribeInstancePatchesResult_NextToken, *v.NextToken)
-	}
-	serializePatchComplianceDataList(s, schemas.DescribeInstancePatchesResult_Patches, v.Patches)
-}
-func (v *DescribeInstancePatchesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeInstancePatchesResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeInstancePatchesResult_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.DescribeInstancePatchesResult_NextToken, v.NextToken)
-		case schemas.DescribeInstancePatchesResult_Patches:
-			return deserializePatchComplianceDataList(d, schemas.DescribeInstancePatchesResult_Patches, &v.Patches)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeInstancePatchesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeInstancePatches, schemas.DescribeInstancePatchesRequest, schemas.DescribeInstancePatchesResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeInstancePatches{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeInstancePatches, schemas.DescribeInstancePatchesRequest, schemas.DescribeInstancePatchesResult), output: &DescribeInstancePatchesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeInstancePatches{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

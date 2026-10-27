@@ -4,9 +4,7 @@ package amplify
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/amplify/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/amplify/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,21 +40,6 @@ type GetDomainAssociationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDomainAssociationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDomainAssociationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDomainAssociationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AppId != nil {
-		s.WriteString(schemas.GetDomainAssociationRequest_appId, *v.AppId)
-	}
-	if v.DomainName != nil {
-		s.WriteString(schemas.GetDomainAssociationRequest_domainName, *v.DomainName)
-	}
-}
-
 // The result structure for the get domain association request.
 type GetDomainAssociationOutput struct {
 
@@ -72,34 +55,13 @@ type GetDomainAssociationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDomainAssociationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDomainAssociationResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDomainAssociationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DomainAssociation != nil {
-		s.WriteStruct(schemas.GetDomainAssociationResult_domainAssociation)
-		v.DomainAssociation.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetDomainAssociationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetDomainAssociationResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetDomainAssociationResult_domainAssociation:
-			v.DomainAssociation = &types.DomainAssociation{}
-			return v.DomainAssociation.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetDomainAssociationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDomainAssociation, schemas.GetDomainAssociationRequest, schemas.GetDomainAssociationResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetDomainAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDomainAssociation, schemas.GetDomainAssociationRequest, schemas.GetDomainAssociationResult), output: &GetDomainAssociationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetDomainAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

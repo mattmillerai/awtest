@@ -4,8 +4,6 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type DeleteGlossaryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteGlossaryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteGlossaryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteGlossaryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Identifier != nil {
-		s.WriteString(schemas.DeleteGlossaryRequest_Identifier, *v.Identifier)
-	}
-}
-
 type DeleteGlossaryOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -55,26 +41,13 @@ type DeleteGlossaryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteGlossaryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteGlossaryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteGlossaryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteGlossaryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteGlossaryResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteGlossaryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteGlossary, schemas.DeleteGlossaryRequest, schemas.DeleteGlossaryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteGlossary{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteGlossary, schemas.DeleteGlossaryRequest, schemas.DeleteGlossaryResponse), output: &DeleteGlossaryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteGlossary{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

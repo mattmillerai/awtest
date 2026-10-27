@@ -4,9 +4,7 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type GetDeploymentInstanceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDeploymentInstanceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDeploymentInstanceInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDeploymentInstanceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeploymentId != nil {
-		s.WriteString(schemas.GetDeploymentInstanceInput_deploymentId, *v.DeploymentId)
-	}
-	if v.InstanceId != nil {
-		s.WriteString(schemas.GetDeploymentInstanceInput_instanceId, *v.InstanceId)
-	}
-}
-
 // Represents the output of a GetDeploymentInstance operation.
 type GetDeploymentInstanceOutput struct {
 
@@ -73,34 +56,13 @@ type GetDeploymentInstanceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDeploymentInstanceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDeploymentInstanceOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDeploymentInstanceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InstanceSummary != nil {
-		s.WriteStruct(schemas.GetDeploymentInstanceOutput_instanceSummary)
-		v.InstanceSummary.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetDeploymentInstanceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetDeploymentInstanceOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetDeploymentInstanceOutput_instanceSummary:
-			v.InstanceSummary = &types.InstanceSummary{}
-			return v.InstanceSummary.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetDeploymentInstanceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDeploymentInstance, schemas.GetDeploymentInstanceInput, schemas.GetDeploymentInstanceOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetDeploymentInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDeploymentInstance, schemas.GetDeploymentInstanceInput, schemas.GetDeploymentInstanceOutput), output: &GetDeploymentInstanceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetDeploymentInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

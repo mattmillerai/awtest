@@ -5,9 +5,7 @@ package lambda
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -76,27 +74,6 @@ type ListEventSourceMappingsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListEventSourceMappingsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListEventSourceMappingsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListEventSourceMappingsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EventSourceArn != nil {
-		s.WriteString(schemas.ListEventSourceMappingsRequest_EventSourceArn, *v.EventSourceArn)
-	}
-	if v.FunctionName != nil {
-		s.WriteString(schemas.ListEventSourceMappingsRequest_FunctionName, *v.FunctionName)
-	}
-	if v.Marker != nil {
-		s.WriteString(schemas.ListEventSourceMappingsRequest_Marker, *v.Marker)
-	}
-	if v.MaxItems != nil {
-		s.WriteInt32(schemas.ListEventSourceMappingsRequest_MaxItems, *v.MaxItems)
-	}
-}
-
 type ListEventSourceMappingsOutput struct {
 
 	// A list of event source mappings.
@@ -112,35 +89,13 @@ type ListEventSourceMappingsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListEventSourceMappingsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListEventSourceMappingsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListEventSourceMappingsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeEventSourceMappingsList(s, schemas.ListEventSourceMappingsResponse_EventSourceMappings, v.EventSourceMappings)
-	if v.NextMarker != nil {
-		s.WriteString(schemas.ListEventSourceMappingsResponse_NextMarker, *v.NextMarker)
-	}
-}
-func (v *ListEventSourceMappingsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListEventSourceMappingsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListEventSourceMappingsResponse_EventSourceMappings:
-			return deserializeEventSourceMappingsList(d, schemas.ListEventSourceMappingsResponse_EventSourceMappings, &v.EventSourceMappings)
-		case schemas.ListEventSourceMappingsResponse_NextMarker:
-			v.NextMarker = new(string)
-			return d.ReadString(schemas.ListEventSourceMappingsResponse_NextMarker, v.NextMarker)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListEventSourceMappingsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListEventSourceMappings, schemas.ListEventSourceMappingsRequest, schemas.ListEventSourceMappingsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListEventSourceMappings{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListEventSourceMappings, schemas.ListEventSourceMappingsRequest, schemas.ListEventSourceMappingsResponse), output: &ListEventSourceMappingsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListEventSourceMappings{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

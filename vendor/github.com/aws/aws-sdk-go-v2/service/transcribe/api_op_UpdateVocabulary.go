@@ -4,9 +4,7 @@ package transcribe
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/transcribe/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -14,10 +12,6 @@ import (
 // Updates an existing custom vocabulary with new values. This operation
 // overwrites all existing information with your new values; you cannot append new
 // terms onto an existing custom vocabulary.
-//
-// Your custom vocabulary must be in a terminal state ( READY or FAILED ) before
-// you can update it. You must include either Phrases or VocabularyFileUri in your
-// request.
 func (c *Client) UpdateVocabulary(ctx context.Context, params *UpdateVocabularyInput, optFns ...func(*Options)) (*UpdateVocabularyOutput, error) {
 	if params == nil {
 		params = &UpdateVocabularyInput{}
@@ -60,9 +54,8 @@ type UpdateVocabularyInput struct {
 
 	// The Amazon Resource Name (ARN) of an IAM role that has permissions to access
 	// the Amazon S3 bucket that contains your input files (in this case, your custom
-	// vocabulary). If you include EncryptionConfiguration in your request, this role
-	// must also have permissions to access the specified KMS key. If the role that you
-	// specify doesn’t have the appropriate permissions, your request fails.
+	// vocabulary). If the role that you specify doesn’t have the appropriate
+	// permissions to access the specified Amazon S3 location, your request fails.
 	//
 	// IAM role ARNs have the format
 	// arn:partition:iam::account:role/role-name-with-path . For example:
@@ -72,11 +65,6 @@ type UpdateVocabularyInput struct {
 	//
 	// [IAM ARNs]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
 	DataAccessRoleArn *string
-
-	// Specifies the new encryption configuration for your custom vocabulary. The
-	// vocabulary artifacts are re-encrypted in place using the specified KMS key or
-	// with an AWS-owned key if a key is not supplied.
-	EncryptionConfiguration *types.EncryptionConfiguration
 
 	// Use this parameter if you want to update your custom vocabulary by including
 	// all desired terms, as comma-separated values, within your request. The other
@@ -107,33 +95,6 @@ type UpdateVocabularyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateVocabularyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateVocabularyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateVocabularyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DataAccessRoleArn != nil {
-		s.WriteString(schemas.UpdateVocabularyRequest_DataAccessRoleArn, *v.DataAccessRoleArn)
-	}
-	if v.EncryptionConfiguration != nil {
-		s.WriteStruct(schemas.UpdateVocabularyRequest_EncryptionConfiguration)
-		v.EncryptionConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.LanguageCode != "" {
-		s.WriteString(schemas.UpdateVocabularyRequest_LanguageCode, string(v.LanguageCode))
-	}
-	serializePhrases(s, schemas.UpdateVocabularyRequest_Phrases, v.Phrases)
-	if v.VocabularyFileUri != nil {
-		s.WriteString(schemas.UpdateVocabularyRequest_VocabularyFileUri, *v.VocabularyFileUri)
-	}
-	if v.VocabularyName != nil {
-		s.WriteString(schemas.UpdateVocabularyRequest_VocabularyName, *v.VocabularyName)
-	}
-}
-
 type UpdateVocabularyOutput struct {
 
 	// The language code you selected for your custom vocabulary.
@@ -158,58 +119,13 @@ type UpdateVocabularyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateVocabularyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateVocabularyResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateVocabularyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LanguageCode != "" {
-		s.WriteString(schemas.UpdateVocabularyResponse_LanguageCode, string(v.LanguageCode))
-	}
-	if v.LastModifiedTime != nil {
-		s.WriteTime(schemas.UpdateVocabularyResponse_LastModifiedTime, *v.LastModifiedTime)
-	}
-	if v.VocabularyName != nil {
-		s.WriteString(schemas.UpdateVocabularyResponse_VocabularyName, *v.VocabularyName)
-	}
-	if v.VocabularyState != "" {
-		s.WriteString(schemas.UpdateVocabularyResponse_VocabularyState, string(v.VocabularyState))
-	}
-}
-func (v *UpdateVocabularyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateVocabularyResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateVocabularyResponse_LanguageCode:
-			var ev string
-			if err := d.ReadString(schemas.UpdateVocabularyResponse_LanguageCode, &ev); err != nil {
-				return err
-			}
-			v.LanguageCode = types.LanguageCode(ev)
-			return nil
-		case schemas.UpdateVocabularyResponse_LastModifiedTime:
-			v.LastModifiedTime = new(time.Time)
-			return d.ReadTime(schemas.UpdateVocabularyResponse_LastModifiedTime, v.LastModifiedTime)
-		case schemas.UpdateVocabularyResponse_VocabularyName:
-			v.VocabularyName = new(string)
-			return d.ReadString(schemas.UpdateVocabularyResponse_VocabularyName, v.VocabularyName)
-		case schemas.UpdateVocabularyResponse_VocabularyState:
-			var ev string
-			if err := d.ReadString(schemas.UpdateVocabularyResponse_VocabularyState, &ev); err != nil {
-				return err
-			}
-			v.VocabularyState = types.VocabularyState(ev)
-			return nil
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateVocabularyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateVocabulary, schemas.UpdateVocabularyRequest, schemas.UpdateVocabularyResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateVocabulary{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateVocabulary, schemas.UpdateVocabularyRequest, schemas.UpdateVocabularyResponse), output: &UpdateVocabularyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateVocabulary{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

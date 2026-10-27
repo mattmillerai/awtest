@@ -4,9 +4,7 @@ package waf
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/waf/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/waf/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,18 +45,6 @@ type GetRegexMatchSetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetRegexMatchSetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetRegexMatchSetRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetRegexMatchSetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RegexMatchSetId != nil {
-		s.WriteString(schemas.GetRegexMatchSetRequest_RegexMatchSetId, *v.RegexMatchSetId)
-	}
-}
-
 type GetRegexMatchSetOutput struct {
 
 	// Information about the RegexMatchSet that you specified in the GetRegexMatchSet request. For
@@ -71,34 +57,13 @@ type GetRegexMatchSetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetRegexMatchSetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetRegexMatchSetResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetRegexMatchSetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RegexMatchSet != nil {
-		s.WriteStruct(schemas.GetRegexMatchSetResponse_RegexMatchSet)
-		v.RegexMatchSet.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetRegexMatchSetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetRegexMatchSetResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetRegexMatchSetResponse_RegexMatchSet:
-			v.RegexMatchSet = &types.RegexMatchSet{}
-			return v.RegexMatchSet.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetRegexMatchSetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetRegexMatchSet, schemas.GetRegexMatchSetRequest, schemas.GetRegexMatchSetResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetRegexMatchSet{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetRegexMatchSet, schemas.GetRegexMatchSetRequest, schemas.GetRegexMatchSetResponse), output: &GetRegexMatchSetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetRegexMatchSet{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

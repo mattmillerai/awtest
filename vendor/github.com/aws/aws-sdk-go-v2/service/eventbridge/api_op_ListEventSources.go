@@ -4,9 +4,7 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -54,24 +52,6 @@ type ListEventSourcesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListEventSourcesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListEventSourcesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListEventSourcesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Limit != nil {
-		s.WriteInt32(schemas.ListEventSourcesRequest_Limit, *v.Limit)
-	}
-	if v.NamePrefix != nil {
-		s.WriteString(schemas.ListEventSourcesRequest_NamePrefix, *v.NamePrefix)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListEventSourcesRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListEventSourcesOutput struct {
 
 	// The list of event sources.
@@ -93,38 +73,19 @@ type ListEventSourcesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListEventSourcesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListEventSourcesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListEventSourcesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeEventSourceList(s, schemas.ListEventSourcesResponse_EventSources, v.EventSources)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListEventSourcesResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListEventSourcesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListEventSourcesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListEventSourcesResponse_EventSources:
-			return deserializeEventSourceList(d, schemas.ListEventSourcesResponse_EventSources, &v.EventSources)
-		case schemas.ListEventSourcesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListEventSourcesResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListEventSourcesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListEventSources, schemas.ListEventSourcesRequest, schemas.ListEventSourcesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListEventSources{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListEventSources, schemas.ListEventSourcesRequest, schemas.ListEventSourcesResponse), output: &ListEventSourcesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListEventSources{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

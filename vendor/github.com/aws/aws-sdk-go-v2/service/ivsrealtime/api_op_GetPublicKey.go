@@ -4,9 +4,7 @@ package ivsrealtime
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ivsrealtime/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ivsrealtime/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type GetPublicKeyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPublicKeyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPublicKeyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPublicKeyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Arn != nil {
-		s.WriteString(schemas.GetPublicKeyRequest_arn, *v.Arn)
-	}
-}
-
 type GetPublicKeyOutput struct {
 
 	// The public key that is returned.
@@ -59,37 +45,19 @@ type GetPublicKeyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPublicKeyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPublicKeyResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPublicKeyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PublicKey != nil {
-		s.WriteStruct(schemas.GetPublicKeyResponse_publicKey)
-		v.PublicKey.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetPublicKeyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetPublicKeyResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetPublicKeyResponse_publicKey:
-			v.PublicKey = &types.PublicKey{}
-			return v.PublicKey.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetPublicKeyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPublicKey, schemas.GetPublicKeyRequest, schemas.GetPublicKeyResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetPublicKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPublicKey, schemas.GetPublicKeyRequest, schemas.GetPublicKeyResponse), output: &GetPublicKeyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetPublicKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

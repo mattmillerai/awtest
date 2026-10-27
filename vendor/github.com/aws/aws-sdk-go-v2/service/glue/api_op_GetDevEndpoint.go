@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,18 +39,6 @@ type GetDevEndpointInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDevEndpointInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDevEndpointRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDevEndpointInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EndpointName != nil {
-		s.WriteString(schemas.GetDevEndpointRequest_EndpointName, *v.EndpointName)
-	}
-}
-
 type GetDevEndpointOutput struct {
 
 	// A DevEndpoint definition.
@@ -64,34 +50,13 @@ type GetDevEndpointOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetDevEndpointOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetDevEndpointResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetDevEndpointOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DevEndpoint != nil {
-		s.WriteStruct(schemas.GetDevEndpointResponse_DevEndpoint)
-		v.DevEndpoint.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetDevEndpointOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetDevEndpointResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetDevEndpointResponse_DevEndpoint:
-			v.DevEndpoint = &types.DevEndpoint{}
-			return v.DevEndpoint.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetDevEndpointMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDevEndpoint, schemas.GetDevEndpointRequest, schemas.GetDevEndpointResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetDevEndpoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetDevEndpoint, schemas.GetDevEndpointRequest, schemas.GetDevEndpointResponse), output: &GetDevEndpointOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetDevEndpoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

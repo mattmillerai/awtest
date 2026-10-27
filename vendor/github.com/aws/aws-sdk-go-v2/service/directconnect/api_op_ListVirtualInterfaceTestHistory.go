@@ -4,9 +4,7 @@ package directconnect
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/directconnect/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/directconnect/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -53,31 +51,6 @@ type ListVirtualInterfaceTestHistoryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListVirtualInterfaceTestHistoryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListVirtualInterfaceTestHistoryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListVirtualInterfaceTestHistoryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeBGPPeerIdList(s, schemas.ListVirtualInterfaceTestHistoryRequest_bgpPeers, v.BgpPeers)
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListVirtualInterfaceTestHistoryRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListVirtualInterfaceTestHistoryRequest_nextToken, *v.NextToken)
-	}
-	if v.Status != nil {
-		s.WriteString(schemas.ListVirtualInterfaceTestHistoryRequest_status, *v.Status)
-	}
-	if v.TestId != nil {
-		s.WriteString(schemas.ListVirtualInterfaceTestHistoryRequest_testId, *v.TestId)
-	}
-	if v.VirtualInterfaceId != nil {
-		s.WriteString(schemas.ListVirtualInterfaceTestHistoryRequest_virtualInterfaceId, *v.VirtualInterfaceId)
-	}
-}
-
 type ListVirtualInterfaceTestHistoryOutput struct {
 
 	// The token to use to retrieve the next page of results. This value is null when
@@ -93,35 +66,13 @@ type ListVirtualInterfaceTestHistoryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListVirtualInterfaceTestHistoryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListVirtualInterfaceTestHistoryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListVirtualInterfaceTestHistoryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListVirtualInterfaceTestHistoryResponse_nextToken, *v.NextToken)
-	}
-	serializeVirtualInterfaceTestHistoryList(s, schemas.ListVirtualInterfaceTestHistoryResponse_virtualInterfaceTestHistory, v.VirtualInterfaceTestHistory)
-}
-func (v *ListVirtualInterfaceTestHistoryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListVirtualInterfaceTestHistoryResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListVirtualInterfaceTestHistoryResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListVirtualInterfaceTestHistoryResponse_nextToken, v.NextToken)
-		case schemas.ListVirtualInterfaceTestHistoryResponse_virtualInterfaceTestHistory:
-			return deserializeVirtualInterfaceTestHistoryList(d, schemas.ListVirtualInterfaceTestHistoryResponse_virtualInterfaceTestHistory, &v.VirtualInterfaceTestHistory)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListVirtualInterfaceTestHistoryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListVirtualInterfaceTestHistory, schemas.ListVirtualInterfaceTestHistoryRequest, schemas.ListVirtualInterfaceTestHistoryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListVirtualInterfaceTestHistory{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListVirtualInterfaceTestHistory, schemas.ListVirtualInterfaceTestHistoryRequest, schemas.ListVirtualInterfaceTestHistoryResponse), output: &ListVirtualInterfaceTestHistoryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListVirtualInterfaceTestHistory{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

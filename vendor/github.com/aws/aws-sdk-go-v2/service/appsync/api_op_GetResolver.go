@@ -4,9 +4,7 @@ package appsync
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/appsync/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,24 +44,6 @@ type GetResolverInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetResolverInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetResolverRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetResolverInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApiId != nil {
-		s.WriteString(schemas.GetResolverRequest_apiId, *v.ApiId)
-	}
-	if v.FieldName != nil {
-		s.WriteString(schemas.GetResolverRequest_fieldName, *v.FieldName)
-	}
-	if v.TypeName != nil {
-		s.WriteString(schemas.GetResolverRequest_typeName, *v.TypeName)
-	}
-}
-
 type GetResolverOutput struct {
 
 	// The Resolver object.
@@ -75,34 +55,13 @@ type GetResolverOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetResolverOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetResolverResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetResolverOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Resolver != nil {
-		s.WriteStruct(schemas.GetResolverResponse_resolver)
-		v.Resolver.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetResolverOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetResolverResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetResolverResponse_resolver:
-			v.Resolver = &types.Resolver{}
-			return v.Resolver.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetResolverMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetResolver, schemas.GetResolverRequest, schemas.GetResolverResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetResolver{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetResolver, schemas.GetResolverRequest, schemas.GetResolverResponse), output: &GetResolverOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetResolver{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

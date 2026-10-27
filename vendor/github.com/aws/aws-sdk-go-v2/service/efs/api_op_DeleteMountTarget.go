@@ -4,8 +4,6 @@ package efs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/efs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -57,18 +55,6 @@ type DeleteMountTargetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteMountTargetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteMountTargetRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteMountTargetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MountTargetId != nil {
-		s.WriteString(schemas.DeleteMountTargetRequest_MountTargetId, *v.MountTargetId)
-	}
-}
-
 type DeleteMountTargetOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -76,26 +62,13 @@ type DeleteMountTargetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteMountTargetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteMountTargetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteMountTargetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteMountTargetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteMountTarget, schemas.DeleteMountTargetRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteMountTarget{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteMountTarget, schemas.DeleteMountTargetRequest, nil), output: &DeleteMountTargetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteMountTarget{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

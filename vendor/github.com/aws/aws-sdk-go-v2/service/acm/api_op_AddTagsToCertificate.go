@@ -4,9 +4,7 @@ package acm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/acm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/acm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/aws/smithy-go/ptr"
 )
@@ -69,18 +67,6 @@ type AddTagsToCertificateInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AddTagsToCertificateInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AddTagsToCertificateRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AddTagsToCertificateInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CertificateArn != nil {
-		s.WriteString(schemas.AddTagsToCertificateRequest_CertificateArn, *v.CertificateArn)
-	}
-	serializeTagList(s, schemas.AddTagsToCertificateRequest_Tags, v.Tags)
-}
 func (in *AddTagsToCertificateInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ServiceType = ptr.String("ACM")
@@ -93,26 +79,13 @@ type AddTagsToCertificateOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AddTagsToCertificateOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AddTagsToCertificateOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AddTagsToCertificateOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAddTagsToCertificateMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AddTagsToCertificate, schemas.AddTagsToCertificateRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpAddTagsToCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AddTagsToCertificate, schemas.AddTagsToCertificateRequest, nil), output: &AddTagsToCertificateOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpAddTagsToCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

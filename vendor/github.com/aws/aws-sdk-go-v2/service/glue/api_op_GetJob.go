@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type GetJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobName != nil {
-		s.WriteString(schemas.GetJobRequest_JobName, *v.JobName)
-	}
-}
-
 type GetJobOutput struct {
 
 	// The requested job definition.
@@ -59,34 +45,13 @@ type GetJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Job != nil {
-		s.WriteStruct(schemas.GetJobResponse_Job)
-		v.Job.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetJobResponse_Job:
-			v.Job = &types.Job{}
-			return v.Job.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetJob, schemas.GetJobRequest, schemas.GetJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetJob, schemas.GetJobRequest, schemas.GetJobResponse), output: &GetJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

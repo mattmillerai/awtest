@@ -4,8 +4,6 @@ package lambda
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,18 +45,6 @@ type GetFunctionConcurrencyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetFunctionConcurrencyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetFunctionConcurrencyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetFunctionConcurrencyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.FunctionName != nil {
-		s.WriteString(schemas.GetFunctionConcurrencyRequest_FunctionName, *v.FunctionName)
-	}
-}
-
 type GetFunctionConcurrencyOutput struct {
 
 	// The number of simultaneous executions that are reserved for the function.
@@ -70,32 +56,13 @@ type GetFunctionConcurrencyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetFunctionConcurrencyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetFunctionConcurrencyResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetFunctionConcurrencyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ReservedConcurrentExecutions != nil {
-		s.WriteInt32(schemas.GetFunctionConcurrencyResponse_ReservedConcurrentExecutions, *v.ReservedConcurrentExecutions)
-	}
-}
-func (v *GetFunctionConcurrencyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetFunctionConcurrencyResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetFunctionConcurrencyResponse_ReservedConcurrentExecutions:
-			v.ReservedConcurrentExecutions = new(int32)
-			return d.ReadInt32(schemas.GetFunctionConcurrencyResponse_ReservedConcurrentExecutions, v.ReservedConcurrentExecutions)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetFunctionConcurrencyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetFunctionConcurrency, schemas.GetFunctionConcurrencyRequest, schemas.GetFunctionConcurrencyResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetFunctionConcurrency{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetFunctionConcurrency, schemas.GetFunctionConcurrencyRequest, schemas.GetFunctionConcurrencyResponse), output: &GetFunctionConcurrencyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetFunctionConcurrency{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

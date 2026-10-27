@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -163,19 +161,6 @@ type CreateIdentityProviderInput struct {
 	// This member is required.
 	UserPoolId *string
 
-	// A mapping between the authentication context class reference (ACR) levels of
-	// your user pool and the ACR values of the external OpenID Connect (OIDC) identity
-	// provider (IdP). The map is keyed by level, from Level1 through Level4 , and each
-	// value is the ACR value that the IdP uses for the corresponding level. Amazon
-	// Cognito uses this mapping to translate a requested user pool ACR level to the
-	// value that the IdP expects, and to map an ACR value that the IdP returns back to
-	// a user pool level. When the IdP returns an ACR value that isn't mapped, Amazon
-	// Cognito resolves it to the lowest level. Only OIDC IdPs support ACR mapping.
-	//
-	// Setting AcrMapping is available in all feature plans. It isn't restricted to
-	// the Essentials or Plus feature plan.
-	AcrMapping map[string]string
-
 	// A mapping of IdP attributes to standard and custom user pool attributes.
 	// Specify a user pool attribute as the key of the key-value pair, and the IdP
 	// attribute claim name as the value.
@@ -193,28 +178,6 @@ type CreateIdentityProviderInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateIdentityProviderInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateIdentityProviderRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateIdentityProviderInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAcrMappingType(s, schemas.CreateIdentityProviderRequest_AcrMapping, v.AcrMapping)
-	serializeAttributeMappingType(s, schemas.CreateIdentityProviderRequest_AttributeMapping, v.AttributeMapping)
-	serializeIdpIdentifiersListType(s, schemas.CreateIdentityProviderRequest_IdpIdentifiers, v.IdpIdentifiers)
-	serializeProviderDetailsType(s, schemas.CreateIdentityProviderRequest_ProviderDetails, v.ProviderDetails)
-	if v.ProviderName != nil {
-		s.WriteString(schemas.CreateIdentityProviderRequest_ProviderName, *v.ProviderName)
-	}
-	if v.ProviderType != "" {
-		s.WriteString(schemas.CreateIdentityProviderRequest_ProviderType, string(v.ProviderType))
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.CreateIdentityProviderRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type CreateIdentityProviderOutput struct {
 
 	// The details of the new user pool IdP.
@@ -228,34 +191,13 @@ type CreateIdentityProviderOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateIdentityProviderOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateIdentityProviderResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateIdentityProviderOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.IdentityProvider != nil {
-		s.WriteStruct(schemas.CreateIdentityProviderResponse_IdentityProvider)
-		v.IdentityProvider.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *CreateIdentityProviderOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateIdentityProviderResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateIdentityProviderResponse_IdentityProvider:
-			v.IdentityProvider = &types.IdentityProviderType{}
-			return v.IdentityProvider.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateIdentityProviderMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateIdentityProvider, schemas.CreateIdentityProviderRequest, schemas.CreateIdentityProviderResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateIdentityProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateIdentityProvider, schemas.CreateIdentityProviderRequest, schemas.CreateIdentityProviderResponse), output: &CreateIdentityProviderOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateIdentityProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

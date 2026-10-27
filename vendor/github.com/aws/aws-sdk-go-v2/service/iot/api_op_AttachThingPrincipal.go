@@ -4,9 +4,7 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -58,24 +56,6 @@ type AttachThingPrincipalInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AttachThingPrincipalInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AttachThingPrincipalRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AttachThingPrincipalInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Principal != nil {
-		s.WriteString(schemas.AttachThingPrincipalRequest_principal, *v.Principal)
-	}
-	if v.ThingName != nil {
-		s.WriteString(schemas.AttachThingPrincipalRequest_thingName, *v.ThingName)
-	}
-	if v.ThingPrincipalType != "" {
-		s.WriteString(schemas.AttachThingPrincipalRequest_thingPrincipalType, string(v.ThingPrincipalType))
-	}
-}
-
 // The output from the AttachThingPrincipal operation.
 type AttachThingPrincipalOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -84,26 +64,13 @@ type AttachThingPrincipalOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AttachThingPrincipalOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AttachThingPrincipalResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AttachThingPrincipalOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AttachThingPrincipalOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.AttachThingPrincipalResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAttachThingPrincipalMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AttachThingPrincipal, schemas.AttachThingPrincipalRequest, schemas.AttachThingPrincipalResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpAttachThingPrincipal{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AttachThingPrincipal, schemas.AttachThingPrincipalRequest, schemas.AttachThingPrincipalResponse), output: &AttachThingPrincipalOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpAttachThingPrincipal{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

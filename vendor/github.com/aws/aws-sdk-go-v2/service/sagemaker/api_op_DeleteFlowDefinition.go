@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteFlowDefinitionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFlowDefinitionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteFlowDefinitionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFlowDefinitionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.FlowDefinitionName != nil {
-		s.WriteString(schemas.DeleteFlowDefinitionRequest_FlowDefinitionName, *v.FlowDefinitionName)
-	}
-}
-
 type DeleteFlowDefinitionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteFlowDefinitionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFlowDefinitionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteFlowDefinitionResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFlowDefinitionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteFlowDefinitionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteFlowDefinitionResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteFlowDefinitionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFlowDefinition, schemas.DeleteFlowDefinitionRequest, schemas.DeleteFlowDefinitionResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteFlowDefinition{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFlowDefinition, schemas.DeleteFlowDefinitionRequest, schemas.DeleteFlowDefinitionResponse), output: &DeleteFlowDefinitionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteFlowDefinition{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

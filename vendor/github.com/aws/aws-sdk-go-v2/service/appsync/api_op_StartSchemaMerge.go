@@ -4,9 +4,7 @@ package appsync
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/appsync/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,21 +44,6 @@ type StartSchemaMergeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartSchemaMergeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartSchemaMergeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartSchemaMergeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AssociationId != nil {
-		s.WriteString(schemas.StartSchemaMergeRequest_associationId, *v.AssociationId)
-	}
-	if v.MergedApiIdentifier != nil {
-		s.WriteString(schemas.StartSchemaMergeRequest_mergedApiIdentifier, *v.MergedApiIdentifier)
-	}
-}
-
 type StartSchemaMergeOutput struct {
 
 	// The state of the source API association.
@@ -72,36 +55,13 @@ type StartSchemaMergeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartSchemaMergeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartSchemaMergeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartSchemaMergeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.SourceApiAssociationStatus != "" {
-		s.WriteString(schemas.StartSchemaMergeResponse_sourceApiAssociationStatus, string(v.SourceApiAssociationStatus))
-	}
-}
-func (v *StartSchemaMergeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartSchemaMergeResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StartSchemaMergeResponse_sourceApiAssociationStatus:
-			var ev string
-			if err := d.ReadString(schemas.StartSchemaMergeResponse_sourceApiAssociationStatus, &ev); err != nil {
-				return err
-			}
-			v.SourceApiAssociationStatus = types.SourceApiAssociationStatus(ev)
-			return nil
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartSchemaMergeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartSchemaMerge, schemas.StartSchemaMergeRequest, schemas.StartSchemaMergeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpStartSchemaMerge{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartSchemaMerge, schemas.StartSchemaMergeRequest, schemas.StartSchemaMergeResponse), output: &StartSchemaMergeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpStartSchemaMerge{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

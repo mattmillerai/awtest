@@ -4,9 +4,7 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -49,19 +47,6 @@ type DisassociateResourceTypesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateResourceTypesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateResourceTypesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateResourceTypesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigurationRecorderArn != nil {
-		s.WriteString(schemas.DisassociateResourceTypesRequest_ConfigurationRecorderArn, *v.ConfigurationRecorderArn)
-	}
-	serializeResourceTypeList(s, schemas.DisassociateResourceTypesRequest_ResourceTypes, v.ResourceTypes)
-}
-
 type DisassociateResourceTypesOutput struct {
 
 	// Records configuration changes to the resource types in scope.
@@ -80,34 +65,13 @@ type DisassociateResourceTypesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateResourceTypesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateResourceTypesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateResourceTypesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigurationRecorder != nil {
-		s.WriteStruct(schemas.DisassociateResourceTypesResponse_ConfigurationRecorder)
-		v.ConfigurationRecorder.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DisassociateResourceTypesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DisassociateResourceTypesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DisassociateResourceTypesResponse_ConfigurationRecorder:
-			v.ConfigurationRecorder = &types.ConfigurationRecorder{}
-			return v.ConfigurationRecorder.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateResourceTypesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateResourceTypes, schemas.DisassociateResourceTypesRequest, schemas.DisassociateResourceTypesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDisassociateResourceTypes{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateResourceTypes, schemas.DisassociateResourceTypesRequest, schemas.DisassociateResourceTypesResponse), output: &DisassociateResourceTypesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDisassociateResourceTypes{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package directconnect
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/directconnect/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/directconnect/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -60,27 +58,6 @@ type DescribeVirtualInterfacesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeVirtualInterfacesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeVirtualInterfacesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeVirtualInterfacesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConnectionId != nil {
-		s.WriteString(schemas.DescribeVirtualInterfacesRequest_connectionId, *v.ConnectionId)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.DescribeVirtualInterfacesRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.DescribeVirtualInterfacesRequest_nextToken, *v.NextToken)
-	}
-	if v.VirtualInterfaceId != nil {
-		s.WriteString(schemas.DescribeVirtualInterfacesRequest_virtualInterfaceId, *v.VirtualInterfaceId)
-	}
-}
-
 type DescribeVirtualInterfacesOutput struct {
 
 	// The token to use to retrieve the next page of results. This value is null when
@@ -96,35 +73,13 @@ type DescribeVirtualInterfacesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeVirtualInterfacesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.VirtualInterfaces)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeVirtualInterfacesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.VirtualInterfaces_nextToken, *v.NextToken)
-	}
-	serializeVirtualInterfaceList(s, schemas.VirtualInterfaces_virtualInterfaces, v.VirtualInterfaces)
-}
-func (v *DescribeVirtualInterfacesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.VirtualInterfaces, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.VirtualInterfaces_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.VirtualInterfaces_nextToken, v.NextToken)
-		case schemas.VirtualInterfaces_virtualInterfaces:
-			return deserializeVirtualInterfaceList(d, schemas.VirtualInterfaces_virtualInterfaces, &v.VirtualInterfaces)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeVirtualInterfacesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeVirtualInterfaces, schemas.DescribeVirtualInterfacesRequest, schemas.VirtualInterfaces)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeVirtualInterfaces{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeVirtualInterfaces, schemas.DescribeVirtualInterfacesRequest, schemas.VirtualInterfaces), output: &DescribeVirtualInterfacesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeVirtualInterfaces{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,21 +41,6 @@ type GetLogFieldsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetLogFieldsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetLogFieldsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetLogFieldsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DataSourceName != nil {
-		s.WriteString(schemas.GetLogFieldsRequest_dataSourceName, *v.DataSourceName)
-	}
-	if v.DataSourceType != nil {
-		s.WriteString(schemas.GetLogFieldsRequest_dataSourceType, *v.DataSourceType)
-	}
-}
-
 type GetLogFieldsOutput struct {
 
 	// The list of log fields for the specified data source, including field names and
@@ -70,29 +53,13 @@ type GetLogFieldsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetLogFieldsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetLogFieldsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetLogFieldsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeLogFieldsList(s, schemas.GetLogFieldsResponse_logFields, v.LogFields)
-}
-func (v *GetLogFieldsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetLogFieldsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetLogFieldsResponse_logFields:
-			return deserializeLogFieldsList(d, schemas.GetLogFieldsResponse_logFields, &v.LogFields)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetLogFieldsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetLogFields, schemas.GetLogFieldsRequest, schemas.GetLogFieldsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetLogFields{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetLogFields, schemas.GetLogFieldsRequest, schemas.GetLogFieldsResponse), output: &GetLogFieldsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetLogFields{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

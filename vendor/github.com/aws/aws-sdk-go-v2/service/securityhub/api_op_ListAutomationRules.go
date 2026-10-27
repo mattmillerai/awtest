@@ -4,9 +4,7 @@ package securityhub
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/securityhub/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,21 +38,6 @@ type ListAutomationRulesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListAutomationRulesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListAutomationRulesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListAutomationRulesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListAutomationRulesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListAutomationRulesRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListAutomationRulesOutput struct {
 
 	//  Metadata for rules in the calling account. The response includes rules with a
@@ -70,35 +53,13 @@ type ListAutomationRulesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListAutomationRulesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListAutomationRulesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListAutomationRulesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAutomationRulesMetadataList(s, schemas.ListAutomationRulesResponse_AutomationRulesMetadata, v.AutomationRulesMetadata)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListAutomationRulesResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListAutomationRulesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListAutomationRulesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListAutomationRulesResponse_AutomationRulesMetadata:
-			return deserializeAutomationRulesMetadataList(d, schemas.ListAutomationRulesResponse_AutomationRulesMetadata, &v.AutomationRulesMetadata)
-		case schemas.ListAutomationRulesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListAutomationRulesResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListAutomationRulesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListAutomationRules, schemas.ListAutomationRulesRequest, schemas.ListAutomationRulesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListAutomationRules{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListAutomationRules, schemas.ListAutomationRulesRequest, schemas.ListAutomationRulesResponse), output: &ListAutomationRulesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListAutomationRules{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

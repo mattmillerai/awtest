@@ -4,9 +4,7 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -56,24 +54,6 @@ type DeleteCustomActionTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCustomActionTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteCustomActionTypeInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCustomActionTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Category != "" {
-		s.WriteString(schemas.DeleteCustomActionTypeInput_category, string(v.Category))
-	}
-	if v.Provider != nil {
-		s.WriteString(schemas.DeleteCustomActionTypeInput_provider, *v.Provider)
-	}
-	if v.Version != nil {
-		s.WriteString(schemas.DeleteCustomActionTypeInput_version, *v.Version)
-	}
-}
-
 type DeleteCustomActionTypeOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -81,29 +61,19 @@ type DeleteCustomActionTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCustomActionTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCustomActionTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteCustomActionTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteCustomActionTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCustomActionType, schemas.DeleteCustomActionTypeInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteCustomActionType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCustomActionType, schemas.DeleteCustomActionTypeInput, nil), output: &DeleteCustomActionTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteCustomActionType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

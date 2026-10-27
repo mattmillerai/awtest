@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,21 +45,6 @@ type SetDefaultPolicyVersionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SetDefaultPolicyVersionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SetDefaultPolicyVersionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SetDefaultPolicyVersionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PolicyName != nil {
-		s.WriteString(schemas.SetDefaultPolicyVersionRequest_policyName, *v.PolicyName)
-	}
-	if v.PolicyVersionId != nil {
-		s.WriteString(schemas.SetDefaultPolicyVersionRequest_policyVersionId, *v.PolicyVersionId)
-	}
-}
-
 type SetDefaultPolicyVersionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -69,26 +52,13 @@ type SetDefaultPolicyVersionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SetDefaultPolicyVersionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SetDefaultPolicyVersionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *SetDefaultPolicyVersionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSetDefaultPolicyVersionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SetDefaultPolicyVersion, schemas.SetDefaultPolicyVersionRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpSetDefaultPolicyVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SetDefaultPolicyVersion, schemas.SetDefaultPolicyVersionRequest, nil), output: &SetDefaultPolicyVersionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpSetDefaultPolicyVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

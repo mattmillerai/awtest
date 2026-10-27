@@ -4,9 +4,7 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -98,25 +96,6 @@ type PutRemediationExceptionsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutRemediationExceptionsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutRemediationExceptionsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutRemediationExceptionsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigRuleName != nil {
-		s.WriteString(schemas.PutRemediationExceptionsRequest_ConfigRuleName, *v.ConfigRuleName)
-	}
-	if v.ExpirationTime != nil {
-		s.WriteTime(schemas.PutRemediationExceptionsRequest_ExpirationTime, *v.ExpirationTime)
-	}
-	if v.Message != nil {
-		s.WriteString(schemas.PutRemediationExceptionsRequest_Message, *v.Message)
-	}
-	serializeRemediationExceptionResourceKeys(s, schemas.PutRemediationExceptionsRequest_ResourceKeys, v.ResourceKeys)
-}
-
 type PutRemediationExceptionsOutput struct {
 
 	// Returns a list of failed remediation exceptions batch objects. Each object in
@@ -129,29 +108,13 @@ type PutRemediationExceptionsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutRemediationExceptionsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutRemediationExceptionsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutRemediationExceptionsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeFailedRemediationExceptionBatches(s, schemas.PutRemediationExceptionsResponse_FailedBatches, v.FailedBatches)
-}
-func (v *PutRemediationExceptionsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutRemediationExceptionsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.PutRemediationExceptionsResponse_FailedBatches:
-			return deserializeFailedRemediationExceptionBatches(d, schemas.PutRemediationExceptionsResponse_FailedBatches, &v.FailedBatches)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutRemediationExceptionsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutRemediationExceptions, schemas.PutRemediationExceptionsRequest, schemas.PutRemediationExceptionsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutRemediationExceptions{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutRemediationExceptions, schemas.PutRemediationExceptionsRequest, schemas.PutRemediationExceptionsResponse), output: &PutRemediationExceptionsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutRemediationExceptions{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

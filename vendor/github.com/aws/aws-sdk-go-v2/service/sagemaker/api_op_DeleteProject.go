@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteProjectInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteProjectInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteProjectInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteProjectInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ProjectName != nil {
-		s.WriteString(schemas.DeleteProjectInput_ProjectName, *v.ProjectName)
-	}
-}
-
 type DeleteProjectOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteProjectOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteProjectOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteProjectOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteProjectOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteProjectMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteProject, schemas.DeleteProjectInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteProject{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteProject, schemas.DeleteProjectInput, nil), output: &DeleteProjectOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteProject{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type DeleteWebhookInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWebhookInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWebhookInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWebhookInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeleteWebhookInput_name, *v.Name)
-	}
-}
-
 type DeleteWebhookOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -58,29 +44,19 @@ type DeleteWebhookOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWebhookOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWebhookOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWebhookOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteWebhookOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteWebhookOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteWebhookMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWebhook, schemas.DeleteWebhookInput, schemas.DeleteWebhookOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteWebhook{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWebhook, schemas.DeleteWebhookInput, schemas.DeleteWebhookOutput), output: &DeleteWebhookOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteWebhook{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

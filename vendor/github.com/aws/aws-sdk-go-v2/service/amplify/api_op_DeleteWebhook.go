@@ -4,9 +4,7 @@ package amplify
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/amplify/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/amplify/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -37,18 +35,6 @@ type DeleteWebhookInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWebhookInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWebhookRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWebhookInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.WebhookId != nil {
-		s.WriteString(schemas.DeleteWebhookRequest_webhookId, *v.WebhookId)
-	}
-}
-
 // The result structure for the delete webhook request.
 type DeleteWebhookOutput struct {
 
@@ -63,34 +49,13 @@ type DeleteWebhookOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWebhookOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWebhookResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWebhookOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Webhook != nil {
-		s.WriteStruct(schemas.DeleteWebhookResult_webhook)
-		v.Webhook.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeleteWebhookOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteWebhookResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteWebhookResult_webhook:
-			v.Webhook = &types.Webhook{}
-			return v.Webhook.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteWebhookMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWebhook, schemas.DeleteWebhookRequest, schemas.DeleteWebhookResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteWebhook{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWebhook, schemas.DeleteWebhookRequest, schemas.DeleteWebhookResult), output: &DeleteWebhookOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteWebhook{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

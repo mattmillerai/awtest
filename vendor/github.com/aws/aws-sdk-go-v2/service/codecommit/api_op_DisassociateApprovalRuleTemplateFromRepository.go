@@ -4,8 +4,6 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type DisassociateApprovalRuleTemplateFromRepositoryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateApprovalRuleTemplateFromRepositoryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateApprovalRuleTemplateFromRepositoryInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateApprovalRuleTemplateFromRepositoryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApprovalRuleTemplateName != nil {
-		s.WriteString(schemas.DisassociateApprovalRuleTemplateFromRepositoryInput_approvalRuleTemplateName, *v.ApprovalRuleTemplateName)
-	}
-	if v.RepositoryName != nil {
-		s.WriteString(schemas.DisassociateApprovalRuleTemplateFromRepositoryInput_repositoryName, *v.RepositoryName)
-	}
-}
-
 type DisassociateApprovalRuleTemplateFromRepositoryOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -66,29 +49,19 @@ type DisassociateApprovalRuleTemplateFromRepositoryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateApprovalRuleTemplateFromRepositoryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateApprovalRuleTemplateFromRepositoryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DisassociateApprovalRuleTemplateFromRepositoryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateApprovalRuleTemplateFromRepositoryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateApprovalRuleTemplateFromRepository, schemas.DisassociateApprovalRuleTemplateFromRepositoryInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDisassociateApprovalRuleTemplateFromRepository{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateApprovalRuleTemplateFromRepository, schemas.DisassociateApprovalRuleTemplateFromRepositoryInput, nil), output: &DisassociateApprovalRuleTemplateFromRepositoryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDisassociateApprovalRuleTemplateFromRepository{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

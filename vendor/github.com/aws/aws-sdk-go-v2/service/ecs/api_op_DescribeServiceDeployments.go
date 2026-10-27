@@ -4,9 +4,7 @@ package ecs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ecs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,16 +41,6 @@ type DescribeServiceDeploymentsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeServiceDeploymentsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeServiceDeploymentsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeServiceDeploymentsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeStringList(s, schemas.DescribeServiceDeploymentsRequest_serviceDeploymentArns, v.ServiceDeploymentArns)
-}
-
 type DescribeServiceDeploymentsOutput struct {
 
 	// Any failures associated with the call.
@@ -71,32 +59,13 @@ type DescribeServiceDeploymentsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeServiceDeploymentsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeServiceDeploymentsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeServiceDeploymentsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeFailures(s, schemas.DescribeServiceDeploymentsResponse_failures, v.Failures)
-	serializeServiceDeployments(s, schemas.DescribeServiceDeploymentsResponse_serviceDeployments, v.ServiceDeployments)
-}
-func (v *DescribeServiceDeploymentsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeServiceDeploymentsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeServiceDeploymentsResponse_failures:
-			return deserializeFailures(d, schemas.DescribeServiceDeploymentsResponse_failures, &v.Failures)
-		case schemas.DescribeServiceDeploymentsResponse_serviceDeployments:
-			return deserializeServiceDeployments(d, schemas.DescribeServiceDeploymentsResponse_serviceDeployments, &v.ServiceDeployments)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeServiceDeploymentsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeServiceDeployments, schemas.DescribeServiceDeploymentsRequest, schemas.DescribeServiceDeploymentsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeServiceDeployments{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeServiceDeployments, schemas.DescribeServiceDeploymentsRequest, schemas.DescribeServiceDeploymentsResponse), output: &DescribeServiceDeploymentsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeServiceDeployments{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

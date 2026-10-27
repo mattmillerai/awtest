@@ -4,8 +4,6 @@ package lambda
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type DeleteLayerVersionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteLayerVersionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteLayerVersionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteLayerVersionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LayerName != nil {
-		s.WriteString(schemas.DeleteLayerVersionRequest_LayerName, *v.LayerName)
-	}
-	if v.VersionNumber != nil {
-		s.WriteInt64(schemas.DeleteLayerVersionRequest_VersionNumber, *v.VersionNumber)
-	}
-}
-
 type DeleteLayerVersionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -66,26 +49,13 @@ type DeleteLayerVersionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteLayerVersionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteLayerVersionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteLayerVersionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteLayerVersionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteLayerVersion, schemas.DeleteLayerVersionRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteLayerVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteLayerVersion, schemas.DeleteLayerVersionRequest, nil), output: &DeleteLayerVersionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteLayerVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

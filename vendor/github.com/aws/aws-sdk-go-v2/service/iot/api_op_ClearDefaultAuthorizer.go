@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -33,15 +31,6 @@ type ClearDefaultAuthorizerInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ClearDefaultAuthorizerInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ClearDefaultAuthorizerRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ClearDefaultAuthorizerInput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-
 type ClearDefaultAuthorizerOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -49,26 +38,13 @@ type ClearDefaultAuthorizerOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ClearDefaultAuthorizerOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ClearDefaultAuthorizerResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ClearDefaultAuthorizerOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *ClearDefaultAuthorizerOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ClearDefaultAuthorizerResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationClearDefaultAuthorizerMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ClearDefaultAuthorizer, schemas.ClearDefaultAuthorizerRequest, schemas.ClearDefaultAuthorizerResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpClearDefaultAuthorizer{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ClearDefaultAuthorizer, schemas.ClearDefaultAuthorizerRequest, schemas.ClearDefaultAuthorizerResponse), output: &ClearDefaultAuthorizerOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpClearDefaultAuthorizer{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

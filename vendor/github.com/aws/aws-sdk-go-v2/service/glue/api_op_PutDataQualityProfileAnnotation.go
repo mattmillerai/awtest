@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,21 +39,6 @@ type PutDataQualityProfileAnnotationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDataQualityProfileAnnotationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDataQualityProfileAnnotationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDataQualityProfileAnnotationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InclusionAnnotation != "" {
-		s.WriteString(schemas.PutDataQualityProfileAnnotationRequest_InclusionAnnotation, string(v.InclusionAnnotation))
-	}
-	if v.ProfileId != nil {
-		s.WriteString(schemas.PutDataQualityProfileAnnotationRequest_ProfileId, *v.ProfileId)
-	}
-}
-
 // Left blank.
 type PutDataQualityProfileAnnotationOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -64,26 +47,13 @@ type PutDataQualityProfileAnnotationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDataQualityProfileAnnotationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDataQualityProfileAnnotationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDataQualityProfileAnnotationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *PutDataQualityProfileAnnotationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutDataQualityProfileAnnotationResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutDataQualityProfileAnnotationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDataQualityProfileAnnotation, schemas.PutDataQualityProfileAnnotationRequest, schemas.PutDataQualityProfileAnnotationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutDataQualityProfileAnnotation{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDataQualityProfileAnnotation, schemas.PutDataQualityProfileAnnotationRequest, schemas.PutDataQualityProfileAnnotationResponse), output: &PutDataQualityProfileAnnotationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutDataQualityProfileAnnotation{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

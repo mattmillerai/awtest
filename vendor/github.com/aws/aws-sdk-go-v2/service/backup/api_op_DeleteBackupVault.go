@@ -4,8 +4,6 @@ package backup
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type DeleteBackupVaultInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBackupVaultInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteBackupVaultInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBackupVaultInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BackupVaultName != nil {
-		s.WriteString(schemas.DeleteBackupVaultInput_BackupVaultName, *v.BackupVaultName)
-	}
-}
-
 type DeleteBackupVaultOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -57,26 +43,13 @@ type DeleteBackupVaultOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBackupVaultOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBackupVaultOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteBackupVaultOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteBackupVaultMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBackupVault, schemas.DeleteBackupVaultInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteBackupVault{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBackupVault, schemas.DeleteBackupVaultInput, nil), output: &DeleteBackupVaultOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteBackupVault{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

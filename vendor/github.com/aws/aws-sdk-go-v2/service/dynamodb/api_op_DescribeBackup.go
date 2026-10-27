@@ -5,10 +5,8 @@ package dynamodb
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	internalEndpointDiscovery "github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,17 +38,6 @@ type DescribeBackupInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeBackupInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeBackupInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeBackupInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BackupArn != nil {
-		s.WriteString(schemas.DescribeBackupInput_BackupArn, *v.BackupArn)
-	}
-}
 func (in *DescribeBackupInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ResourceArn = in.BackupArn
@@ -68,34 +55,13 @@ type DescribeBackupOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeBackupOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeBackupOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeBackupOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BackupDescription != nil {
-		s.WriteStruct(schemas.DescribeBackupOutput_BackupDescription)
-		v.BackupDescription.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeBackupOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeBackupOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeBackupOutput_BackupDescription:
-			v.BackupDescription = &types.BackupDescription{}
-			return v.BackupDescription.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeBackupMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeBackup, schemas.DescribeBackupInput, schemas.DescribeBackupOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpDescribeBackup{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeBackup, schemas.DescribeBackupInput, schemas.DescribeBackupOutput), output: &DescribeBackupOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpDescribeBackup{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

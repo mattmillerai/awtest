@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,23 +40,6 @@ type PutDataCatalogEncryptionSettingsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDataCatalogEncryptionSettingsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDataCatalogEncryptionSettingsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDataCatalogEncryptionSettingsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CatalogId != nil {
-		s.WriteString(schemas.PutDataCatalogEncryptionSettingsRequest_CatalogId, *v.CatalogId)
-	}
-	if v.DataCatalogEncryptionSettings != nil {
-		s.WriteStruct(schemas.PutDataCatalogEncryptionSettingsRequest_DataCatalogEncryptionSettings)
-		v.DataCatalogEncryptionSettings.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type PutDataCatalogEncryptionSettingsOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -66,26 +47,13 @@ type PutDataCatalogEncryptionSettingsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDataCatalogEncryptionSettingsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDataCatalogEncryptionSettingsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDataCatalogEncryptionSettingsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *PutDataCatalogEncryptionSettingsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutDataCatalogEncryptionSettingsResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutDataCatalogEncryptionSettingsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDataCatalogEncryptionSettings, schemas.PutDataCatalogEncryptionSettingsRequest, schemas.PutDataCatalogEncryptionSettingsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutDataCatalogEncryptionSettings{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDataCatalogEncryptionSettings, schemas.PutDataCatalogEncryptionSettingsRequest, schemas.PutDataCatalogEncryptionSettingsResponse), output: &PutDataCatalogEncryptionSettingsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutDataCatalogEncryptionSettings{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

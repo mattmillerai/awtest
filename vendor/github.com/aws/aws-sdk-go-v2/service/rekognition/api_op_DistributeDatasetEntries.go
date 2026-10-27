@@ -4,9 +4,7 @@ package rekognition
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/rekognition/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,16 +53,6 @@ type DistributeDatasetEntriesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DistributeDatasetEntriesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DistributeDatasetEntriesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DistributeDatasetEntriesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeDistributeDatasetMetadataList(s, schemas.DistributeDatasetEntriesRequest_Datasets, v.Datasets)
-}
-
 type DistributeDatasetEntriesOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -72,26 +60,13 @@ type DistributeDatasetEntriesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DistributeDatasetEntriesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DistributeDatasetEntriesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DistributeDatasetEntriesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DistributeDatasetEntriesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DistributeDatasetEntriesResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDistributeDatasetEntriesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DistributeDatasetEntries, schemas.DistributeDatasetEntriesRequest, schemas.DistributeDatasetEntriesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDistributeDatasetEntries{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DistributeDatasetEntries, schemas.DistributeDatasetEntriesRequest, schemas.DistributeDatasetEntriesResponse), output: &DistributeDatasetEntriesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDistributeDatasetEntries{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

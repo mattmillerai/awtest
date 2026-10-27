@@ -4,9 +4,7 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -78,19 +76,6 @@ type GetParametersInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetParametersInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetParametersRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetParametersInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeParameterNameList(s, schemas.GetParametersRequest_Names, v.Names)
-	if v.WithDecryption != nil {
-		s.WriteBool(schemas.GetParametersRequest_WithDecryption, *v.WithDecryption)
-	}
-}
-
 type GetParametersOutput struct {
 
 	// A list of parameters that aren't formatted correctly or don't run during an
@@ -106,32 +91,13 @@ type GetParametersOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetParametersOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetParametersResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetParametersOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeParameterNameList(s, schemas.GetParametersResult_InvalidParameters, v.InvalidParameters)
-	serializeParameterList(s, schemas.GetParametersResult_Parameters, v.Parameters)
-}
-func (v *GetParametersOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetParametersResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetParametersResult_InvalidParameters:
-			return deserializeParameterNameList(d, schemas.GetParametersResult_InvalidParameters, &v.InvalidParameters)
-		case schemas.GetParametersResult_Parameters:
-			return deserializeParameterList(d, schemas.GetParametersResult_Parameters, &v.Parameters)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetParametersMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetParameters, schemas.GetParametersRequest, schemas.GetParametersResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetParameters{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetParameters, schemas.GetParametersRequest, schemas.GetParametersResult), output: &GetParametersOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetParameters{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

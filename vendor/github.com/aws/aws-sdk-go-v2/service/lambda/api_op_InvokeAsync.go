@@ -4,8 +4,6 @@ package lambda
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"io"
 )
@@ -62,25 +60,6 @@ type InvokeAsyncInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InvokeAsyncInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InvokeAsyncRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InvokeAsyncInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.FunctionName != nil {
-		s.WriteString(schemas.InvokeAsyncRequest_FunctionName, *v.FunctionName)
-	}
-}
-func (v *InvokeAsyncInput) GetPayloadStream() io.Reader { return v.InvokeArgs }
-
-var _ smithy.StreamingInput = (*InvokeAsyncInput)(nil)
-
-func (v *InvokeAsyncInput) SetPayloadStream(r io.ReadCloser) { v.InvokeArgs = r }
-
-var _ smithy.StreamingOutput = (*InvokeAsyncInput)(nil)
-
 // A success response ( 202 Accepted ) indicates that the request is queued for
 // invocation.
 type InvokeAsyncOutput struct {
@@ -94,31 +73,13 @@ type InvokeAsyncOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InvokeAsyncOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InvokeAsyncResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InvokeAsyncOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Status != 0 {
-		s.WriteInt32(schemas.InvokeAsyncResponse_Status, v.Status)
-	}
-}
-func (v *InvokeAsyncOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.InvokeAsyncResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.InvokeAsyncResponse_Status:
-			return d.ReadInt32(schemas.InvokeAsyncResponse_Status, &v.Status)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationInvokeAsyncMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InvokeAsync, schemas.InvokeAsyncRequest, schemas.InvokeAsyncResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpInvokeAsync{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InvokeAsync, schemas.InvokeAsyncRequest, schemas.InvokeAsyncResponse), output: &InvokeAsyncOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpInvokeAsync{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -5,9 +5,7 @@ package codebuild
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -59,29 +57,6 @@ type ListReportsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListReportsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListReportsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListReportsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Filter != nil {
-		s.WriteStruct(schemas.ListReportsInput_filter)
-		v.Filter.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListReportsInput_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListReportsInput_nextToken, *v.NextToken)
-	}
-	if v.SortOrder != "" {
-		s.WriteString(schemas.ListReportsInput_sortOrder, string(v.SortOrder))
-	}
-}
-
 type ListReportsOutput struct {
 
 	//  During a previous call, the maximum number of items that can be returned is
@@ -102,38 +77,19 @@ type ListReportsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListReportsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListReportsOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListReportsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListReportsOutput_nextToken, *v.NextToken)
-	}
-	serializeReportArns(s, schemas.ListReportsOutput_reports, v.Reports)
-}
-func (v *ListReportsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListReportsOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListReportsOutput_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListReportsOutput_nextToken, v.NextToken)
-		case schemas.ListReportsOutput_reports:
-			return deserializeReportArns(d, schemas.ListReportsOutput_reports, &v.Reports)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListReportsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListReports, schemas.ListReportsInput, schemas.ListReportsOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListReports{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListReports, schemas.ListReportsInput, schemas.ListReportsOutput), output: &ListReportsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListReports{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

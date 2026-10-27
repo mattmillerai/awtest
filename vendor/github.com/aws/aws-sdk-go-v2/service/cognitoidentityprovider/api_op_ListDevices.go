@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -63,24 +61,6 @@ type ListDevicesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListDevicesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListDevicesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListDevicesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccessToken != nil {
-		s.WriteString(schemas.ListDevicesRequest_AccessToken, *v.AccessToken)
-	}
-	if v.Limit != nil {
-		s.WriteInt32(schemas.ListDevicesRequest_Limit, *v.Limit)
-	}
-	if v.PaginationToken != nil {
-		s.WriteString(schemas.ListDevicesRequest_PaginationToken, *v.PaginationToken)
-	}
-}
-
 // Represents the response to list devices.
 type ListDevicesOutput struct {
 
@@ -100,35 +80,13 @@ type ListDevicesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListDevicesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListDevicesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListDevicesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeDeviceListType(s, schemas.ListDevicesResponse_Devices, v.Devices)
-	if v.PaginationToken != nil {
-		s.WriteString(schemas.ListDevicesResponse_PaginationToken, *v.PaginationToken)
-	}
-}
-func (v *ListDevicesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListDevicesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListDevicesResponse_Devices:
-			return deserializeDeviceListType(d, schemas.ListDevicesResponse_Devices, &v.Devices)
-		case schemas.ListDevicesResponse_PaginationToken:
-			v.PaginationToken = new(string)
-			return d.ReadString(schemas.ListDevicesResponse_PaginationToken, v.PaginationToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListDevicesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListDevices, schemas.ListDevicesRequest, schemas.ListDevicesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListDevices{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListDevices, schemas.ListDevicesRequest, schemas.ListDevicesResponse), output: &ListDevicesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListDevices{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

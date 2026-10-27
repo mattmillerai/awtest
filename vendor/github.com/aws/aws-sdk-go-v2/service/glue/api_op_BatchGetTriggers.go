@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,16 +38,6 @@ type BatchGetTriggersInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetTriggersInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetTriggersRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetTriggersInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeTriggerNameList(s, schemas.BatchGetTriggersRequest_TriggerNames, v.TriggerNames)
-}
-
 type BatchGetTriggersOutput struct {
 
 	// A list of trigger definitions.
@@ -64,32 +52,13 @@ type BatchGetTriggersOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetTriggersOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetTriggersResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetTriggersOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeTriggerList(s, schemas.BatchGetTriggersResponse_Triggers, v.Triggers)
-	serializeTriggerNameList(s, schemas.BatchGetTriggersResponse_TriggersNotFound, v.TriggersNotFound)
-}
-func (v *BatchGetTriggersOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.BatchGetTriggersResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.BatchGetTriggersResponse_Triggers:
-			return deserializeTriggerList(d, schemas.BatchGetTriggersResponse_Triggers, &v.Triggers)
-		case schemas.BatchGetTriggersResponse_TriggersNotFound:
-			return deserializeTriggerNameList(d, schemas.BatchGetTriggersResponse_TriggersNotFound, &v.TriggersNotFound)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationBatchGetTriggersMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetTriggers, schemas.BatchGetTriggersRequest, schemas.BatchGetTriggersResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpBatchGetTriggers{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetTriggers, schemas.BatchGetTriggersRequest, schemas.BatchGetTriggersResponse), output: &BatchGetTriggersOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpBatchGetTriggers{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

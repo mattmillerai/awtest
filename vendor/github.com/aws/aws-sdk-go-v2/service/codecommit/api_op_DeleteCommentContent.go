@@ -4,9 +4,7 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codecommit/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -37,18 +35,6 @@ type DeleteCommentContentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCommentContentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteCommentContentInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCommentContentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CommentId != nil {
-		s.WriteString(schemas.DeleteCommentContentInput_commentId, *v.CommentId)
-	}
-}
-
 type DeleteCommentContentOutput struct {
 
 	// Information about the comment you just deleted.
@@ -60,37 +46,19 @@ type DeleteCommentContentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCommentContentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteCommentContentOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCommentContentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Comment != nil {
-		s.WriteStruct(schemas.DeleteCommentContentOutput_comment)
-		v.Comment.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeleteCommentContentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteCommentContentOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteCommentContentOutput_comment:
-			v.Comment = &types.Comment{}
-			return v.Comment.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteCommentContentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCommentContent, schemas.DeleteCommentContentInput, schemas.DeleteCommentContentOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteCommentContent{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCommentContent, schemas.DeleteCommentContentInput, schemas.DeleteCommentContentOutput), output: &DeleteCommentContentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteCommentContent{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

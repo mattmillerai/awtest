@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type StopInferenceRecommendationsJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopInferenceRecommendationsJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopInferenceRecommendationsJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopInferenceRecommendationsJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobName != nil {
-		s.WriteString(schemas.StopInferenceRecommendationsJobRequest_JobName, *v.JobName)
-	}
-}
-
 type StopInferenceRecommendationsJobOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type StopInferenceRecommendationsJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopInferenceRecommendationsJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopInferenceRecommendationsJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopInferenceRecommendationsJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopInferenceRecommendationsJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopInferenceRecommendationsJob, schemas.StopInferenceRecommendationsJobRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopInferenceRecommendationsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopInferenceRecommendationsJob, schemas.StopInferenceRecommendationsJobRequest, nil), output: &StopInferenceRecommendationsJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopInferenceRecommendationsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codecommit/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,19 +43,6 @@ type BatchAssociateApprovalRuleTemplateWithRepositoriesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchAssociateApprovalRuleTemplateWithRepositoriesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchAssociateApprovalRuleTemplateWithRepositoriesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApprovalRuleTemplateName != nil {
-		s.WriteString(schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesInput_approvalRuleTemplateName, *v.ApprovalRuleTemplateName)
-	}
-	serializeRepositoryNameList(s, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesInput_repositoryNames, v.RepositoryNames)
-}
-
 type BatchAssociateApprovalRuleTemplateWithRepositoriesOutput struct {
 
 	// A list of names of the repositories that have been associated with the template.
@@ -77,35 +62,19 @@ type BatchAssociateApprovalRuleTemplateWithRepositoriesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchAssociateApprovalRuleTemplateWithRepositoriesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchAssociateApprovalRuleTemplateWithRepositoriesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeRepositoryNameList(s, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_associatedRepositoryNames, v.AssociatedRepositoryNames)
-	serializeBatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList(s, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_errors, v.Errors)
-}
-func (v *BatchAssociateApprovalRuleTemplateWithRepositoriesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_associatedRepositoryNames:
-			return deserializeRepositoryNameList(d, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_associatedRepositoryNames, &v.AssociatedRepositoryNames)
-		case schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_errors:
-			return deserializeBatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList(d, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput_errors, &v.Errors)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationBatchAssociateApprovalRuleTemplateWithRepositoriesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchAssociateApprovalRuleTemplateWithRepositories, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesInput, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpBatchAssociateApprovalRuleTemplateWithRepositories{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchAssociateApprovalRuleTemplateWithRepositories, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesInput, schemas.BatchAssociateApprovalRuleTemplateWithRepositoriesOutput), output: &BatchAssociateApprovalRuleTemplateWithRepositoriesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpBatchAssociateApprovalRuleTemplateWithRepositories{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

@@ -4,9 +4,7 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,21 +38,6 @@ type RetryBuildInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RetryBuildInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RetryBuildInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RetryBuildInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Id != nil {
-		s.WriteString(schemas.RetryBuildInput_id, *v.Id)
-	}
-	if v.IdempotencyToken != nil {
-		s.WriteString(schemas.RetryBuildInput_idempotencyToken, *v.IdempotencyToken)
-	}
-}
-
 type RetryBuildOutput struct {
 
 	// Information about a build.
@@ -66,37 +49,19 @@ type RetryBuildOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RetryBuildOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RetryBuildOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RetryBuildOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Build != nil {
-		s.WriteStruct(schemas.RetryBuildOutput_build)
-		v.Build.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *RetryBuildOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.RetryBuildOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.RetryBuildOutput_build:
-			v.Build = &types.Build{}
-			return v.Build.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRetryBuildMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RetryBuild, schemas.RetryBuildInput, schemas.RetryBuildOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRetryBuild{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RetryBuild, schemas.RetryBuildInput, schemas.RetryBuildOutput), output: &RetryBuildOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRetryBuild{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

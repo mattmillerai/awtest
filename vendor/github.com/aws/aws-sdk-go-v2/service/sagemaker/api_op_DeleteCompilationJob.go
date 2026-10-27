@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,18 +40,6 @@ type DeleteCompilationJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCompilationJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteCompilationJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCompilationJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CompilationJobName != nil {
-		s.WriteString(schemas.DeleteCompilationJobRequest_CompilationJobName, *v.CompilationJobName)
-	}
-}
-
 type DeleteCompilationJobOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -61,26 +47,13 @@ type DeleteCompilationJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteCompilationJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteCompilationJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteCompilationJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteCompilationJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCompilationJob, schemas.DeleteCompilationJobRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteCompilationJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteCompilationJob, schemas.DeleteCompilationJobRequest, nil), output: &DeleteCompilationJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteCompilationJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

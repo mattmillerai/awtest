@@ -4,9 +4,7 @@ package organizations
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/organizations/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,18 +45,6 @@ type DescribeOrganizationalUnitInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeOrganizationalUnitInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeOrganizationalUnitRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeOrganizationalUnitInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.OrganizationalUnitId != nil {
-		s.WriteString(schemas.DescribeOrganizationalUnitRequest_OrganizationalUnitId, *v.OrganizationalUnitId)
-	}
-}
-
 type DescribeOrganizationalUnitOutput struct {
 
 	// A structure that contains details about the specified OU.
@@ -70,34 +56,13 @@ type DescribeOrganizationalUnitOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeOrganizationalUnitOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeOrganizationalUnitResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeOrganizationalUnitOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.OrganizationalUnit != nil {
-		s.WriteStruct(schemas.DescribeOrganizationalUnitResponse_OrganizationalUnit)
-		v.OrganizationalUnit.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeOrganizationalUnitOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeOrganizationalUnitResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeOrganizationalUnitResponse_OrganizationalUnit:
-			v.OrganizationalUnit = &types.OrganizationalUnit{}
-			return v.OrganizationalUnit.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeOrganizationalUnitMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeOrganizationalUnit, schemas.DescribeOrganizationalUnitRequest, schemas.DescribeOrganizationalUnitResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeOrganizationalUnit{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeOrganizationalUnit, schemas.DescribeOrganizationalUnitRequest, schemas.DescribeOrganizationalUnitResponse), output: &DescribeOrganizationalUnitOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeOrganizationalUnit{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

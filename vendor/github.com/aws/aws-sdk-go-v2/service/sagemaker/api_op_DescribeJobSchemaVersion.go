@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,21 +48,6 @@ type DescribeJobSchemaVersionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeJobSchemaVersionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeJobSchemaVersionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeJobSchemaVersionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobCategory != "" {
-		s.WriteString(schemas.DescribeJobSchemaVersionRequest_JobCategory, string(v.JobCategory))
-	}
-	if v.JobConfigSchemaVersion != nil {
-		s.WriteString(schemas.DescribeJobSchemaVersionRequest_JobConfigSchemaVersion, *v.JobConfigSchemaVersion)
-	}
-}
-
 type DescribeJobSchemaVersionOutput struct {
 
 	// The category of the job schema.
@@ -88,48 +71,13 @@ type DescribeJobSchemaVersionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeJobSchemaVersionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeJobSchemaVersionResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeJobSchemaVersionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobCategory != "" {
-		s.WriteString(schemas.DescribeJobSchemaVersionResponse_JobCategory, string(v.JobCategory))
-	}
-	if v.JobConfigSchema != nil {
-		s.WriteString(schemas.DescribeJobSchemaVersionResponse_JobConfigSchema, *v.JobConfigSchema)
-	}
-	if v.JobConfigSchemaVersion != nil {
-		s.WriteString(schemas.DescribeJobSchemaVersionResponse_JobConfigSchemaVersion, *v.JobConfigSchemaVersion)
-	}
-}
-func (v *DescribeJobSchemaVersionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeJobSchemaVersionResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeJobSchemaVersionResponse_JobCategory:
-			var ev string
-			if err := d.ReadString(schemas.DescribeJobSchemaVersionResponse_JobCategory, &ev); err != nil {
-				return err
-			}
-			v.JobCategory = types.JobCategory(ev)
-			return nil
-		case schemas.DescribeJobSchemaVersionResponse_JobConfigSchema:
-			v.JobConfigSchema = new(string)
-			return d.ReadString(schemas.DescribeJobSchemaVersionResponse_JobConfigSchema, v.JobConfigSchema)
-		case schemas.DescribeJobSchemaVersionResponse_JobConfigSchemaVersion:
-			v.JobConfigSchemaVersion = new(string)
-			return d.ReadString(schemas.DescribeJobSchemaVersionResponse_JobConfigSchemaVersion, v.JobConfigSchemaVersion)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeJobSchemaVersionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeJobSchemaVersion, schemas.DescribeJobSchemaVersionRequest, schemas.DescribeJobSchemaVersionResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeJobSchemaVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeJobSchemaVersion, schemas.DescribeJobSchemaVersionRequest, schemas.DescribeJobSchemaVersionResponse), output: &DescribeJobSchemaVersionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeJobSchemaVersion{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

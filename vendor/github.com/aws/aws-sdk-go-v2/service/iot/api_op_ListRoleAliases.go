@@ -5,8 +5,6 @@ package iot
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type ListRoleAliasesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListRoleAliasesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListRoleAliasesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListRoleAliasesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AscendingOrder != false {
-		s.WriteBool(schemas.ListRoleAliasesRequest_ascendingOrder, v.AscendingOrder)
-	}
-	if v.Marker != nil {
-		s.WriteString(schemas.ListRoleAliasesRequest_marker, *v.Marker)
-	}
-	if v.PageSize != nil {
-		s.WriteInt32(schemas.ListRoleAliasesRequest_pageSize, *v.PageSize)
-	}
-}
-
 type ListRoleAliasesOutput struct {
 
 	// A marker used to get the next set of results.
@@ -76,35 +56,13 @@ type ListRoleAliasesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListRoleAliasesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListRoleAliasesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListRoleAliasesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextMarker != nil {
-		s.WriteString(schemas.ListRoleAliasesResponse_nextMarker, *v.NextMarker)
-	}
-	serializeRoleAliases(s, schemas.ListRoleAliasesResponse_roleAliases, v.RoleAliases)
-}
-func (v *ListRoleAliasesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListRoleAliasesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListRoleAliasesResponse_nextMarker:
-			v.NextMarker = new(string)
-			return d.ReadString(schemas.ListRoleAliasesResponse_nextMarker, v.NextMarker)
-		case schemas.ListRoleAliasesResponse_roleAliases:
-			return deserializeRoleAliases(d, schemas.ListRoleAliasesResponse_roleAliases, &v.RoleAliases)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListRoleAliasesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListRoleAliases, schemas.ListRoleAliasesRequest, schemas.ListRoleAliasesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListRoleAliases{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListRoleAliases, schemas.ListRoleAliasesRequest, schemas.ListRoleAliasesResponse), output: &ListRoleAliasesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListRoleAliases{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

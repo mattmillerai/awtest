@@ -4,9 +4,7 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -53,22 +51,6 @@ type PutEvaluationsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutEvaluationsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutEvaluationsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutEvaluationsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeEvaluations(s, schemas.PutEvaluationsRequest_Evaluations, v.Evaluations)
-	if v.ResultToken != nil {
-		s.WriteString(schemas.PutEvaluationsRequest_ResultToken, *v.ResultToken)
-	}
-	if v.TestMode != false {
-		s.WriteBool(schemas.PutEvaluationsRequest_TestMode, v.TestMode)
-	}
-}
-
 type PutEvaluationsOutput struct {
 
 	// Requests that failed because of a client or server error.
@@ -80,29 +62,13 @@ type PutEvaluationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutEvaluationsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutEvaluationsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutEvaluationsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeEvaluations(s, schemas.PutEvaluationsResponse_FailedEvaluations, v.FailedEvaluations)
-}
-func (v *PutEvaluationsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutEvaluationsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.PutEvaluationsResponse_FailedEvaluations:
-			return deserializeEvaluations(d, schemas.PutEvaluationsResponse_FailedEvaluations, &v.FailedEvaluations)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutEvaluationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutEvaluations, schemas.PutEvaluationsRequest, schemas.PutEvaluationsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutEvaluations{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutEvaluations, schemas.PutEvaluationsRequest, schemas.PutEvaluationsResponse), output: &PutEvaluationsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutEvaluations{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

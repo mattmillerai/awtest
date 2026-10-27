@@ -5,8 +5,6 @@ package iot
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,21 +45,6 @@ type DeletePackageInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePackageInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePackageRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePackageInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientToken != nil {
-		s.WriteString(schemas.DeletePackageRequest_clientToken, *v.ClientToken)
-	}
-	if v.PackageName != nil {
-		s.WriteString(schemas.DeletePackageRequest_packageName, *v.PackageName)
-	}
-}
-
 type DeletePackageOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -69,26 +52,13 @@ type DeletePackageOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePackageOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePackageResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePackageOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeletePackageOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeletePackageResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeletePackageMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePackage, schemas.DeletePackageRequest, schemas.DeletePackageResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeletePackage{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePackage, schemas.DeletePackageRequest, schemas.DeletePackageResponse), output: &DeletePackageOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeletePackage{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

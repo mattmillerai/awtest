@@ -5,9 +5,7 @@ package acm
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/acm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/acm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/aws/smithy-go/ptr"
 )
@@ -57,27 +55,6 @@ type SearchCertificatesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SearchCertificatesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SearchCertificatesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SearchCertificatesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeCertificateFilterStatement(s, schemas.SearchCertificatesRequest_FilterStatement, v.FilterStatement)
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.SearchCertificatesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.SearchCertificatesRequest_NextToken, *v.NextToken)
-	}
-	if v.SortBy != "" {
-		s.WriteString(schemas.SearchCertificatesRequest_SortBy, string(v.SortBy))
-	}
-	if v.SortOrder != "" {
-		s.WriteString(schemas.SearchCertificatesRequest_SortOrder, string(v.SortOrder))
-	}
-}
 func (in *SearchCertificatesInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ServiceType = ptr.String("ACM")
@@ -99,35 +76,13 @@ type SearchCertificatesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SearchCertificatesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SearchCertificatesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SearchCertificatesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.SearchCertificatesResponse_NextToken, *v.NextToken)
-	}
-	serializeCertificateSearchResultList(s, schemas.SearchCertificatesResponse_Results, v.Results)
-}
-func (v *SearchCertificatesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.SearchCertificatesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.SearchCertificatesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.SearchCertificatesResponse_NextToken, v.NextToken)
-		case schemas.SearchCertificatesResponse_Results:
-			return deserializeCertificateSearchResultList(d, schemas.SearchCertificatesResponse_Results, &v.Results)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSearchCertificatesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SearchCertificates, schemas.SearchCertificatesRequest, schemas.SearchCertificatesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpSearchCertificates{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SearchCertificates, schemas.SearchCertificatesRequest, schemas.SearchCertificatesResponse), output: &SearchCertificatesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpSearchCertificates{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

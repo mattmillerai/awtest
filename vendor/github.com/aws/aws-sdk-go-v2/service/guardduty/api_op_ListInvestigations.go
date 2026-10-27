@@ -5,9 +5,7 @@ package guardduty
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/guardduty/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/guardduty/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -64,29 +62,6 @@ type ListInvestigationsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListInvestigationsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListInvestigationsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListInvestigationsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DetectorId != nil {
-		s.WriteString(schemas.ListInvestigationsRequest_DetectorId, *v.DetectorId)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListInvestigationsRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListInvestigationsRequest_NextToken, *v.NextToken)
-	}
-	if v.SortCriteria != nil {
-		s.WriteStruct(schemas.ListInvestigationsRequest_SortCriteria)
-		v.SortCriteria.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type ListInvestigationsOutput struct {
 
 	// A list of investigation summaries associated with the specified detector.
@@ -104,35 +79,13 @@ type ListInvestigationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListInvestigationsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListInvestigationsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListInvestigationsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeInvestigationSummaries(s, schemas.ListInvestigationsResponse_Investigations, v.Investigations)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListInvestigationsResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListInvestigationsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListInvestigationsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListInvestigationsResponse_Investigations:
-			return deserializeInvestigationSummaries(d, schemas.ListInvestigationsResponse_Investigations, &v.Investigations)
-		case schemas.ListInvestigationsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListInvestigationsResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListInvestigationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListInvestigations, schemas.ListInvestigationsRequest, schemas.ListInvestigationsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListInvestigations{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListInvestigations, schemas.ListInvestigationsRequest, schemas.ListInvestigationsResponse), output: &ListInvestigationsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListInvestigations{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

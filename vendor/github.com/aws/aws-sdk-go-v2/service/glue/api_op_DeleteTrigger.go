@@ -4,8 +4,6 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type DeleteTriggerInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTriggerInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTriggerRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTriggerInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeleteTriggerRequest_Name, *v.Name)
-	}
-}
-
 type DeleteTriggerOutput struct {
 
 	// The name of the trigger that was deleted.
@@ -59,32 +45,13 @@ type DeleteTriggerOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTriggerOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTriggerResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTriggerOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeleteTriggerResponse_Name, *v.Name)
-	}
-}
-func (v *DeleteTriggerOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteTriggerResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteTriggerResponse_Name:
-			v.Name = new(string)
-			return d.ReadString(schemas.DeleteTriggerResponse_Name, v.Name)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteTriggerMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTrigger, schemas.DeleteTriggerRequest, schemas.DeleteTriggerResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteTrigger{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTrigger, schemas.DeleteTriggerRequest, schemas.DeleteTriggerResponse), output: &DeleteTriggerOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteTrigger{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

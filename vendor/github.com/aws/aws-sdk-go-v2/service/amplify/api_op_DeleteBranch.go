@@ -4,9 +4,7 @@ package amplify
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/amplify/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/amplify/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,21 +40,6 @@ type DeleteBranchInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBranchInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteBranchRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBranchInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AppId != nil {
-		s.WriteString(schemas.DeleteBranchRequest_appId, *v.AppId)
-	}
-	if v.BranchName != nil {
-		s.WriteString(schemas.DeleteBranchRequest_branchName, *v.BranchName)
-	}
-}
-
 // The result structure for the delete branch request.
 type DeleteBranchOutput struct {
 
@@ -71,34 +54,13 @@ type DeleteBranchOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBranchOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteBranchResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBranchOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Branch != nil {
-		s.WriteStruct(schemas.DeleteBranchResult_branch)
-		v.Branch.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeleteBranchOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteBranchResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteBranchResult_branch:
-			v.Branch = &types.Branch{}
-			return v.Branch.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteBranchMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBranch, schemas.DeleteBranchRequest, schemas.DeleteBranchResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBranch, schemas.DeleteBranchRequest, schemas.DeleteBranchResult), output: &DeleteBranchOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

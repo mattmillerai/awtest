@@ -5,9 +5,7 @@ package glue
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,27 +48,6 @@ type GetPartitionIndexesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPartitionIndexesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPartitionIndexesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPartitionIndexesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CatalogId != nil {
-		s.WriteString(schemas.GetPartitionIndexesRequest_CatalogId, *v.CatalogId)
-	}
-	if v.DatabaseName != nil {
-		s.WriteString(schemas.GetPartitionIndexesRequest_DatabaseName, *v.DatabaseName)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.GetPartitionIndexesRequest_NextToken, *v.NextToken)
-	}
-	if v.TableName != nil {
-		s.WriteString(schemas.GetPartitionIndexesRequest_TableName, *v.TableName)
-	}
-}
-
 type GetPartitionIndexesOutput struct {
 
 	// A continuation token, present if the current list segment is not the last.
@@ -85,35 +62,13 @@ type GetPartitionIndexesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetPartitionIndexesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetPartitionIndexesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetPartitionIndexesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.GetPartitionIndexesResponse_NextToken, *v.NextToken)
-	}
-	serializePartitionIndexDescriptorList(s, schemas.GetPartitionIndexesResponse_PartitionIndexDescriptorList, v.PartitionIndexDescriptorList)
-}
-func (v *GetPartitionIndexesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetPartitionIndexesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetPartitionIndexesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.GetPartitionIndexesResponse_NextToken, v.NextToken)
-		case schemas.GetPartitionIndexesResponse_PartitionIndexDescriptorList:
-			return deserializePartitionIndexDescriptorList(d, schemas.GetPartitionIndexesResponse_PartitionIndexDescriptorList, &v.PartitionIndexDescriptorList)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetPartitionIndexesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPartitionIndexes, schemas.GetPartitionIndexesRequest, schemas.GetPartitionIndexesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetPartitionIndexes{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetPartitionIndexes, schemas.GetPartitionIndexesRequest, schemas.GetPartitionIndexesResponse), output: &GetPartitionIndexesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetPartitionIndexes{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

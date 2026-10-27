@@ -4,9 +4,7 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -93,21 +91,6 @@ type PutConfigRuleInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutConfigRuleInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutConfigRuleRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutConfigRuleInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigRule != nil {
-		s.WriteStruct(schemas.PutConfigRuleRequest_ConfigRule)
-		v.ConfigRule.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagsList(s, schemas.PutConfigRuleRequest_Tags, v.Tags)
-}
-
 type PutConfigRuleOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -115,26 +98,13 @@ type PutConfigRuleOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutConfigRuleOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutConfigRuleOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *PutConfigRuleOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutConfigRuleMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutConfigRule, schemas.PutConfigRuleRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutConfigRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutConfigRule, schemas.PutConfigRuleRequest, nil), output: &PutConfigRuleOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutConfigRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

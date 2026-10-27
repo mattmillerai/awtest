@@ -4,9 +4,7 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,17 +43,6 @@ type AddTagsToOnPremisesInstancesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AddTagsToOnPremisesInstancesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AddTagsToOnPremisesInstancesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AddTagsToOnPremisesInstancesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeInstanceNameList(s, schemas.AddTagsToOnPremisesInstancesInput_instanceNames, v.InstanceNames)
-	serializeTagList(s, schemas.AddTagsToOnPremisesInstancesInput_tags, v.Tags)
-}
-
 type AddTagsToOnPremisesInstancesOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -63,26 +50,13 @@ type AddTagsToOnPremisesInstancesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AddTagsToOnPremisesInstancesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AddTagsToOnPremisesInstancesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AddTagsToOnPremisesInstancesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAddTagsToOnPremisesInstancesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AddTagsToOnPremisesInstances, schemas.AddTagsToOnPremisesInstancesInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpAddTagsToOnPremisesInstances{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AddTagsToOnPremisesInstances, schemas.AddTagsToOnPremisesInstancesInput, nil), output: &AddTagsToOnPremisesInstancesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpAddTagsToOnPremisesInstances{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteAppImageConfigInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAppImageConfigInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAppImageConfigRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAppImageConfigInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AppImageConfigName != nil {
-		s.WriteString(schemas.DeleteAppImageConfigRequest_AppImageConfigName, *v.AppImageConfigName)
-	}
-}
-
 type DeleteAppImageConfigOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteAppImageConfigOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAppImageConfigOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAppImageConfigOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteAppImageConfigOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteAppImageConfigMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAppImageConfig, schemas.DeleteAppImageConfigRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteAppImageConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAppImageConfig, schemas.DeleteAppImageConfigRequest, nil), output: &DeleteAppImageConfigOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteAppImageConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

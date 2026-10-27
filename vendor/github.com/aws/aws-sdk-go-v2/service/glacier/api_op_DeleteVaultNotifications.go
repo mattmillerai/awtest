@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -62,21 +60,6 @@ type DeleteVaultNotificationsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteVaultNotificationsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteVaultNotificationsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteVaultNotificationsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.DeleteVaultNotificationsInput_accountId, *v.AccountId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.DeleteVaultNotificationsInput_vaultName, *v.VaultName)
-	}
-}
-
 type DeleteVaultNotificationsOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -84,26 +67,13 @@ type DeleteVaultNotificationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteVaultNotificationsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteVaultNotificationsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteVaultNotificationsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteVaultNotificationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteVaultNotifications, schemas.DeleteVaultNotificationsInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteVaultNotifications{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteVaultNotifications, schemas.DeleteVaultNotificationsInput, nil), output: &DeleteVaultNotificationsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteVaultNotifications{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,21 +44,6 @@ type DeleteThingInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteThingInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteThingRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteThingInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ExpectedVersion != nil {
-		s.WriteInt64(schemas.DeleteThingRequest_expectedVersion, *v.ExpectedVersion)
-	}
-	if v.ThingName != nil {
-		s.WriteString(schemas.DeleteThingRequest_thingName, *v.ThingName)
-	}
-}
-
 // The output of the DeleteThing operation.
 type DeleteThingOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -69,26 +52,13 @@ type DeleteThingOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteThingOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteThingResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteThingOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteThingOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteThingResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteThingMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteThing, schemas.DeleteThingRequest, schemas.DeleteThingResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteThing{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteThing, schemas.DeleteThingRequest, schemas.DeleteThingResponse), output: &DeleteThingOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteThing{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

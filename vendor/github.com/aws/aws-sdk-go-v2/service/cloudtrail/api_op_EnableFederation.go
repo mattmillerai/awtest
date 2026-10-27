@@ -4,17 +4,12 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
+//	Enables Lake query federation on the specified event data store. Federating an
 //
-// Enables Lake query federation on the specified event data store. Federating an
 // event data store lets you view the metadata associated with the event data store
 // in the Glue [Data Catalog]and run SQL queries against your event data using Amazon Athena.
 // The table metadata stored in the Glue Data Catalog lets the Athena query engine
@@ -30,7 +25,6 @@ import (
 // For more information about Lake query federation, see [Federate an event data store].
 //
 // [Federate an event data store]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/query-federation.html
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 // [Lake Formation]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/query-federation-lake-formation.html
 // [Data Catalog]: https://docs.aws.amazon.com/glue/latest/dg/components-overview.html#data-catalog-intro
 func (c *Client) EnableFederation(ctx context.Context, params *EnableFederationInput, optFns ...func(*Options)) (*EnableFederationOutput, error) {
@@ -69,21 +63,6 @@ type EnableFederationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableFederationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.EnableFederationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableFederationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EventDataStore != nil {
-		s.WriteString(schemas.EnableFederationRequest_EventDataStore, *v.EventDataStore)
-	}
-	if v.FederationRoleArn != nil {
-		s.WriteString(schemas.EnableFederationRequest_FederationRoleArn, *v.FederationRoleArn)
-	}
-}
-
 type EnableFederationOutput struct {
 
 	//  The ARN of the event data store for which you enabled Lake query federation.
@@ -101,48 +80,13 @@ type EnableFederationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableFederationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.EnableFederationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableFederationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EventDataStoreArn != nil {
-		s.WriteString(schemas.EnableFederationResponse_EventDataStoreArn, *v.EventDataStoreArn)
-	}
-	if v.FederationRoleArn != nil {
-		s.WriteString(schemas.EnableFederationResponse_FederationRoleArn, *v.FederationRoleArn)
-	}
-	if v.FederationStatus != "" {
-		s.WriteString(schemas.EnableFederationResponse_FederationStatus, string(v.FederationStatus))
-	}
-}
-func (v *EnableFederationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.EnableFederationResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.EnableFederationResponse_EventDataStoreArn:
-			v.EventDataStoreArn = new(string)
-			return d.ReadString(schemas.EnableFederationResponse_EventDataStoreArn, v.EventDataStoreArn)
-		case schemas.EnableFederationResponse_FederationRoleArn:
-			v.FederationRoleArn = new(string)
-			return d.ReadString(schemas.EnableFederationResponse_FederationRoleArn, v.FederationRoleArn)
-		case schemas.EnableFederationResponse_FederationStatus:
-			var ev string
-			if err := d.ReadString(schemas.EnableFederationResponse_FederationStatus, &ev); err != nil {
-				return err
-			}
-			v.FederationStatus = types.FederationStatus(ev)
-			return nil
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationEnableFederationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableFederation, schemas.EnableFederationRequest, schemas.EnableFederationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpEnableFederation{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableFederation, schemas.EnableFederationRequest, schemas.EnableFederationResponse), output: &EnableFederationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpEnableFederation{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

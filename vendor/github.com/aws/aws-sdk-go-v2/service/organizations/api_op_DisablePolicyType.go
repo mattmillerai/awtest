@@ -4,9 +4,7 @@ package organizations
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/organizations/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -74,11 +72,8 @@ type DisablePolicyTypeInput struct {
 	//
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]
 	//
-	// [GUARDDUTY_POLICY]
-	//
 	// [BEDROCK_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_bedrock.html
 	// [NETWORK_SECURITY_DIRECTOR_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_network_security_director.html
-	// [GUARDDUTY_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_guardduty.html
 	// [UPGRADE_ROLLOUT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_upgrade_rollout.html
 	// [BACKUP_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_backup.html
 	// [CHATBOT_POLICY]: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_chatbot.html
@@ -108,21 +103,6 @@ type DisablePolicyTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisablePolicyTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisablePolicyTypeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisablePolicyTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PolicyType != "" {
-		s.WriteString(schemas.DisablePolicyTypeRequest_PolicyType, string(v.PolicyType))
-	}
-	if v.RootId != nil {
-		s.WriteString(schemas.DisablePolicyTypeRequest_RootId, *v.RootId)
-	}
-}
-
 type DisablePolicyTypeOutput struct {
 
 	// A structure that shows the root with the updated list of enabled policy types.
@@ -134,34 +114,13 @@ type DisablePolicyTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisablePolicyTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisablePolicyTypeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisablePolicyTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Root != nil {
-		s.WriteStruct(schemas.DisablePolicyTypeResponse_Root)
-		v.Root.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DisablePolicyTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DisablePolicyTypeResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DisablePolicyTypeResponse_Root:
-			v.Root = &types.Root{}
-			return v.Root.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisablePolicyTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisablePolicyType, schemas.DisablePolicyTypeRequest, schemas.DisablePolicyTypeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDisablePolicyType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisablePolicyType, schemas.DisablePolicyTypeRequest, schemas.DisablePolicyTypeResponse), output: &DisablePolicyTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDisablePolicyType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

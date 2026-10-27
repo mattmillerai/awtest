@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,21 +43,6 @@ type DeprecateThingTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeprecateThingTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeprecateThingTypeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeprecateThingTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ThingTypeName != nil {
-		s.WriteString(schemas.DeprecateThingTypeRequest_thingTypeName, *v.ThingTypeName)
-	}
-	if v.UndoDeprecate != false {
-		s.WriteBool(schemas.DeprecateThingTypeRequest_undoDeprecate, v.UndoDeprecate)
-	}
-}
-
 // The output for the DeprecateThingType operation.
 type DeprecateThingTypeOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -68,26 +51,13 @@ type DeprecateThingTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeprecateThingTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeprecateThingTypeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeprecateThingTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeprecateThingTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeprecateThingTypeResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeprecateThingTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeprecateThingType, schemas.DeprecateThingTypeRequest, schemas.DeprecateThingTypeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeprecateThingType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeprecateThingType, schemas.DeprecateThingTypeRequest, schemas.DeprecateThingTypeResponse), output: &DeprecateThingTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeprecateThingType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

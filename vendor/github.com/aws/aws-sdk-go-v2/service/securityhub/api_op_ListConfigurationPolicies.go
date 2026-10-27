@@ -5,9 +5,7 @@ package securityhub
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/securityhub/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -51,21 +49,6 @@ type ListConfigurationPoliciesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListConfigurationPoliciesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListConfigurationPoliciesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListConfigurationPoliciesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListConfigurationPoliciesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListConfigurationPoliciesRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListConfigurationPoliciesOutput struct {
 
 	//  Provides metadata for each of your configuration policies.
@@ -83,35 +66,13 @@ type ListConfigurationPoliciesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListConfigurationPoliciesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListConfigurationPoliciesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListConfigurationPoliciesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeConfigurationPolicySummaryList(s, schemas.ListConfigurationPoliciesResponse_ConfigurationPolicySummaries, v.ConfigurationPolicySummaries)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListConfigurationPoliciesResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListConfigurationPoliciesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListConfigurationPoliciesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListConfigurationPoliciesResponse_ConfigurationPolicySummaries:
-			return deserializeConfigurationPolicySummaryList(d, schemas.ListConfigurationPoliciesResponse_ConfigurationPolicySummaries, &v.ConfigurationPolicySummaries)
-		case schemas.ListConfigurationPoliciesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListConfigurationPoliciesResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListConfigurationPoliciesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListConfigurationPolicies, schemas.ListConfigurationPoliciesRequest, schemas.ListConfigurationPoliciesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListConfigurationPolicies{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListConfigurationPolicies, schemas.ListConfigurationPoliciesRequest, schemas.ListConfigurationPoliciesResponse), output: &ListConfigurationPoliciesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListConfigurationPolicies{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

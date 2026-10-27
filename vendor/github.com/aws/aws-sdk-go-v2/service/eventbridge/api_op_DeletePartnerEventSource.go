@@ -4,8 +4,6 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,21 +43,6 @@ type DeletePartnerEventSourceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePartnerEventSourceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePartnerEventSourceRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePartnerEventSourceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Account != nil {
-		s.WriteString(schemas.DeletePartnerEventSourceRequest_Account, *v.Account)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.DeletePartnerEventSourceRequest_Name, *v.Name)
-	}
-}
-
 type DeletePartnerEventSourceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -67,29 +50,19 @@ type DeletePartnerEventSourceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePartnerEventSourceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePartnerEventSourceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeletePartnerEventSourceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeletePartnerEventSourceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePartnerEventSource, schemas.DeletePartnerEventSourceRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeletePartnerEventSource{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePartnerEventSource, schemas.DeletePartnerEventSourceRequest, nil), output: &DeletePartnerEventSourceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeletePartnerEventSource{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

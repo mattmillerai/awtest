@@ -4,8 +4,6 @@ package backup
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,21 +44,6 @@ type DisassociateRecoveryPointFromParentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateRecoveryPointFromParentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DisassociateRecoveryPointFromParentInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateRecoveryPointFromParentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BackupVaultName != nil {
-		s.WriteString(schemas.DisassociateRecoveryPointFromParentInput_BackupVaultName, *v.BackupVaultName)
-	}
-	if v.RecoveryPointArn != nil {
-		s.WriteString(schemas.DisassociateRecoveryPointFromParentInput_RecoveryPointArn, *v.RecoveryPointArn)
-	}
-}
-
 type DisassociateRecoveryPointFromParentOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -68,26 +51,13 @@ type DisassociateRecoveryPointFromParentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DisassociateRecoveryPointFromParentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DisassociateRecoveryPointFromParentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DisassociateRecoveryPointFromParentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDisassociateRecoveryPointFromParentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateRecoveryPointFromParent, schemas.DisassociateRecoveryPointFromParentInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDisassociateRecoveryPointFromParent{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DisassociateRecoveryPointFromParent, schemas.DisassociateRecoveryPointFromParentInput, nil), output: &DisassociateRecoveryPointFromParentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDisassociateRecoveryPointFromParent{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

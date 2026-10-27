@@ -5,9 +5,7 @@ package ivs
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ivs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ivs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,40 +43,6 @@ type ListStreamSessionsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListStreamSessionsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListStreamSessionsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListStreamSessionsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChannelArn != nil {
-		s.WriteString(schemas.ListStreamSessionsRequest_channelArn, *v.ChannelArn)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListStreamSessionsRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListStreamSessionsRequest_nextToken, *v.NextToken)
-	}
-}
-func (v *ListStreamSessionsInput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListStreamSessionsRequest, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListStreamSessionsRequest_channelArn:
-			v.ChannelArn = new(string)
-			return d.ReadString(schemas.ListStreamSessionsRequest_channelArn, v.ChannelArn)
-		case schemas.ListStreamSessionsRequest_maxResults:
-			v.MaxResults = new(int32)
-			return d.ReadInt32(schemas.ListStreamSessionsRequest_maxResults, v.MaxResults)
-		case schemas.ListStreamSessionsRequest_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListStreamSessionsRequest_nextToken, v.NextToken)
-		}
-		return nil
-	})
-}
-
 type ListStreamSessionsOutput struct {
 
 	// List of stream sessions.
@@ -96,38 +60,19 @@ type ListStreamSessionsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListStreamSessionsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListStreamSessionsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListStreamSessionsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListStreamSessionsResponse_nextToken, *v.NextToken)
-	}
-	serializeStreamSessionList(s, schemas.ListStreamSessionsResponse_streamSessions, v.StreamSessions)
-}
-func (v *ListStreamSessionsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListStreamSessionsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListStreamSessionsResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListStreamSessionsResponse_nextToken, v.NextToken)
-		case schemas.ListStreamSessionsResponse_streamSessions:
-			return deserializeStreamSessionList(d, schemas.ListStreamSessionsResponse_streamSessions, &v.StreamSessions)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListStreamSessionsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListStreamSessions, schemas.ListStreamSessionsRequest, schemas.ListStreamSessionsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListStreamSessions{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListStreamSessions, schemas.ListStreamSessionsRequest, schemas.ListStreamSessionsResponse), output: &ListStreamSessionsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListStreamSessions{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

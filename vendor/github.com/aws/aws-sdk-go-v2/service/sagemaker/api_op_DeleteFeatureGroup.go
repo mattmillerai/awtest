@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,18 +43,6 @@ type DeleteFeatureGroupInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFeatureGroupInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteFeatureGroupRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFeatureGroupInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.FeatureGroupName != nil {
-		s.WriteString(schemas.DeleteFeatureGroupRequest_FeatureGroupName, *v.FeatureGroupName)
-	}
-}
-
 type DeleteFeatureGroupOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,26 +50,13 @@ type DeleteFeatureGroupOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFeatureGroupOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFeatureGroupOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteFeatureGroupOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteFeatureGroupMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFeatureGroup, schemas.DeleteFeatureGroupRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteFeatureGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFeatureGroup, schemas.DeleteFeatureGroupRequest, nil), output: &DeleteFeatureGroupOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteFeatureGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

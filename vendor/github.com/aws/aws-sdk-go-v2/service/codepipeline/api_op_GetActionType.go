@@ -4,9 +4,7 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -70,27 +68,6 @@ type GetActionTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetActionTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetActionTypeInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetActionTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Category != "" {
-		s.WriteString(schemas.GetActionTypeInput_category, string(v.Category))
-	}
-	if v.Owner != nil {
-		s.WriteString(schemas.GetActionTypeInput_owner, *v.Owner)
-	}
-	if v.Provider != nil {
-		s.WriteString(schemas.GetActionTypeInput_provider, *v.Provider)
-	}
-	if v.Version != nil {
-		s.WriteString(schemas.GetActionTypeInput_version, *v.Version)
-	}
-}
-
 type GetActionTypeOutput struct {
 
 	// The action type information for the requested action type, such as the action
@@ -103,37 +80,19 @@ type GetActionTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetActionTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetActionTypeOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetActionTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ActionType != nil {
-		s.WriteStruct(schemas.GetActionTypeOutput_actionType)
-		v.ActionType.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetActionTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetActionTypeOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetActionTypeOutput_actionType:
-			v.ActionType = &types.ActionTypeDeclaration{}
-			return v.ActionType.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetActionTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetActionType, schemas.GetActionTypeInput, schemas.GetActionTypeOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetActionType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetActionType, schemas.GetActionTypeInput, schemas.GetActionTypeOutput), output: &GetActionTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetActionType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

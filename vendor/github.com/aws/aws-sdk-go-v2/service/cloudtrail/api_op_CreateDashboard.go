@@ -4,27 +4,21 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
+//	Creates a custom dashboard or the Highlights dashboard.
 //
-// Creates a custom dashboard or the Highlights dashboard.
+//	 - Custom dashboards - Custom dashboards allow you to query events in any
+//	 event data store type. You can add up to 10 widgets to a custom dashboard. You
+//	 can manually refresh a custom dashboard, or you can set a refresh schedule.
 //
-//   - Custom dashboards - Custom dashboards allow you to query events in any
-//     event data store type. You can add up to 10 widgets to a custom dashboard. You
-//     can manually refresh a custom dashboard, or you can set a refresh schedule.
-//
-//   - Highlights dashboard - You can create the Highlights dashboard to see a
-//     summary of key user activities and API usage across all your event data stores.
-//     CloudTrail Lake manages the Highlights dashboard and refreshes the dashboard
-//     every 6 hours. To create the Highlights dashboard, you must set and enable a
-//     refresh schedule.
+//	 - Highlights dashboard - You can create the Highlights dashboard to see a
+//	 summary of key user activities and API usage across all your event data stores.
+//	 CloudTrail Lake manages the Highlights dashboard and refreshes the dashboard
+//	 every 6 hours. To create the Highlights dashboard, you must set and enable a
+//	 refresh schedule.
 //
 // CloudTrail runs queries to populate the dashboard's widgets during a manual or
 // scheduled refresh. CloudTrail must be granted permissions to run the StartQuery
@@ -41,7 +35,6 @@ import (
 // For more information about dashboards, see [CloudTrail Lake dashboards] in the CloudTrail User Guide.
 //
 // [CloudTrail Lake dashboards]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/lake-dashboard.html
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 // [Example: Allow CloudTrail to run queries to populate a dashboard]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/security_iam_resource-based-policy-examples.html#security_iam_resource-based-policy-examples-eds-dashboard
 // [Resource-based policy example for a dashboard]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/security_iam_resource-based-policy-examples.html#security_iam_resource-based-policy-examples-dashboards
 func (c *Client) CreateDashboard(ctx context.Context, params *CreateDashboardInput, optFns ...func(*Options)) (*CreateDashboardOutput, error) {
@@ -92,28 +85,6 @@ type CreateDashboardInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateDashboardInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateDashboardRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateDashboardInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.CreateDashboardRequest_Name, *v.Name)
-	}
-	if v.RefreshSchedule != nil {
-		s.WriteStruct(schemas.CreateDashboardRequest_RefreshSchedule)
-		v.RefreshSchedule.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagsList(s, schemas.CreateDashboardRequest_TagsList, v.TagsList)
-	if v.TerminationProtectionEnabled != nil {
-		s.WriteBool(schemas.CreateDashboardRequest_TerminationProtectionEnabled, *v.TerminationProtectionEnabled)
-	}
-	serializeRequestWidgetList(s, schemas.CreateDashboardRequest_Widgets, v.Widgets)
-}
-
 type CreateDashboardOutput struct {
 
 	//  The ARN for the dashboard.
@@ -143,68 +114,13 @@ type CreateDashboardOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateDashboardOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateDashboardResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateDashboardOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DashboardArn != nil {
-		s.WriteString(schemas.CreateDashboardResponse_DashboardArn, *v.DashboardArn)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.CreateDashboardResponse_Name, *v.Name)
-	}
-	if v.RefreshSchedule != nil {
-		s.WriteStruct(schemas.CreateDashboardResponse_RefreshSchedule)
-		v.RefreshSchedule.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagsList(s, schemas.CreateDashboardResponse_TagsList, v.TagsList)
-	if v.TerminationProtectionEnabled != nil {
-		s.WriteBool(schemas.CreateDashboardResponse_TerminationProtectionEnabled, *v.TerminationProtectionEnabled)
-	}
-	if v.Type != "" {
-		s.WriteString(schemas.CreateDashboardResponse_Type, string(v.Type))
-	}
-	serializeWidgetList(s, schemas.CreateDashboardResponse_Widgets, v.Widgets)
-}
-func (v *CreateDashboardOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateDashboardResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateDashboardResponse_DashboardArn:
-			v.DashboardArn = new(string)
-			return d.ReadString(schemas.CreateDashboardResponse_DashboardArn, v.DashboardArn)
-		case schemas.CreateDashboardResponse_Name:
-			v.Name = new(string)
-			return d.ReadString(schemas.CreateDashboardResponse_Name, v.Name)
-		case schemas.CreateDashboardResponse_RefreshSchedule:
-			v.RefreshSchedule = &types.RefreshSchedule{}
-			return v.RefreshSchedule.Deserialize(d)
-		case schemas.CreateDashboardResponse_TagsList:
-			return deserializeTagsList(d, schemas.CreateDashboardResponse_TagsList, &v.TagsList)
-		case schemas.CreateDashboardResponse_TerminationProtectionEnabled:
-			v.TerminationProtectionEnabled = new(bool)
-			return d.ReadBool(schemas.CreateDashboardResponse_TerminationProtectionEnabled, v.TerminationProtectionEnabled)
-		case schemas.CreateDashboardResponse_Type:
-			var ev string
-			if err := d.ReadString(schemas.CreateDashboardResponse_Type, &ev); err != nil {
-				return err
-			}
-			v.Type = types.DashboardType(ev)
-			return nil
-		case schemas.CreateDashboardResponse_Widgets:
-			return deserializeWidgetList(d, schemas.CreateDashboardResponse_Widgets, &v.Widgets)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateDashboardMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateDashboard, schemas.CreateDashboardRequest, schemas.CreateDashboardResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateDashboard{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateDashboard, schemas.CreateDashboardRequest, schemas.CreateDashboardResponse), output: &CreateDashboardOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateDashboard{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

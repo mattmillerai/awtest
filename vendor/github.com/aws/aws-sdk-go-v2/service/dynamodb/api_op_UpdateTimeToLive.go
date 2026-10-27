@@ -5,10 +5,8 @@ package dynamodb
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	internalEndpointDiscovery "github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -74,22 +72,6 @@ type UpdateTimeToLiveInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateTimeToLiveInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateTimeToLiveInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateTimeToLiveInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TableName != nil {
-		s.WriteString(schemas.UpdateTimeToLiveInput_TableName, *v.TableName)
-	}
-	if v.TimeToLiveSpecification != nil {
-		s.WriteStruct(schemas.UpdateTimeToLiveInput_TimeToLiveSpecification)
-		v.TimeToLiveSpecification.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
 func (in *UpdateTimeToLiveInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ResourceArn = in.TableName
@@ -107,34 +89,13 @@ type UpdateTimeToLiveOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateTimeToLiveOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateTimeToLiveOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateTimeToLiveOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TimeToLiveSpecification != nil {
-		s.WriteStruct(schemas.UpdateTimeToLiveOutput_TimeToLiveSpecification)
-		v.TimeToLiveSpecification.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *UpdateTimeToLiveOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateTimeToLiveOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateTimeToLiveOutput_TimeToLiveSpecification:
-			v.TimeToLiveSpecification = &types.TimeToLiveSpecification{}
-			return v.TimeToLiveSpecification.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateTimeToLiveMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateTimeToLive, schemas.UpdateTimeToLiveInput, schemas.UpdateTimeToLiveOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpUpdateTimeToLive{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateTimeToLive, schemas.UpdateTimeToLiveInput, schemas.UpdateTimeToLiveOutput), output: &UpdateTimeToLiveOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpUpdateTimeToLive{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

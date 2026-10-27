@@ -5,9 +5,7 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glacier/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,23 +53,6 @@ type SetDataRetrievalPolicyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SetDataRetrievalPolicyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SetDataRetrievalPolicyInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SetDataRetrievalPolicyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Policy != nil {
-		s.WriteStruct(schemas.SetDataRetrievalPolicyInput_Policy)
-		v.Policy.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.AccountId != nil {
-		s.WriteString(schemas.SetDataRetrievalPolicyInput_accountId, *v.AccountId)
-	}
-}
-
 type SetDataRetrievalPolicyOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -79,26 +60,13 @@ type SetDataRetrievalPolicyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SetDataRetrievalPolicyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SetDataRetrievalPolicyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *SetDataRetrievalPolicyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSetDataRetrievalPolicyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SetDataRetrievalPolicy, schemas.SetDataRetrievalPolicyInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpSetDataRetrievalPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SetDataRetrievalPolicy, schemas.SetDataRetrievalPolicyInput, nil), output: &SetDataRetrievalPolicyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpSetDataRetrievalPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

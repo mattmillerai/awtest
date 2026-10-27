@@ -4,9 +4,7 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,22 +45,6 @@ type UpdateCertificateProviderInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateCertificateProviderInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateCertificateProviderRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateCertificateProviderInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeCertificateProviderAccountDefaultForOperations(s, schemas.UpdateCertificateProviderRequest_accountDefaultForOperations, v.AccountDefaultForOperations)
-	if v.CertificateProviderName != nil {
-		s.WriteString(schemas.UpdateCertificateProviderRequest_certificateProviderName, *v.CertificateProviderName)
-	}
-	if v.LambdaFunctionArn != nil {
-		s.WriteString(schemas.UpdateCertificateProviderRequest_lambdaFunctionArn, *v.LambdaFunctionArn)
-	}
-}
-
 type UpdateCertificateProviderOutput struct {
 
 	// The ARN of the certificate provider.
@@ -77,38 +59,13 @@ type UpdateCertificateProviderOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateCertificateProviderOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateCertificateProviderResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateCertificateProviderOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CertificateProviderArn != nil {
-		s.WriteString(schemas.UpdateCertificateProviderResponse_certificateProviderArn, *v.CertificateProviderArn)
-	}
-	if v.CertificateProviderName != nil {
-		s.WriteString(schemas.UpdateCertificateProviderResponse_certificateProviderName, *v.CertificateProviderName)
-	}
-}
-func (v *UpdateCertificateProviderOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateCertificateProviderResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateCertificateProviderResponse_certificateProviderArn:
-			v.CertificateProviderArn = new(string)
-			return d.ReadString(schemas.UpdateCertificateProviderResponse_certificateProviderArn, v.CertificateProviderArn)
-		case schemas.UpdateCertificateProviderResponse_certificateProviderName:
-			v.CertificateProviderName = new(string)
-			return d.ReadString(schemas.UpdateCertificateProviderResponse_certificateProviderName, v.CertificateProviderName)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateCertificateProviderMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateCertificateProvider, schemas.UpdateCertificateProviderRequest, schemas.UpdateCertificateProviderResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpUpdateCertificateProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateCertificateProvider, schemas.UpdateCertificateProviderRequest, schemas.UpdateCertificateProviderResponse), output: &UpdateCertificateProviderOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpUpdateCertificateProvider{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

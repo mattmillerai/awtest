@@ -4,8 +4,6 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,18 +41,6 @@ type DeactivateEventSourceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeactivateEventSourceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeactivateEventSourceRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeactivateEventSourceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeactivateEventSourceRequest_Name, *v.Name)
-	}
-}
-
 type DeactivateEventSourceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -62,29 +48,19 @@ type DeactivateEventSourceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeactivateEventSourceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeactivateEventSourceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeactivateEventSourceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeactivateEventSourceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeactivateEventSource, schemas.DeactivateEventSourceRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeactivateEventSource{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeactivateEventSource, schemas.DeactivateEventSourceRequest, nil), output: &DeactivateEventSourceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeactivateEventSource{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

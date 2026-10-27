@@ -4,8 +4,6 @@ package batch
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/batch/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,21 +40,6 @@ type TerminateServiceJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TerminateServiceJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TerminateServiceJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TerminateServiceJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobId != nil {
-		s.WriteString(schemas.TerminateServiceJobRequest_jobId, *v.JobId)
-	}
-	if v.Reason != nil {
-		s.WriteString(schemas.TerminateServiceJobRequest_reason, *v.Reason)
-	}
-}
-
 type TerminateServiceJobOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,26 +47,13 @@ type TerminateServiceJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TerminateServiceJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TerminateServiceJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TerminateServiceJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *TerminateServiceJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.TerminateServiceJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationTerminateServiceJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TerminateServiceJob, schemas.TerminateServiceJobRequest, schemas.TerminateServiceJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpTerminateServiceJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TerminateServiceJob, schemas.TerminateServiceJobRequest, schemas.TerminateServiceJobResponse), output: &TerminateServiceJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpTerminateServiceJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -49,24 +47,6 @@ type CreateBranchInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateBranchInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateBranchInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateBranchInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BranchName != nil {
-		s.WriteString(schemas.CreateBranchInput_branchName, *v.BranchName)
-	}
-	if v.CommitId != nil {
-		s.WriteString(schemas.CreateBranchInput_commitId, *v.CommitId)
-	}
-	if v.RepositoryName != nil {
-		s.WriteString(schemas.CreateBranchInput_repositoryName, *v.RepositoryName)
-	}
-}
-
 type CreateBranchOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -74,29 +54,19 @@ type CreateBranchOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateBranchOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateBranchOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *CreateBranchOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateBranchMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateBranch, schemas.CreateBranchInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateBranch, schemas.CreateBranchInput, nil), output: &CreateBranchOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

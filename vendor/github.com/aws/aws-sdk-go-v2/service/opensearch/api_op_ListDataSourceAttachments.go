@@ -4,9 +4,7 @@ package opensearch
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/opensearch/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/opensearch/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,24 +43,6 @@ type ListDataSourceAttachmentsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListDataSourceAttachmentsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListDataSourceAttachmentsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListDataSourceAttachmentsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Id != nil {
-		s.WriteString(schemas.ListDataSourceAttachmentsRequest_id, *v.Id)
-	}
-	if v.MaxResults != 0 {
-		s.WriteInt32(schemas.ListDataSourceAttachmentsRequest_maxResults, v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListDataSourceAttachmentsRequest_nextToken, *v.NextToken)
-	}
-}
-
 type ListDataSourceAttachmentsOutput struct {
 
 	// A list of data source attachment summaries for the specified application.
@@ -78,35 +58,13 @@ type ListDataSourceAttachmentsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListDataSourceAttachmentsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListDataSourceAttachmentsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListDataSourceAttachmentsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeDataSourceAttachmentSummaryList(s, schemas.ListDataSourceAttachmentsResponse_attachments, v.Attachments)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListDataSourceAttachmentsResponse_nextToken, *v.NextToken)
-	}
-}
-func (v *ListDataSourceAttachmentsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListDataSourceAttachmentsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListDataSourceAttachmentsResponse_attachments:
-			return deserializeDataSourceAttachmentSummaryList(d, schemas.ListDataSourceAttachmentsResponse_attachments, &v.Attachments)
-		case schemas.ListDataSourceAttachmentsResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListDataSourceAttachmentsResponse_nextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListDataSourceAttachmentsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListDataSourceAttachments, schemas.ListDataSourceAttachmentsRequest, schemas.ListDataSourceAttachmentsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListDataSourceAttachments{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListDataSourceAttachments, schemas.ListDataSourceAttachmentsRequest, schemas.ListDataSourceAttachmentsResponse), output: &ListDataSourceAttachmentsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListDataSourceAttachments{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

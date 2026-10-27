@@ -4,8 +4,6 @@ package batch
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/batch/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,21 +43,6 @@ type UpdateServiceJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateServiceJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateServiceJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateServiceJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobId != nil {
-		s.WriteString(schemas.UpdateServiceJobRequest_jobId, *v.JobId)
-	}
-	if v.SchedulingPriority != nil {
-		s.WriteInt32(schemas.UpdateServiceJobRequest_schedulingPriority, *v.SchedulingPriority)
-	}
-}
-
 type UpdateServiceJobOutput struct {
 
 	// The Amazon Resource Name (ARN) for the job.
@@ -77,44 +60,13 @@ type UpdateServiceJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateServiceJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateServiceJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateServiceJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobArn != nil {
-		s.WriteString(schemas.UpdateServiceJobResponse_jobArn, *v.JobArn)
-	}
-	if v.JobId != nil {
-		s.WriteString(schemas.UpdateServiceJobResponse_jobId, *v.JobId)
-	}
-	if v.JobName != nil {
-		s.WriteString(schemas.UpdateServiceJobResponse_jobName, *v.JobName)
-	}
-}
-func (v *UpdateServiceJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateServiceJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateServiceJobResponse_jobArn:
-			v.JobArn = new(string)
-			return d.ReadString(schemas.UpdateServiceJobResponse_jobArn, v.JobArn)
-		case schemas.UpdateServiceJobResponse_jobId:
-			v.JobId = new(string)
-			return d.ReadString(schemas.UpdateServiceJobResponse_jobId, v.JobId)
-		case schemas.UpdateServiceJobResponse_jobName:
-			v.JobName = new(string)
-			return d.ReadString(schemas.UpdateServiceJobResponse_jobName, v.JobName)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateServiceJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateServiceJob, schemas.UpdateServiceJobRequest, schemas.UpdateServiceJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpUpdateServiceJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateServiceJob, schemas.UpdateServiceJobRequest, schemas.UpdateServiceJobResponse), output: &UpdateServiceJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpUpdateServiceJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/glue/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,31 +53,6 @@ type UpdateIntegrationTablePropertiesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateIntegrationTablePropertiesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateIntegrationTablePropertiesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateIntegrationTablePropertiesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ResourceArn != nil {
-		s.WriteString(schemas.UpdateIntegrationTablePropertiesRequest_ResourceArn, *v.ResourceArn)
-	}
-	if v.SourceTableConfig != nil {
-		s.WriteStruct(schemas.UpdateIntegrationTablePropertiesRequest_SourceTableConfig)
-		v.SourceTableConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.TableName != nil {
-		s.WriteString(schemas.UpdateIntegrationTablePropertiesRequest_TableName, *v.TableName)
-	}
-	if v.TargetTableConfig != nil {
-		s.WriteStruct(schemas.UpdateIntegrationTablePropertiesRequest_TargetTableConfig)
-		v.TargetTableConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type UpdateIntegrationTablePropertiesOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -87,26 +60,13 @@ type UpdateIntegrationTablePropertiesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateIntegrationTablePropertiesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateIntegrationTablePropertiesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateIntegrationTablePropertiesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *UpdateIntegrationTablePropertiesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateIntegrationTablePropertiesResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateIntegrationTablePropertiesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateIntegrationTableProperties, schemas.UpdateIntegrationTablePropertiesRequest, schemas.UpdateIntegrationTablePropertiesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateIntegrationTableProperties{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateIntegrationTableProperties, schemas.UpdateIntegrationTablePropertiesRequest, schemas.UpdateIntegrationTablePropertiesResponse), output: &UpdateIntegrationTablePropertiesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateIntegrationTableProperties{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

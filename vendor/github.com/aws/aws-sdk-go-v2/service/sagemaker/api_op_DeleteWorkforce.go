@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,18 +45,6 @@ type DeleteWorkforceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWorkforceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWorkforceRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWorkforceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.WorkforceName != nil {
-		s.WriteString(schemas.DeleteWorkforceRequest_WorkforceName, *v.WorkforceName)
-	}
-}
-
 type DeleteWorkforceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -66,26 +52,13 @@ type DeleteWorkforceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteWorkforceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteWorkforceResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteWorkforceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteWorkforceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteWorkforceResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteWorkforceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWorkforce, schemas.DeleteWorkforceRequest, schemas.DeleteWorkforceResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteWorkforce{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteWorkforce, schemas.DeleteWorkforceRequest, schemas.DeleteWorkforceResponse), output: &DeleteWorkforceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteWorkforce{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -5,9 +5,7 @@ package athena
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/athena/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/athena/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -62,27 +60,6 @@ type ListExecutorsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListExecutorsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListExecutorsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListExecutorsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ExecutorStateFilter != "" {
-		s.WriteString(schemas.ListExecutorsRequest_ExecutorStateFilter, string(v.ExecutorStateFilter))
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListExecutorsRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListExecutorsRequest_NextToken, *v.NextToken)
-	}
-	if v.SessionId != nil {
-		s.WriteString(schemas.ListExecutorsRequest_SessionId, *v.SessionId)
-	}
-}
-
 type ListExecutorsOutput struct {
 
 	// The session ID.
@@ -104,41 +81,13 @@ type ListExecutorsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListExecutorsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListExecutorsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListExecutorsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeExecutorsSummaryList(s, schemas.ListExecutorsResponse_ExecutorsSummary, v.ExecutorsSummary)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListExecutorsResponse_NextToken, *v.NextToken)
-	}
-	if v.SessionId != nil {
-		s.WriteString(schemas.ListExecutorsResponse_SessionId, *v.SessionId)
-	}
-}
-func (v *ListExecutorsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListExecutorsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListExecutorsResponse_ExecutorsSummary:
-			return deserializeExecutorsSummaryList(d, schemas.ListExecutorsResponse_ExecutorsSummary, &v.ExecutorsSummary)
-		case schemas.ListExecutorsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListExecutorsResponse_NextToken, v.NextToken)
-		case schemas.ListExecutorsResponse_SessionId:
-			v.SessionId = new(string)
-			return d.ReadString(schemas.ListExecutorsResponse_SessionId, v.SessionId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListExecutorsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListExecutors, schemas.ListExecutorsRequest, schemas.ListExecutorsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListExecutors{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListExecutors, schemas.ListExecutorsRequest, schemas.ListExecutorsResponse), output: &ListExecutorsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListExecutors{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

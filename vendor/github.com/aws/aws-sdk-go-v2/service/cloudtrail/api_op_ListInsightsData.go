@@ -5,9 +5,7 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -29,11 +27,6 @@ import (
 //
 // The rate of ListInsightsData requests is limited to two per second, per
 // account, per Region. If this limit is exceeded, a throttling error occurs.
-//
-// For data event Insights on organization trails, only the management account and
-// delegated administrator accounts can call ListInsightsData . For these callers,
-// the API returns Insights events only for the caller's own account. Member
-// accounts cannot call this API on organization trails.
 func (c *Client) ListInsightsData(ctx context.Context, params *ListInsightsDataInput, optFns ...func(*Options)) (*ListInsightsDataOutput, error) {
 	if params == nil {
 		params = &ListInsightsDataInput{}
@@ -90,34 +83,6 @@ type ListInsightsDataInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListInsightsDataInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListInsightsDataRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListInsightsDataInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DataType != "" {
-		s.WriteString(schemas.ListInsightsDataRequest_DataType, string(v.DataType))
-	}
-	serializeListInsightsDataDimensions(s, schemas.ListInsightsDataRequest_Dimensions, v.Dimensions)
-	if v.EndTime != nil {
-		s.WriteTime(schemas.ListInsightsDataRequest_EndTime, *v.EndTime)
-	}
-	if v.InsightSource != nil {
-		s.WriteString(schemas.ListInsightsDataRequest_InsightSource, *v.InsightSource)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListInsightsDataRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListInsightsDataRequest_NextToken, *v.NextToken)
-	}
-	if v.StartTime != nil {
-		s.WriteTime(schemas.ListInsightsDataRequest_StartTime, *v.StartTime)
-	}
-}
-
 type ListInsightsDataOutput struct {
 
 	// A list of events returned based on the InsightSource, DataType or Dimensions
@@ -138,35 +103,13 @@ type ListInsightsDataOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListInsightsDataOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListInsightsDataResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListInsightsDataOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeEventsList(s, schemas.ListInsightsDataResponse_Events, v.Events)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListInsightsDataResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListInsightsDataOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListInsightsDataResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListInsightsDataResponse_Events:
-			return deserializeEventsList(d, schemas.ListInsightsDataResponse_Events, &v.Events)
-		case schemas.ListInsightsDataResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListInsightsDataResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListInsightsDataMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListInsightsData, schemas.ListInsightsDataRequest, schemas.ListInsightsDataResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListInsightsData{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListInsightsData, schemas.ListInsightsDataRequest, schemas.ListInsightsDataResponse), output: &ListInsightsDataOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListInsightsData{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,21 +41,6 @@ type DeleteFleetMetricInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFleetMetricInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteFleetMetricRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFleetMetricInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ExpectedVersion != nil {
-		s.WriteInt64(schemas.DeleteFleetMetricRequest_expectedVersion, *v.ExpectedVersion)
-	}
-	if v.MetricName != nil {
-		s.WriteString(schemas.DeleteFleetMetricRequest_metricName, *v.MetricName)
-	}
-}
-
 type DeleteFleetMetricOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -65,26 +48,13 @@ type DeleteFleetMetricOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteFleetMetricOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteFleetMetricOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteFleetMetricOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteFleetMetricMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFleetMetric, schemas.DeleteFleetMetricRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteFleetMetric{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteFleetMetric, schemas.DeleteFleetMetricRequest, nil), output: &DeleteFleetMetricOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteFleetMetric{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

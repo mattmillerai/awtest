@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -48,18 +46,6 @@ type ExtendTrainingPlanInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ExtendTrainingPlanInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ExtendTrainingPlanRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ExtendTrainingPlanInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TrainingPlanExtensionOfferingId != nil {
-		s.WriteString(schemas.ExtendTrainingPlanRequest_TrainingPlanExtensionOfferingId, *v.TrainingPlanExtensionOfferingId)
-	}
-}
-
 type ExtendTrainingPlanOutput struct {
 
 	// The list of extensions for the training plan, including the newly created
@@ -74,29 +60,13 @@ type ExtendTrainingPlanOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ExtendTrainingPlanOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ExtendTrainingPlanResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ExtendTrainingPlanOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeTrainingPlanExtensions(s, schemas.ExtendTrainingPlanResponse_TrainingPlanExtensions, v.TrainingPlanExtensions)
-}
-func (v *ExtendTrainingPlanOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ExtendTrainingPlanResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ExtendTrainingPlanResponse_TrainingPlanExtensions:
-			return deserializeTrainingPlanExtensions(d, schemas.ExtendTrainingPlanResponse_TrainingPlanExtensions, &v.TrainingPlanExtensions)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationExtendTrainingPlanMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ExtendTrainingPlan, schemas.ExtendTrainingPlanRequest, schemas.ExtendTrainingPlanResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpExtendTrainingPlan{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ExtendTrainingPlan, schemas.ExtendTrainingPlanRequest, schemas.ExtendTrainingPlanResponse), output: &ExtendTrainingPlanOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpExtendTrainingPlan{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

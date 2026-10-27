@@ -4,9 +4,7 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -34,15 +32,6 @@ type GetIndexingConfigurationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetIndexingConfigurationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetIndexingConfigurationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetIndexingConfigurationInput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-
 type GetIndexingConfigurationOutput struct {
 
 	// The index configuration.
@@ -57,42 +46,13 @@ type GetIndexingConfigurationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetIndexingConfigurationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetIndexingConfigurationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetIndexingConfigurationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ThingGroupIndexingConfiguration != nil {
-		s.WriteStruct(schemas.GetIndexingConfigurationResponse_thingGroupIndexingConfiguration)
-		v.ThingGroupIndexingConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.ThingIndexingConfiguration != nil {
-		s.WriteStruct(schemas.GetIndexingConfigurationResponse_thingIndexingConfiguration)
-		v.ThingIndexingConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetIndexingConfigurationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetIndexingConfigurationResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetIndexingConfigurationResponse_thingGroupIndexingConfiguration:
-			v.ThingGroupIndexingConfiguration = &types.ThingGroupIndexingConfiguration{}
-			return v.ThingGroupIndexingConfiguration.Deserialize(d)
-		case schemas.GetIndexingConfigurationResponse_thingIndexingConfiguration:
-			v.ThingIndexingConfiguration = &types.ThingIndexingConfiguration{}
-			return v.ThingIndexingConfiguration.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetIndexingConfigurationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetIndexingConfiguration, schemas.GetIndexingConfigurationRequest, schemas.GetIndexingConfigurationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetIndexingConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetIndexingConfiguration, schemas.GetIndexingConfigurationRequest, schemas.GetIndexingConfigurationResponse), output: &GetIndexingConfigurationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetIndexingConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

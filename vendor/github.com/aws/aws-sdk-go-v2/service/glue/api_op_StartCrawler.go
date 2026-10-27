@@ -4,8 +4,6 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type StartCrawlerInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCrawlerInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCrawlerRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCrawlerInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.StartCrawlerRequest_Name, *v.Name)
-	}
-}
-
 type StartCrawlerOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -57,26 +43,13 @@ type StartCrawlerOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCrawlerOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCrawlerResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCrawlerOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StartCrawlerOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartCrawlerResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartCrawlerMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCrawler, schemas.StartCrawlerRequest, schemas.StartCrawlerResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStartCrawler{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCrawler, schemas.StartCrawlerRequest, schemas.StartCrawlerResponse), output: &StartCrawlerOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStartCrawler{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

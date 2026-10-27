@@ -4,9 +4,7 @@ package sqs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -51,21 +49,6 @@ type ListMessageMoveTasksInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListMessageMoveTasksInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListMessageMoveTasksRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListMessageMoveTasksInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListMessageMoveTasksRequest_MaxResults, *v.MaxResults)
-	}
-	if v.SourceArn != nil {
-		s.WriteString(schemas.ListMessageMoveTasksRequest_SourceArn, *v.SourceArn)
-	}
-}
-
 type ListMessageMoveTasksOutput struct {
 
 	// A list of message movement tasks and their attributes.
@@ -77,29 +60,13 @@ type ListMessageMoveTasksOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListMessageMoveTasksOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListMessageMoveTasksResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListMessageMoveTasksOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeListMessageMoveTasksResultEntryList(s, schemas.ListMessageMoveTasksResult_Results, v.Results)
-}
-func (v *ListMessageMoveTasksOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListMessageMoveTasksResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListMessageMoveTasksResult_Results:
-			return deserializeListMessageMoveTasksResultEntryList(d, schemas.ListMessageMoveTasksResult_Results, &v.Results)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListMessageMoveTasksMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListMessageMoveTasks, schemas.ListMessageMoveTasksRequest, schemas.ListMessageMoveTasksResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpListMessageMoveTasks{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListMessageMoveTasks, schemas.ListMessageMoveTasksRequest, schemas.ListMessageMoveTasksResult), output: &ListMessageMoveTasksOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpListMessageMoveTasks{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

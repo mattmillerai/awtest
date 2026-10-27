@@ -4,8 +4,6 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,21 +40,6 @@ type DeleteUserPoolClientInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteUserPoolClientInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteUserPoolClientRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteUserPoolClientInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientId != nil {
-		s.WriteString(schemas.DeleteUserPoolClientRequest_ClientId, *v.ClientId)
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.DeleteUserPoolClientRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type DeleteUserPoolClientOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,26 +47,13 @@ type DeleteUserPoolClientOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteUserPoolClientOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteUserPoolClientOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteUserPoolClientOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteUserPoolClientMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteUserPoolClient, schemas.DeleteUserPoolClientRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteUserPoolClient{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteUserPoolClient, schemas.DeleteUserPoolClientRequest, nil), output: &DeleteUserPoolClientOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteUserPoolClient{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

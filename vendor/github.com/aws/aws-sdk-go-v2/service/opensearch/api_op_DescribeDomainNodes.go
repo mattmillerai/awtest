@@ -4,9 +4,7 @@ package opensearch
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/opensearch/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/opensearch/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type DescribeDomainNodesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDomainNodesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDomainNodesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDomainNodesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DomainName != nil {
-		s.WriteString(schemas.DescribeDomainNodesRequest_DomainName, *v.DomainName)
-	}
-}
-
 // The result of a DescribeDomainNodes request. Contains information about the
 // nodes on the requested domain.
 type DescribeDomainNodesOutput struct {
@@ -65,29 +51,13 @@ type DescribeDomainNodesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDomainNodesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDomainNodesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDomainNodesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeDomainNodesStatusList(s, schemas.DescribeDomainNodesResponse_DomainNodesStatusList, v.DomainNodesStatusList)
-}
-func (v *DescribeDomainNodesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeDomainNodesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeDomainNodesResponse_DomainNodesStatusList:
-			return deserializeDomainNodesStatusList(d, schemas.DescribeDomainNodesResponse_DomainNodesStatusList, &v.DomainNodesStatusList)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeDomainNodesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDomainNodes, schemas.DescribeDomainNodesRequest, schemas.DescribeDomainNodesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDescribeDomainNodes{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDomainNodes, schemas.DescribeDomainNodesRequest, schemas.DescribeDomainNodesResponse), output: &DescribeDomainNodesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDescribeDomainNodes{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

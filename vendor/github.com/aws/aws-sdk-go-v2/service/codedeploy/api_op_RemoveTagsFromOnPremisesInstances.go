@@ -4,9 +4,7 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,17 +40,6 @@ type RemoveTagsFromOnPremisesInstancesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsFromOnPremisesInstancesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RemoveTagsFromOnPremisesInstancesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsFromOnPremisesInstancesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeInstanceNameList(s, schemas.RemoveTagsFromOnPremisesInstancesInput_instanceNames, v.InstanceNames)
-	serializeTagList(s, schemas.RemoveTagsFromOnPremisesInstancesInput_tags, v.Tags)
-}
-
 type RemoveTagsFromOnPremisesInstancesOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -60,26 +47,13 @@ type RemoveTagsFromOnPremisesInstancesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsFromOnPremisesInstancesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsFromOnPremisesInstancesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RemoveTagsFromOnPremisesInstancesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRemoveTagsFromOnPremisesInstancesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTagsFromOnPremisesInstances, schemas.RemoveTagsFromOnPremisesInstancesInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRemoveTagsFromOnPremisesInstances{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTagsFromOnPremisesInstances, schemas.RemoveTagsFromOnPremisesInstancesInput, nil), output: &RemoveTagsFromOnPremisesInstancesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRemoveTagsFromOnPremisesInstances{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

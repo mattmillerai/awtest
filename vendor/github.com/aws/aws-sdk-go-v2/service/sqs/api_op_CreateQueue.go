@@ -4,8 +4,6 @@ package sqs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -289,20 +287,6 @@ type CreateQueueInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateQueueInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateQueueRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateQueueInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeQueueAttributeMap(s, schemas.CreateQueueRequest_Attributes, v.Attributes)
-	if v.QueueName != nil {
-		s.WriteString(schemas.CreateQueueRequest_QueueName, *v.QueueName)
-	}
-	serializeTagMap(s, schemas.CreateQueueRequest_tags, v.Tags)
-}
-
 // Returns the QueueUrl attribute of the created queue.
 type CreateQueueOutput struct {
 
@@ -315,32 +299,13 @@ type CreateQueueOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateQueueOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateQueueResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateQueueOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.QueueUrl != nil {
-		s.WriteString(schemas.CreateQueueResult_QueueUrl, *v.QueueUrl)
-	}
-}
-func (v *CreateQueueOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateQueueResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateQueueResult_QueueUrl:
-			v.QueueUrl = new(string)
-			return d.ReadString(schemas.CreateQueueResult_QueueUrl, v.QueueUrl)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateQueueMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateQueue, schemas.CreateQueueRequest, schemas.CreateQueueResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpCreateQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateQueue, schemas.CreateQueueRequest, schemas.CreateQueueResult), output: &CreateQueueOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpCreateQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

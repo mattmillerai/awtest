@@ -4,8 +4,6 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteApiDestinationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteApiDestinationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteApiDestinationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteApiDestinationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeleteApiDestinationRequest_Name, *v.Name)
-	}
-}
-
 type DeleteApiDestinationOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,29 +40,19 @@ type DeleteApiDestinationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteApiDestinationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteApiDestinationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteApiDestinationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteApiDestinationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteApiDestinationResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteApiDestinationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteApiDestination, schemas.DeleteApiDestinationRequest, schemas.DeleteApiDestinationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteApiDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteApiDestination, schemas.DeleteApiDestinationRequest, schemas.DeleteApiDestinationResponse), output: &DeleteApiDestinationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteApiDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

@@ -5,9 +5,7 @@ package backup
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/backup/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -90,35 +88,6 @@ type StartCopyJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCopyJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCopyJobInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCopyJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DestinationBackupVaultArn != nil {
-		s.WriteString(schemas.StartCopyJobInput_DestinationBackupVaultArn, *v.DestinationBackupVaultArn)
-	}
-	if v.IamRoleArn != nil {
-		s.WriteString(schemas.StartCopyJobInput_IamRoleArn, *v.IamRoleArn)
-	}
-	if v.IdempotencyToken != nil {
-		s.WriteString(schemas.StartCopyJobInput_IdempotencyToken, *v.IdempotencyToken)
-	}
-	if v.Lifecycle != nil {
-		s.WriteStruct(schemas.StartCopyJobInput_Lifecycle)
-		v.Lifecycle.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.RecoveryPointArn != nil {
-		s.WriteString(schemas.StartCopyJobInput_RecoveryPointArn, *v.RecoveryPointArn)
-	}
-	if v.SourceBackupVaultName != nil {
-		s.WriteString(schemas.StartCopyJobInput_SourceBackupVaultName, *v.SourceBackupVaultName)
-	}
-}
-
 type StartCopyJobOutput struct {
 
 	// Uniquely identifies a copy job.
@@ -140,43 +109,13 @@ type StartCopyJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCopyJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCopyJobOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCopyJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CopyJobId != nil {
-		s.WriteString(schemas.StartCopyJobOutput_CopyJobId, *v.CopyJobId)
-	}
-	if v.CreationDate != nil {
-		s.WriteTime(schemas.StartCopyJobOutput_CreationDate, *v.CreationDate)
-	}
-	if v.IsParent != false {
-		s.WriteBool(schemas.StartCopyJobOutput_IsParent, v.IsParent)
-	}
-}
-func (v *StartCopyJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartCopyJobOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StartCopyJobOutput_CopyJobId:
-			v.CopyJobId = new(string)
-			return d.ReadString(schemas.StartCopyJobOutput_CopyJobId, v.CopyJobId)
-		case schemas.StartCopyJobOutput_CreationDate:
-			v.CreationDate = new(time.Time)
-			return d.ReadTime(schemas.StartCopyJobOutput_CreationDate, v.CreationDate)
-		case schemas.StartCopyJobOutput_IsParent:
-			return d.ReadBool(schemas.StartCopyJobOutput_IsParent, &v.IsParent)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartCopyJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCopyJob, schemas.StartCopyJobInput, schemas.StartCopyJobOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpStartCopyJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCopyJob, schemas.StartCopyJobInput, schemas.StartCopyJobOutput), output: &StartCopyJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpStartCopyJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

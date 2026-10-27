@@ -5,9 +5,7 @@ package batch
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/batch/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/batch/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -67,28 +65,6 @@ type DescribeJobDefinitionsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeJobDefinitionsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeJobDefinitionsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeJobDefinitionsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobDefinitionName != nil {
-		s.WriteString(schemas.DescribeJobDefinitionsRequest_jobDefinitionName, *v.JobDefinitionName)
-	}
-	serializeStringList(s, schemas.DescribeJobDefinitionsRequest_jobDefinitions, v.JobDefinitions)
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.DescribeJobDefinitionsRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.DescribeJobDefinitionsRequest_nextToken, *v.NextToken)
-	}
-	if v.Status != nil {
-		s.WriteString(schemas.DescribeJobDefinitionsRequest_status, *v.Status)
-	}
-}
-
 type DescribeJobDefinitionsOutput struct {
 
 	// The list of job definitions.
@@ -106,35 +82,13 @@ type DescribeJobDefinitionsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeJobDefinitionsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeJobDefinitionsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeJobDefinitionsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeJobDefinitionList(s, schemas.DescribeJobDefinitionsResponse_jobDefinitions, v.JobDefinitions)
-	if v.NextToken != nil {
-		s.WriteString(schemas.DescribeJobDefinitionsResponse_nextToken, *v.NextToken)
-	}
-}
-func (v *DescribeJobDefinitionsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeJobDefinitionsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeJobDefinitionsResponse_jobDefinitions:
-			return deserializeJobDefinitionList(d, schemas.DescribeJobDefinitionsResponse_jobDefinitions, &v.JobDefinitions)
-		case schemas.DescribeJobDefinitionsResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.DescribeJobDefinitionsResponse_nextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeJobDefinitionsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeJobDefinitions, schemas.DescribeJobDefinitionsRequest, schemas.DescribeJobDefinitionsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDescribeJobDefinitions{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeJobDefinitions, schemas.DescribeJobDefinitionsRequest, schemas.DescribeJobDefinitionsResponse), output: &DescribeJobDefinitionsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDescribeJobDefinitions{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

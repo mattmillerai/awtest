@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type DeleteTrialComponentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTrialComponentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTrialComponentRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTrialComponentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TrialComponentName != nil {
-		s.WriteString(schemas.DeleteTrialComponentRequest_TrialComponentName, *v.TrialComponentName)
-	}
-}
-
 type DeleteTrialComponentOutput struct {
 
 	// The Amazon Resource Name (ARN) of the component is being deleted.
@@ -62,32 +48,13 @@ type DeleteTrialComponentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTrialComponentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTrialComponentResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTrialComponentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TrialComponentArn != nil {
-		s.WriteString(schemas.DeleteTrialComponentResponse_TrialComponentArn, *v.TrialComponentArn)
-	}
-}
-func (v *DeleteTrialComponentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteTrialComponentResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteTrialComponentResponse_TrialComponentArn:
-			v.TrialComponentArn = new(string)
-			return d.ReadString(schemas.DeleteTrialComponentResponse_TrialComponentArn, v.TrialComponentArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteTrialComponentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTrialComponent, schemas.DeleteTrialComponentRequest, schemas.DeleteTrialComponentResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteTrialComponent{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTrialComponent, schemas.DeleteTrialComponentRequest, schemas.DeleteTrialComponentResponse), output: &DeleteTrialComponentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteTrialComponent{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

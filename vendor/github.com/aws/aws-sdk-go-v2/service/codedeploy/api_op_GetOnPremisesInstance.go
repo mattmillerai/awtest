@@ -4,9 +4,7 @@ package codedeploy
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codedeploy/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -37,18 +35,6 @@ type GetOnPremisesInstanceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetOnPremisesInstanceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetOnPremisesInstanceInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetOnPremisesInstanceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InstanceName != nil {
-		s.WriteString(schemas.GetOnPremisesInstanceInput_instanceName, *v.InstanceName)
-	}
-}
-
 // Represents the output of a GetOnPremisesInstance operation.
 type GetOnPremisesInstanceOutput struct {
 
@@ -61,34 +47,13 @@ type GetOnPremisesInstanceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetOnPremisesInstanceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetOnPremisesInstanceOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetOnPremisesInstanceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InstanceInfo != nil {
-		s.WriteStruct(schemas.GetOnPremisesInstanceOutput_instanceInfo)
-		v.InstanceInfo.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetOnPremisesInstanceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetOnPremisesInstanceOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetOnPremisesInstanceOutput_instanceInfo:
-			v.InstanceInfo = &types.InstanceInfo{}
-			return v.InstanceInfo.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetOnPremisesInstanceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetOnPremisesInstance, schemas.GetOnPremisesInstanceInput, schemas.GetOnPremisesInstanceOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetOnPremisesInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetOnPremisesInstance, schemas.GetOnPremisesInstanceInput, schemas.GetOnPremisesInstanceOutput), output: &GetOnPremisesInstanceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetOnPremisesInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

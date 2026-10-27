@@ -4,8 +4,6 @@ package sqs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,18 +53,6 @@ type DeleteQueueInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteQueueInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteQueueRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteQueueInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.QueueUrl != nil {
-		s.WriteString(schemas.DeleteQueueRequest_QueueUrl, *v.QueueUrl)
-	}
-}
-
 type DeleteQueueOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -74,26 +60,13 @@ type DeleteQueueOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteQueueOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteQueueOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteQueueOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteQueueMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteQueue, schemas.DeleteQueueRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpDeleteQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteQueue, schemas.DeleteQueueRequest, nil), output: &DeleteQueueOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpDeleteQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

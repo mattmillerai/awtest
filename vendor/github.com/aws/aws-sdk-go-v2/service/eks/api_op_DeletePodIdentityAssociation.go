@@ -4,9 +4,7 @@ package eks
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eks/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,21 +44,6 @@ type DeletePodIdentityAssociationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePodIdentityAssociationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePodIdentityAssociationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePodIdentityAssociationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AssociationId != nil {
-		s.WriteString(schemas.DeletePodIdentityAssociationRequest_associationId, *v.AssociationId)
-	}
-	if v.ClusterName != nil {
-		s.WriteString(schemas.DeletePodIdentityAssociationRequest_clusterName, *v.ClusterName)
-	}
-}
-
 type DeletePodIdentityAssociationOutput struct {
 
 	// The full description of the EKS Pod Identity association that was deleted.
@@ -72,34 +55,13 @@ type DeletePodIdentityAssociationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePodIdentityAssociationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePodIdentityAssociationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePodIdentityAssociationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Association != nil {
-		s.WriteStruct(schemas.DeletePodIdentityAssociationResponse_association)
-		v.Association.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeletePodIdentityAssociationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeletePodIdentityAssociationResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeletePodIdentityAssociationResponse_association:
-			v.Association = &types.PodIdentityAssociation{}
-			return v.Association.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeletePodIdentityAssociationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePodIdentityAssociation, schemas.DeletePodIdentityAssociationRequest, schemas.DeletePodIdentityAssociationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeletePodIdentityAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePodIdentityAssociation, schemas.DeletePodIdentityAssociationRequest, schemas.DeletePodIdentityAssociationResponse), output: &DeletePodIdentityAssociationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeletePodIdentityAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

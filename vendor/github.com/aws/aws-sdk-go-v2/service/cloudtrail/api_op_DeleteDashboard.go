@@ -4,19 +4,12 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
+//	Deletes the specified dashboard. You cannot delete a dashboard that has
 //
-// Deletes the specified dashboard. You cannot delete a dashboard that has
 // termination protection enabled.
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 func (c *Client) DeleteDashboard(ctx context.Context, params *DeleteDashboardInput, optFns ...func(*Options)) (*DeleteDashboardOutput, error) {
 	if params == nil {
 		params = &DeleteDashboardInput{}
@@ -42,18 +35,6 @@ type DeleteDashboardInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDashboardInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteDashboardRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDashboardInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DashboardId != nil {
-		s.WriteString(schemas.DeleteDashboardRequest_DashboardId, *v.DashboardId)
-	}
-}
-
 type DeleteDashboardOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -61,26 +42,13 @@ type DeleteDashboardOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDashboardOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteDashboardResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDashboardOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteDashboardOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteDashboardResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteDashboardMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDashboard, schemas.DeleteDashboardRequest, schemas.DeleteDashboardResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteDashboard{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDashboard, schemas.DeleteDashboardRequest, schemas.DeleteDashboardResponse), output: &DeleteDashboardOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteDashboard{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

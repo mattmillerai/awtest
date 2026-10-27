@@ -5,9 +5,7 @@ package codecommit
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codecommit/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type ListRepositoriesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListRepositoriesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListRepositoriesInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListRepositoriesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListRepositoriesInput_nextToken, *v.NextToken)
-	}
-	if v.Order != "" {
-		s.WriteString(schemas.ListRepositoriesInput_order, string(v.Order))
-	}
-	if v.SortBy != "" {
-		s.WriteString(schemas.ListRepositoriesInput_sortBy, string(v.SortBy))
-	}
-}
-
 // Represents the output of a list repositories operation.
 type ListRepositoriesOutput struct {
 
@@ -79,38 +59,19 @@ type ListRepositoriesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListRepositoriesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListRepositoriesOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListRepositoriesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListRepositoriesOutput_nextToken, *v.NextToken)
-	}
-	serializeRepositoryNameIdPairList(s, schemas.ListRepositoriesOutput_repositories, v.Repositories)
-}
-func (v *ListRepositoriesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListRepositoriesOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListRepositoriesOutput_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListRepositoriesOutput_nextToken, v.NextToken)
-		case schemas.ListRepositoriesOutput_repositories:
-			return deserializeRepositoryNameIdPairList(d, schemas.ListRepositoriesOutput_repositories, &v.Repositories)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListRepositoriesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListRepositories, schemas.ListRepositoriesInput, schemas.ListRepositoriesOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListRepositories{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListRepositories, schemas.ListRepositoriesInput, schemas.ListRepositoriesOutput), output: &ListRepositoriesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListRepositories{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

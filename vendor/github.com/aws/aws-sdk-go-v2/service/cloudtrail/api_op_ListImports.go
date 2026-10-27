@@ -5,20 +5,13 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
+//	Returns information on all imports, or a select set of imports by ImportStatus
 //
-// Returns information on all imports, or a select set of imports by ImportStatus
 // or Destination .
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 func (c *Client) ListImports(ctx context.Context, params *ListImportsInput, optFns ...func(*Options)) (*ListImportsOutput, error) {
 	if params == nil {
 		params = &ListImportsInput{}
@@ -51,27 +44,6 @@ type ListImportsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListImportsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListImportsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListImportsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Destination != nil {
-		s.WriteString(schemas.ListImportsRequest_Destination, *v.Destination)
-	}
-	if v.ImportStatus != "" {
-		s.WriteString(schemas.ListImportsRequest_ImportStatus, string(v.ImportStatus))
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListImportsRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListImportsRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListImportsOutput struct {
 
 	//  The list of returned imports.
@@ -86,35 +58,13 @@ type ListImportsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListImportsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListImportsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListImportsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeImportsList(s, schemas.ListImportsResponse_Imports, v.Imports)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListImportsResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListImportsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListImportsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListImportsResponse_Imports:
-			return deserializeImportsList(d, schemas.ListImportsResponse_Imports, &v.Imports)
-		case schemas.ListImportsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListImportsResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListImportsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListImports, schemas.ListImportsRequest, schemas.ListImportsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListImports{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListImports, schemas.ListImportsRequest, schemas.ListImportsResponse), output: &ListImportsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListImports{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

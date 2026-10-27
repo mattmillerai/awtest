@@ -4,8 +4,6 @@ package appsync
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,24 +43,6 @@ type DeleteResolverInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteResolverInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteResolverRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteResolverInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApiId != nil {
-		s.WriteString(schemas.DeleteResolverRequest_apiId, *v.ApiId)
-	}
-	if v.FieldName != nil {
-		s.WriteString(schemas.DeleteResolverRequest_fieldName, *v.FieldName)
-	}
-	if v.TypeName != nil {
-		s.WriteString(schemas.DeleteResolverRequest_typeName, *v.TypeName)
-	}
-}
-
 type DeleteResolverOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -70,26 +50,13 @@ type DeleteResolverOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteResolverOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteResolverResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteResolverOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteResolverOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteResolverResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteResolverMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteResolver, schemas.DeleteResolverRequest, schemas.DeleteResolverResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteResolver{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteResolver, schemas.DeleteResolverRequest, schemas.DeleteResolverResponse), output: &DeleteResolverOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteResolver{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

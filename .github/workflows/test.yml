@@ -32,6 +32,23 @@ jobs:
       - name: Test
         run: go test -race ./...
 
+  # Guards against schema-bearing aws-sdk-go-v2 releases (aws/aws-sdk-go-v2#3601): builds the
+  # release binary, fails above 36 MB or if `awtest -version` uses more than 40 MB RSS.
+  size-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Binary size and startup RSS
+        env:
+          AWTEST_SIZE_GUARD: "1"
+        run: go test -count=1 -v ./internal/sizeguard/
+
   actionlint:
     runs-on: ubuntu-latest
     steps:

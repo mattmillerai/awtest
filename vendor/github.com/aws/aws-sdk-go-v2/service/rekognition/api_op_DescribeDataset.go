@@ -4,9 +4,7 @@ package rekognition
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/rekognition/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,18 +41,6 @@ type DescribeDatasetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDatasetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDatasetRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDatasetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DatasetArn != nil {
-		s.WriteString(schemas.DescribeDatasetRequest_DatasetArn, *v.DatasetArn)
-	}
-}
-
 type DescribeDatasetOutput struct {
 
 	//  The description for the dataset.
@@ -66,34 +52,13 @@ type DescribeDatasetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDatasetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDatasetResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDatasetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DatasetDescription != nil {
-		s.WriteStruct(schemas.DescribeDatasetResponse_DatasetDescription)
-		v.DatasetDescription.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeDatasetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeDatasetResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeDatasetResponse_DatasetDescription:
-			v.DatasetDescription = &types.DatasetDescription{}
-			return v.DatasetDescription.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeDatasetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDataset, schemas.DescribeDatasetRequest, schemas.DescribeDatasetResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeDataset{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDataset, schemas.DescribeDatasetRequest, schemas.DescribeDatasetResponse), output: &DescribeDatasetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeDataset{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

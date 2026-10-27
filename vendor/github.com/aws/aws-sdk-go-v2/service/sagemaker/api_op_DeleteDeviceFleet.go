@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteDeviceFleetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDeviceFleetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteDeviceFleetRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDeviceFleetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeviceFleetName != nil {
-		s.WriteString(schemas.DeleteDeviceFleetRequest_DeviceFleetName, *v.DeviceFleetName)
-	}
-}
-
 type DeleteDeviceFleetOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteDeviceFleetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDeviceFleetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDeviceFleetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteDeviceFleetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteDeviceFleetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDeviceFleet, schemas.DeleteDeviceFleetRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteDeviceFleet{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDeviceFleet, schemas.DeleteDeviceFleetRequest, nil), output: &DeleteDeviceFleetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteDeviceFleet{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

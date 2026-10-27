@@ -4,8 +4,6 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type DeleteJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobName != nil {
-		s.WriteString(schemas.DeleteJobRequest_JobName, *v.JobName)
-	}
-}
-
 type DeleteJobOutput struct {
 
 	// The name of the job definition that was deleted.
@@ -59,32 +45,13 @@ type DeleteJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobName != nil {
-		s.WriteString(schemas.DeleteJobResponse_JobName, *v.JobName)
-	}
-}
-func (v *DeleteJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteJobResponse_JobName:
-			v.JobName = new(string)
-			return d.ReadString(schemas.DeleteJobResponse_JobName, v.JobName)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteJob, schemas.DeleteJobRequest, schemas.DeleteJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteJob, schemas.DeleteJobRequest, schemas.DeleteJobResponse), output: &DeleteJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

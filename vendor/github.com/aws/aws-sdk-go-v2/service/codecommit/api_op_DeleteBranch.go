@@ -4,9 +4,7 @@ package codecommit
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codecommit/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codecommit/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,21 +41,6 @@ type DeleteBranchInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBranchInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteBranchInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBranchInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.BranchName != nil {
-		s.WriteString(schemas.DeleteBranchInput_branchName, *v.BranchName)
-	}
-	if v.RepositoryName != nil {
-		s.WriteString(schemas.DeleteBranchInput_repositoryName, *v.RepositoryName)
-	}
-}
-
 // Represents the output of a delete branch operation.
 type DeleteBranchOutput struct {
 
@@ -71,37 +54,19 @@ type DeleteBranchOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteBranchOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteBranchOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteBranchOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeletedBranch != nil {
-		s.WriteStruct(schemas.DeleteBranchOutput_deletedBranch)
-		v.DeletedBranch.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeleteBranchOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteBranchOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteBranchOutput_deletedBranch:
-			v.DeletedBranch = &types.BranchInfo{}
-			return v.DeletedBranch.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteBranchMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBranch, schemas.DeleteBranchInput, schemas.DeleteBranchOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteBranch, schemas.DeleteBranchInput, schemas.DeleteBranchOutput), output: &DeleteBranchOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteBranch{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

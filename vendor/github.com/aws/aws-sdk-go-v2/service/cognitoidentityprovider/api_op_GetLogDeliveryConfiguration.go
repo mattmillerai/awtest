@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -54,18 +52,6 @@ type GetLogDeliveryConfigurationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetLogDeliveryConfigurationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetLogDeliveryConfigurationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetLogDeliveryConfigurationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.GetLogDeliveryConfigurationRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type GetLogDeliveryConfigurationOutput struct {
 
 	// The logging configuration of the requested user pool. Includes types of logs
@@ -78,34 +64,13 @@ type GetLogDeliveryConfigurationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetLogDeliveryConfigurationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetLogDeliveryConfigurationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetLogDeliveryConfigurationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LogDeliveryConfiguration != nil {
-		s.WriteStruct(schemas.GetLogDeliveryConfigurationResponse_LogDeliveryConfiguration)
-		v.LogDeliveryConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetLogDeliveryConfigurationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetLogDeliveryConfigurationResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetLogDeliveryConfigurationResponse_LogDeliveryConfiguration:
-			v.LogDeliveryConfiguration = &types.LogDeliveryConfigurationType{}
-			return v.LogDeliveryConfiguration.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetLogDeliveryConfigurationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetLogDeliveryConfiguration, schemas.GetLogDeliveryConfigurationRequest, schemas.GetLogDeliveryConfigurationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetLogDeliveryConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetLogDeliveryConfiguration, schemas.GetLogDeliveryConfigurationRequest, schemas.GetLogDeliveryConfigurationResponse), output: &GetLogDeliveryConfigurationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetLogDeliveryConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

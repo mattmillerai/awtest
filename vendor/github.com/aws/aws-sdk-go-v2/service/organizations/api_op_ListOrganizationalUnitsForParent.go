@@ -5,9 +5,7 @@ package organizations
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/organizations/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -69,24 +67,6 @@ type ListOrganizationalUnitsForParentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListOrganizationalUnitsForParentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListOrganizationalUnitsForParentRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListOrganizationalUnitsForParentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListOrganizationalUnitsForParentRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListOrganizationalUnitsForParentRequest_NextToken, *v.NextToken)
-	}
-	if v.ParentId != nil {
-		s.WriteString(schemas.ListOrganizationalUnitsForParentRequest_ParentId, *v.ParentId)
-	}
-}
-
 type ListOrganizationalUnitsForParentOutput struct {
 
 	// If present, indicates that more output is available than is included in the
@@ -104,35 +84,13 @@ type ListOrganizationalUnitsForParentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListOrganizationalUnitsForParentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListOrganizationalUnitsForParentResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListOrganizationalUnitsForParentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListOrganizationalUnitsForParentResponse_NextToken, *v.NextToken)
-	}
-	serializeOrganizationalUnits(s, schemas.ListOrganizationalUnitsForParentResponse_OrganizationalUnits, v.OrganizationalUnits)
-}
-func (v *ListOrganizationalUnitsForParentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListOrganizationalUnitsForParentResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListOrganizationalUnitsForParentResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListOrganizationalUnitsForParentResponse_NextToken, v.NextToken)
-		case schemas.ListOrganizationalUnitsForParentResponse_OrganizationalUnits:
-			return deserializeOrganizationalUnits(d, schemas.ListOrganizationalUnitsForParentResponse_OrganizationalUnits, &v.OrganizationalUnits)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListOrganizationalUnitsForParentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListOrganizationalUnitsForParent, schemas.ListOrganizationalUnitsForParentRequest, schemas.ListOrganizationalUnitsForParentResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListOrganizationalUnitsForParent{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListOrganizationalUnitsForParent, schemas.ListOrganizationalUnitsForParentRequest, schemas.ListOrganizationalUnitsForParentResponse), output: &ListOrganizationalUnitsForParentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListOrganizationalUnitsForParent{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

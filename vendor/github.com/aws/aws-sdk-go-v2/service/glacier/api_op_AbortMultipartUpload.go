@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -77,24 +75,6 @@ type AbortMultipartUploadInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AbortMultipartUploadInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AbortMultipartUploadInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AbortMultipartUploadInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.AbortMultipartUploadInput_accountId, *v.AccountId)
-	}
-	if v.UploadId != nil {
-		s.WriteString(schemas.AbortMultipartUploadInput_uploadId, *v.UploadId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.AbortMultipartUploadInput_vaultName, *v.VaultName)
-	}
-}
-
 type AbortMultipartUploadOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -102,26 +82,13 @@ type AbortMultipartUploadOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AbortMultipartUploadOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AbortMultipartUploadOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AbortMultipartUploadOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAbortMultipartUploadMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AbortMultipartUpload, schemas.AbortMultipartUploadInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpAbortMultipartUpload{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AbortMultipartUpload, schemas.AbortMultipartUploadInput, nil), output: &AbortMultipartUploadOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpAbortMultipartUpload{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -49,24 +47,6 @@ type DescribeDocumentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDocumentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDocumentRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDocumentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DocumentVersion != nil {
-		s.WriteString(schemas.DescribeDocumentRequest_DocumentVersion, *v.DocumentVersion)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.DescribeDocumentRequest_Name, *v.Name)
-	}
-	if v.VersionName != nil {
-		s.WriteString(schemas.DescribeDocumentRequest_VersionName, *v.VersionName)
-	}
-}
-
 type DescribeDocumentOutput struct {
 
 	// Information about the SSM document.
@@ -78,34 +58,13 @@ type DescribeDocumentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDocumentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDocumentResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDocumentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Document != nil {
-		s.WriteStruct(schemas.DescribeDocumentResult_Document)
-		v.Document.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeDocumentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeDocumentResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeDocumentResult_Document:
-			v.Document = &types.DocumentDescription{}
-			return v.Document.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeDocumentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDocument, schemas.DescribeDocumentRequest, schemas.DescribeDocumentResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeDocument{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDocument, schemas.DescribeDocumentRequest, schemas.DescribeDocumentResult), output: &DescribeDocumentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeDocument{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

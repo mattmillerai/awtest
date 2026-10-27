@@ -4,8 +4,6 @@ package acm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/acm/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/aws/smithy-go/ptr"
 )
@@ -38,17 +36,6 @@ type RevokeAcmeExternalAccountBindingInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RevokeAcmeExternalAccountBindingInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RevokeAcmeExternalAccountBindingRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RevokeAcmeExternalAccountBindingInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AcmeExternalAccountBindingArn != nil {
-		s.WriteString(schemas.RevokeAcmeExternalAccountBindingRequest_AcmeExternalAccountBindingArn, *v.AcmeExternalAccountBindingArn)
-	}
-}
 func (in *RevokeAcmeExternalAccountBindingInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ServiceType = ptr.String("ACM-ACME")
@@ -61,26 +48,13 @@ type RevokeAcmeExternalAccountBindingOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RevokeAcmeExternalAccountBindingOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RevokeAcmeExternalAccountBindingOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RevokeAcmeExternalAccountBindingOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRevokeAcmeExternalAccountBindingMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RevokeAcmeExternalAccountBinding, schemas.RevokeAcmeExternalAccountBindingRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRevokeAcmeExternalAccountBinding{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RevokeAcmeExternalAccountBinding, schemas.RevokeAcmeExternalAccountBindingRequest, nil), output: &RevokeAcmeExternalAccountBindingOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRevokeAcmeExternalAccountBinding{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

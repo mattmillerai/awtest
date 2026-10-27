@@ -4,8 +4,6 @@ package apigateway
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/apigateway/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,21 +39,6 @@ type FlushStageAuthorizersCacheInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *FlushStageAuthorizersCacheInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.FlushStageAuthorizersCacheRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *FlushStageAuthorizersCacheInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RestApiId != nil {
-		s.WriteString(schemas.FlushStageAuthorizersCacheRequest_restApiId, *v.RestApiId)
-	}
-	if v.StageName != nil {
-		s.WriteString(schemas.FlushStageAuthorizersCacheRequest_stageName, *v.StageName)
-	}
-}
-
 type FlushStageAuthorizersCacheOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -63,26 +46,13 @@ type FlushStageAuthorizersCacheOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *FlushStageAuthorizersCacheOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *FlushStageAuthorizersCacheOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *FlushStageAuthorizersCacheOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationFlushStageAuthorizersCacheMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.FlushStageAuthorizersCache, schemas.FlushStageAuthorizersCacheRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpFlushStageAuthorizersCache{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.FlushStageAuthorizersCache, schemas.FlushStageAuthorizersCacheRequest, nil), output: &FlushStageAuthorizersCacheOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpFlushStageAuthorizersCache{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

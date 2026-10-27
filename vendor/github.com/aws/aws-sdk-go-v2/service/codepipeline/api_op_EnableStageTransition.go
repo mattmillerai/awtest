@@ -4,9 +4,7 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codepipeline/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -51,24 +49,6 @@ type EnableStageTransitionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableStageTransitionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.EnableStageTransitionInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableStageTransitionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PipelineName != nil {
-		s.WriteString(schemas.EnableStageTransitionInput_pipelineName, *v.PipelineName)
-	}
-	if v.StageName != nil {
-		s.WriteString(schemas.EnableStageTransitionInput_stageName, *v.StageName)
-	}
-	if v.TransitionType != "" {
-		s.WriteString(schemas.EnableStageTransitionInput_transitionType, string(v.TransitionType))
-	}
-}
-
 type EnableStageTransitionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -76,29 +56,19 @@ type EnableStageTransitionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableStageTransitionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableStageTransitionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *EnableStageTransitionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationEnableStageTransitionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableStageTransition, schemas.EnableStageTransitionInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpEnableStageTransition{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableStageTransition, schemas.EnableStageTransitionInput, nil), output: &EnableStageTransitionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpEnableStageTransition{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

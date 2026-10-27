@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,18 +42,6 @@ type ConfirmTopicRuleDestinationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ConfirmTopicRuleDestinationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ConfirmTopicRuleDestinationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ConfirmTopicRuleDestinationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfirmationToken != nil {
-		s.WriteString(schemas.ConfirmTopicRuleDestinationRequest_confirmationToken, *v.ConfirmationToken)
-	}
-}
-
 type ConfirmTopicRuleDestinationOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -63,26 +49,13 @@ type ConfirmTopicRuleDestinationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ConfirmTopicRuleDestinationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ConfirmTopicRuleDestinationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ConfirmTopicRuleDestinationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *ConfirmTopicRuleDestinationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ConfirmTopicRuleDestinationResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationConfirmTopicRuleDestinationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ConfirmTopicRuleDestination, schemas.ConfirmTopicRuleDestinationRequest, schemas.ConfirmTopicRuleDestinationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpConfirmTopicRuleDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ConfirmTopicRuleDestination, schemas.ConfirmTopicRuleDestinationRequest, schemas.ConfirmTopicRuleDestinationResponse), output: &ConfirmTopicRuleDestinationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpConfirmTopicRuleDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package backup
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/backup/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type GetTieringConfigurationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetTieringConfigurationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetTieringConfigurationInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetTieringConfigurationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TieringConfigurationName != nil {
-		s.WriteString(schemas.GetTieringConfigurationInput_TieringConfigurationName, *v.TieringConfigurationName)
-	}
-}
-
 type GetTieringConfigurationOutput struct {
 
 	// Specifies the body of a tiering configuration. Includes TieringConfigurationName
@@ -62,34 +48,13 @@ type GetTieringConfigurationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetTieringConfigurationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetTieringConfigurationOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetTieringConfigurationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TieringConfiguration != nil {
-		s.WriteStruct(schemas.GetTieringConfigurationOutput_TieringConfiguration)
-		v.TieringConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetTieringConfigurationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetTieringConfigurationOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetTieringConfigurationOutput_TieringConfiguration:
-			v.TieringConfiguration = &types.TieringConfiguration{}
-			return v.TieringConfiguration.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetTieringConfigurationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetTieringConfiguration, schemas.GetTieringConfigurationInput, schemas.GetTieringConfigurationOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetTieringConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetTieringConfiguration, schemas.GetTieringConfigurationInput, schemas.GetTieringConfigurationOutput), output: &GetTieringConfigurationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetTieringConfiguration{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

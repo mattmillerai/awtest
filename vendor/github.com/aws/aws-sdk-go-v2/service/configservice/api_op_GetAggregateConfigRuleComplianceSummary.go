@@ -5,9 +5,7 @@ package configservice
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -56,32 +54,6 @@ type GetAggregateConfigRuleComplianceSummaryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetAggregateConfigRuleComplianceSummaryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetAggregateConfigRuleComplianceSummaryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetAggregateConfigRuleComplianceSummaryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigurationAggregatorName != nil {
-		s.WriteString(schemas.GetAggregateConfigRuleComplianceSummaryRequest_ConfigurationAggregatorName, *v.ConfigurationAggregatorName)
-	}
-	if v.Filters != nil {
-		s.WriteStruct(schemas.GetAggregateConfigRuleComplianceSummaryRequest_Filters)
-		v.Filters.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.GroupByKey != "" {
-		s.WriteString(schemas.GetAggregateConfigRuleComplianceSummaryRequest_GroupByKey, string(v.GroupByKey))
-	}
-	if v.Limit != 0 {
-		s.WriteInt32(schemas.GetAggregateConfigRuleComplianceSummaryRequest_Limit, v.Limit)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.GetAggregateConfigRuleComplianceSummaryRequest_NextToken, *v.NextToken)
-	}
-}
-
 type GetAggregateConfigRuleComplianceSummaryOutput struct {
 
 	// Returns a list of AggregateComplianceCounts object.
@@ -100,41 +72,13 @@ type GetAggregateConfigRuleComplianceSummaryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetAggregateConfigRuleComplianceSummaryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetAggregateConfigRuleComplianceSummaryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetAggregateConfigRuleComplianceSummaryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAggregateComplianceCountList(s, schemas.GetAggregateConfigRuleComplianceSummaryResponse_AggregateComplianceCounts, v.AggregateComplianceCounts)
-	if v.GroupByKey != nil {
-		s.WriteString(schemas.GetAggregateConfigRuleComplianceSummaryResponse_GroupByKey, *v.GroupByKey)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.GetAggregateConfigRuleComplianceSummaryResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *GetAggregateConfigRuleComplianceSummaryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetAggregateConfigRuleComplianceSummaryResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetAggregateConfigRuleComplianceSummaryResponse_AggregateComplianceCounts:
-			return deserializeAggregateComplianceCountList(d, schemas.GetAggregateConfigRuleComplianceSummaryResponse_AggregateComplianceCounts, &v.AggregateComplianceCounts)
-		case schemas.GetAggregateConfigRuleComplianceSummaryResponse_GroupByKey:
-			v.GroupByKey = new(string)
-			return d.ReadString(schemas.GetAggregateConfigRuleComplianceSummaryResponse_GroupByKey, v.GroupByKey)
-		case schemas.GetAggregateConfigRuleComplianceSummaryResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.GetAggregateConfigRuleComplianceSummaryResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetAggregateConfigRuleComplianceSummaryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetAggregateConfigRuleComplianceSummary, schemas.GetAggregateConfigRuleComplianceSummaryRequest, schemas.GetAggregateConfigRuleComplianceSummaryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetAggregateConfigRuleComplianceSummary{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetAggregateConfigRuleComplianceSummary, schemas.GetAggregateConfigRuleComplianceSummaryRequest, schemas.GetAggregateConfigRuleComplianceSummaryResponse), output: &GetAggregateConfigRuleComplianceSummaryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetAggregateConfigRuleComplianceSummary{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

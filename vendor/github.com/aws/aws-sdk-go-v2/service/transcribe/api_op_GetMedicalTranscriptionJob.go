@@ -5,9 +5,7 @@ package transcribe
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/transcribe/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	smithytime "github.com/aws/smithy-go/time"
 	smithywaiter "github.com/aws/smithy-go/waiter"
@@ -49,18 +47,6 @@ type GetMedicalTranscriptionJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetMedicalTranscriptionJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetMedicalTranscriptionJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetMedicalTranscriptionJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MedicalTranscriptionJobName != nil {
-		s.WriteString(schemas.GetMedicalTranscriptionJobRequest_MedicalTranscriptionJobName, *v.MedicalTranscriptionJobName)
-	}
-}
-
 type GetMedicalTranscriptionJobOutput struct {
 
 	// Provides detailed information about the specified medical transcription job,
@@ -73,34 +59,13 @@ type GetMedicalTranscriptionJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetMedicalTranscriptionJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetMedicalTranscriptionJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetMedicalTranscriptionJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MedicalTranscriptionJob != nil {
-		s.WriteStruct(schemas.GetMedicalTranscriptionJobResponse_MedicalTranscriptionJob)
-		v.MedicalTranscriptionJob.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetMedicalTranscriptionJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetMedicalTranscriptionJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetMedicalTranscriptionJobResponse_MedicalTranscriptionJob:
-			v.MedicalTranscriptionJob = &types.MedicalTranscriptionJob{}
-			return v.MedicalTranscriptionJob.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetMedicalTranscriptionJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetMedicalTranscriptionJob, schemas.GetMedicalTranscriptionJobRequest, schemas.GetMedicalTranscriptionJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetMedicalTranscriptionJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetMedicalTranscriptionJob, schemas.GetMedicalTranscriptionJobRequest, schemas.GetMedicalTranscriptionJobResponse), output: &GetMedicalTranscriptionJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetMedicalTranscriptionJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

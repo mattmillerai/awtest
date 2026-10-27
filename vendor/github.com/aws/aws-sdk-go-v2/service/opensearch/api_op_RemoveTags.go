@@ -4,8 +4,6 @@ package opensearch
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/opensearch/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,19 +43,6 @@ type RemoveTagsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RemoveTagsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ARN != nil {
-		s.WriteString(schemas.RemoveTagsRequest_ARN, *v.ARN)
-	}
-	serializeStringList(s, schemas.RemoveTagsRequest_TagKeys, v.TagKeys)
-}
-
 type RemoveTagsOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -65,26 +50,13 @@ type RemoveTagsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveTagsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveTagsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RemoveTagsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRemoveTagsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTags, schemas.RemoveTagsRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpRemoveTags{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveTags, schemas.RemoveTagsRequest, nil), output: &RemoveTagsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpRemoveTags{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

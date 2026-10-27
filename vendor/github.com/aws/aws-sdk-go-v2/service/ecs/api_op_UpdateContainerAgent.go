@@ -4,9 +4,7 @@ package ecs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ecs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -63,21 +61,6 @@ type UpdateContainerAgentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateContainerAgentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateContainerAgentRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateContainerAgentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Cluster != nil {
-		s.WriteString(schemas.UpdateContainerAgentRequest_cluster, *v.Cluster)
-	}
-	if v.ContainerInstance != nil {
-		s.WriteString(schemas.UpdateContainerAgentRequest_containerInstance, *v.ContainerInstance)
-	}
-}
-
 type UpdateContainerAgentOutput struct {
 
 	// The container instance that the container agent was updated for.
@@ -89,34 +72,13 @@ type UpdateContainerAgentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateContainerAgentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateContainerAgentResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateContainerAgentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ContainerInstance != nil {
-		s.WriteStruct(schemas.UpdateContainerAgentResponse_containerInstance)
-		v.ContainerInstance.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *UpdateContainerAgentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateContainerAgentResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateContainerAgentResponse_containerInstance:
-			v.ContainerInstance = &types.ContainerInstance{}
-			return v.ContainerInstance.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateContainerAgentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateContainerAgent, schemas.UpdateContainerAgentRequest, schemas.UpdateContainerAgentResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateContainerAgent{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateContainerAgent, schemas.UpdateContainerAgentRequest, schemas.UpdateContainerAgentResponse), output: &UpdateContainerAgentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateContainerAgent{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

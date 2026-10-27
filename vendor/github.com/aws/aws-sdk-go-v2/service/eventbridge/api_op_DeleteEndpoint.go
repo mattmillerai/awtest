@@ -4,8 +4,6 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type DeleteEndpointInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteEndpointInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteEndpointRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteEndpointInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeleteEndpointRequest_Name, *v.Name)
-	}
-}
-
 type DeleteEndpointOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -58,29 +44,19 @@ type DeleteEndpointOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteEndpointOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteEndpointResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteEndpointOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteEndpointOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteEndpointResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteEndpointMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteEndpoint, schemas.DeleteEndpointRequest, schemas.DeleteEndpointResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteEndpoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteEndpoint, schemas.DeleteEndpointRequest, schemas.DeleteEndpointResponse), output: &DeleteEndpointOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteEndpoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

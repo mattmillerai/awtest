@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -65,37 +63,6 @@ type UpdateInferenceExperimentInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateInferenceExperimentInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateInferenceExperimentRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateInferenceExperimentInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DataStorageConfig != nil {
-		s.WriteStruct(schemas.UpdateInferenceExperimentRequest_DataStorageConfig)
-		v.DataStorageConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.Description != nil {
-		s.WriteString(schemas.UpdateInferenceExperimentRequest_Description, *v.Description)
-	}
-	serializeModelVariantConfigList(s, schemas.UpdateInferenceExperimentRequest_ModelVariants, v.ModelVariants)
-	if v.Name != nil {
-		s.WriteString(schemas.UpdateInferenceExperimentRequest_Name, *v.Name)
-	}
-	if v.Schedule != nil {
-		s.WriteStruct(schemas.UpdateInferenceExperimentRequest_Schedule)
-		v.Schedule.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.ShadowModeConfig != nil {
-		s.WriteStruct(schemas.UpdateInferenceExperimentRequest_ShadowModeConfig)
-		v.ShadowModeConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type UpdateInferenceExperimentOutput struct {
 
 	// The ARN of the updated inference experiment.
@@ -109,32 +76,13 @@ type UpdateInferenceExperimentOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateInferenceExperimentOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateInferenceExperimentResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateInferenceExperimentOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InferenceExperimentArn != nil {
-		s.WriteString(schemas.UpdateInferenceExperimentResponse_InferenceExperimentArn, *v.InferenceExperimentArn)
-	}
-}
-func (v *UpdateInferenceExperimentOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateInferenceExperimentResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateInferenceExperimentResponse_InferenceExperimentArn:
-			v.InferenceExperimentArn = new(string)
-			return d.ReadString(schemas.UpdateInferenceExperimentResponse_InferenceExperimentArn, v.InferenceExperimentArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateInferenceExperimentMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateInferenceExperiment, schemas.UpdateInferenceExperimentRequest, schemas.UpdateInferenceExperimentResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateInferenceExperiment{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateInferenceExperiment, schemas.UpdateInferenceExperimentRequest, schemas.UpdateInferenceExperimentResponse), output: &UpdateInferenceExperimentOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateInferenceExperiment{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

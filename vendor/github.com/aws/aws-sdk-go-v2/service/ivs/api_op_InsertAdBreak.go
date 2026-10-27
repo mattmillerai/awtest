@@ -4,8 +4,6 @@ package ivs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ivs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -48,21 +46,6 @@ type InsertAdBreakInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InsertAdBreakInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InsertAdBreakRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InsertAdBreakInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChannelArn != nil {
-		s.WriteString(schemas.InsertAdBreakRequest_channelArn, *v.ChannelArn)
-	}
-	if v.DurationSeconds != nil {
-		s.WriteInt32(schemas.InsertAdBreakRequest_durationSeconds, *v.DurationSeconds)
-	}
-}
-
 type InsertAdBreakOutput struct {
 
 	// Unique identifier for the ad break that was inserted into the playlist.
@@ -74,35 +57,19 @@ type InsertAdBreakOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *InsertAdBreakOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.InsertAdBreakResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *InsertAdBreakOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AdBreakId != nil {
-		s.WriteString(schemas.InsertAdBreakResponse_adBreakId, *v.AdBreakId)
-	}
-}
-func (v *InsertAdBreakOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.InsertAdBreakResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.InsertAdBreakResponse_adBreakId:
-			v.AdBreakId = new(string)
-			return d.ReadString(schemas.InsertAdBreakResponse_adBreakId, v.AdBreakId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationInsertAdBreakMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InsertAdBreak, schemas.InsertAdBreakRequest, schemas.InsertAdBreakResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpInsertAdBreak{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.InsertAdBreak, schemas.InsertAdBreakRequest, schemas.InsertAdBreakResponse), output: &InsertAdBreakOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpInsertAdBreak{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

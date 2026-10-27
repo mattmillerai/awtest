@@ -5,9 +5,7 @@ package iot
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,24 +45,6 @@ type ListThingTypesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListThingTypesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListThingTypesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListThingTypesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListThingTypesRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListThingTypesRequest_nextToken, *v.NextToken)
-	}
-	if v.ThingTypeName != nil {
-		s.WriteString(schemas.ListThingTypesRequest_thingTypeName, *v.ThingTypeName)
-	}
-}
-
 // The output for the ListThingTypes operation.
 type ListThingTypesOutput struct {
 
@@ -81,35 +61,13 @@ type ListThingTypesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListThingTypesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListThingTypesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListThingTypesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListThingTypesResponse_nextToken, *v.NextToken)
-	}
-	serializeThingTypeList(s, schemas.ListThingTypesResponse_thingTypes, v.ThingTypes)
-}
-func (v *ListThingTypesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListThingTypesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListThingTypesResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListThingTypesResponse_nextToken, v.NextToken)
-		case schemas.ListThingTypesResponse_thingTypes:
-			return deserializeThingTypeList(d, schemas.ListThingTypesResponse_thingTypes, &v.ThingTypes)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListThingTypesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListThingTypes, schemas.ListThingTypesRequest, schemas.ListThingTypesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListThingTypes{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListThingTypes, schemas.ListThingTypesRequest, schemas.ListThingTypesResponse), output: &ListThingTypesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListThingTypes{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

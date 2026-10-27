@@ -4,8 +4,6 @@ package apigateway
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/apigateway/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,21 +41,6 @@ type GetUsagePlanKeyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetUsagePlanKeyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetUsagePlanKeyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetUsagePlanKeyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.KeyId != nil {
-		s.WriteString(schemas.GetUsagePlanKeyRequest_keyId, *v.KeyId)
-	}
-	if v.UsagePlanId != nil {
-		s.WriteString(schemas.GetUsagePlanKeyRequest_usagePlanId, *v.UsagePlanId)
-	}
-}
-
 // Represents a usage plan key to identify a plan customer.
 type GetUsagePlanKeyOutput struct {
 
@@ -79,50 +62,13 @@ type GetUsagePlanKeyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetUsagePlanKeyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UsagePlanKey)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetUsagePlanKeyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Id != nil {
-		s.WriteString(schemas.UsagePlanKey_id, *v.Id)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.UsagePlanKey_name, *v.Name)
-	}
-	if v.Type != nil {
-		s.WriteString(schemas.UsagePlanKey_type, *v.Type)
-	}
-	if v.Value != nil {
-		s.WriteString(schemas.UsagePlanKey_value, *v.Value)
-	}
-}
-func (v *GetUsagePlanKeyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UsagePlanKey, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UsagePlanKey_id:
-			v.Id = new(string)
-			return d.ReadString(schemas.UsagePlanKey_id, v.Id)
-		case schemas.UsagePlanKey_name:
-			v.Name = new(string)
-			return d.ReadString(schemas.UsagePlanKey_name, v.Name)
-		case schemas.UsagePlanKey_type:
-			v.Type = new(string)
-			return d.ReadString(schemas.UsagePlanKey_type, v.Type)
-		case schemas.UsagePlanKey_value:
-			v.Value = new(string)
-			return d.ReadString(schemas.UsagePlanKey_value, v.Value)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetUsagePlanKeyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetUsagePlanKey, schemas.GetUsagePlanKeyRequest, schemas.UsagePlanKey)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpGetUsagePlanKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetUsagePlanKey, schemas.GetUsagePlanKeyRequest, schemas.UsagePlanKey), output: &GetUsagePlanKeyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpGetUsagePlanKey{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

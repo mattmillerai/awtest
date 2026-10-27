@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -71,21 +69,6 @@ type CreateVaultInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateVaultInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateVaultInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateVaultInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.CreateVaultInput_accountId, *v.AccountId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.CreateVaultInput_vaultName, *v.VaultName)
-	}
-}
-
 // Contains the Amazon Glacier response to your request.
 type CreateVaultOutput struct {
 
@@ -98,32 +81,13 @@ type CreateVaultOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateVaultOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateVaultOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateVaultOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Location != nil {
-		s.WriteString(schemas.CreateVaultOutput_location, *v.Location)
-	}
-}
-func (v *CreateVaultOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateVaultOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateVaultOutput_location:
-			v.Location = new(string)
-			return d.ReadString(schemas.CreateVaultOutput_location, v.Location)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateVaultMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateVault, schemas.CreateVaultInput, schemas.CreateVaultOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpCreateVault{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateVault, schemas.CreateVaultInput, schemas.CreateVaultOutput), output: &CreateVaultOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpCreateVault{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

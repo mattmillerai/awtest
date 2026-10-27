@@ -4,21 +4,14 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
+//	Searches sample queries and returns a list of sample queries that are sorted
 //
-// Searches sample queries and returns a list of sample queries that are sorted by
-// relevance. To search for sample queries, provide a natural language SearchPhrase
-// in English.
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
+// by relevance. To search for sample queries, provide a natural language
+// SearchPhrase in English.
 func (c *Client) SearchSampleQueries(ctx context.Context, params *SearchSampleQueriesInput, optFns ...func(*Options)) (*SearchSampleQueriesOutput, error) {
 	if params == nil {
 		params = &SearchSampleQueriesInput{}
@@ -53,24 +46,6 @@ type SearchSampleQueriesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SearchSampleQueriesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SearchSampleQueriesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SearchSampleQueriesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.SearchSampleQueriesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.SearchSampleQueriesRequest_NextToken, *v.NextToken)
-	}
-	if v.SearchPhrase != nil {
-		s.WriteString(schemas.SearchSampleQueriesRequest_SearchPhrase, *v.SearchPhrase)
-	}
-}
-
 type SearchSampleQueriesOutput struct {
 
 	//  A token you can use to get the next page of results.
@@ -86,35 +61,13 @@ type SearchSampleQueriesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SearchSampleQueriesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SearchSampleQueriesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SearchSampleQueriesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.SearchSampleQueriesResponse_NextToken, *v.NextToken)
-	}
-	serializeSearchSampleQueriesSearchResults(s, schemas.SearchSampleQueriesResponse_SearchResults, v.SearchResults)
-}
-func (v *SearchSampleQueriesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.SearchSampleQueriesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.SearchSampleQueriesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.SearchSampleQueriesResponse_NextToken, v.NextToken)
-		case schemas.SearchSampleQueriesResponse_SearchResults:
-			return deserializeSearchSampleQueriesSearchResults(d, schemas.SearchSampleQueriesResponse_SearchResults, &v.SearchResults)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSearchSampleQueriesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SearchSampleQueries, schemas.SearchSampleQueriesRequest, schemas.SearchSampleQueriesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpSearchSampleQueries{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SearchSampleQueries, schemas.SearchSampleQueriesRequest, schemas.SearchSampleQueriesResponse), output: &SearchSampleQueriesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpSearchSampleQueries{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

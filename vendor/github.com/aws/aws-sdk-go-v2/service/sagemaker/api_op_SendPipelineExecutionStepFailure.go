@@ -5,8 +5,6 @@ package sagemaker
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,24 +44,6 @@ type SendPipelineExecutionStepFailureInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SendPipelineExecutionStepFailureInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SendPipelineExecutionStepFailureRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SendPipelineExecutionStepFailureInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CallbackToken != nil {
-		s.WriteString(schemas.SendPipelineExecutionStepFailureRequest_CallbackToken, *v.CallbackToken)
-	}
-	if v.ClientRequestToken != nil {
-		s.WriteString(schemas.SendPipelineExecutionStepFailureRequest_ClientRequestToken, *v.ClientRequestToken)
-	}
-	if v.FailureReason != nil {
-		s.WriteString(schemas.SendPipelineExecutionStepFailureRequest_FailureReason, *v.FailureReason)
-	}
-}
-
 type SendPipelineExecutionStepFailureOutput struct {
 
 	// The Amazon Resource Name (ARN) of the pipeline execution.
@@ -75,32 +55,13 @@ type SendPipelineExecutionStepFailureOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SendPipelineExecutionStepFailureOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SendPipelineExecutionStepFailureResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SendPipelineExecutionStepFailureOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.PipelineExecutionArn != nil {
-		s.WriteString(schemas.SendPipelineExecutionStepFailureResponse_PipelineExecutionArn, *v.PipelineExecutionArn)
-	}
-}
-func (v *SendPipelineExecutionStepFailureOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.SendPipelineExecutionStepFailureResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.SendPipelineExecutionStepFailureResponse_PipelineExecutionArn:
-			v.PipelineExecutionArn = new(string)
-			return d.ReadString(schemas.SendPipelineExecutionStepFailureResponse_PipelineExecutionArn, v.PipelineExecutionArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSendPipelineExecutionStepFailureMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SendPipelineExecutionStepFailure, schemas.SendPipelineExecutionStepFailureRequest, schemas.SendPipelineExecutionStepFailureResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpSendPipelineExecutionStepFailure{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SendPipelineExecutionStepFailure, schemas.SendPipelineExecutionStepFailureRequest, schemas.SendPipelineExecutionStepFailureResponse), output: &SendPipelineExecutionStepFailureOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpSendPipelineExecutionStepFailure{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

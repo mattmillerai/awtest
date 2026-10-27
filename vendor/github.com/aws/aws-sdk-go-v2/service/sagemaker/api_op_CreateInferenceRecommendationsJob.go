@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -80,43 +78,6 @@ type CreateInferenceRecommendationsJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateInferenceRecommendationsJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateInferenceRecommendationsJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateInferenceRecommendationsJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InputConfig != nil {
-		s.WriteStruct(schemas.CreateInferenceRecommendationsJobRequest_InputConfig)
-		v.InputConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.JobDescription != nil {
-		s.WriteString(schemas.CreateInferenceRecommendationsJobRequest_JobDescription, *v.JobDescription)
-	}
-	if v.JobName != nil {
-		s.WriteString(schemas.CreateInferenceRecommendationsJobRequest_JobName, *v.JobName)
-	}
-	if v.JobType != "" {
-		s.WriteString(schemas.CreateInferenceRecommendationsJobRequest_JobType, string(v.JobType))
-	}
-	if v.OutputConfig != nil {
-		s.WriteStruct(schemas.CreateInferenceRecommendationsJobRequest_OutputConfig)
-		v.OutputConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.RoleArn != nil {
-		s.WriteString(schemas.CreateInferenceRecommendationsJobRequest_RoleArn, *v.RoleArn)
-	}
-	if v.StoppingConditions != nil {
-		s.WriteStruct(schemas.CreateInferenceRecommendationsJobRequest_StoppingConditions)
-		v.StoppingConditions.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeTagList(s, schemas.CreateInferenceRecommendationsJobRequest_Tags, v.Tags)
-}
-
 type CreateInferenceRecommendationsJobOutput struct {
 
 	// The Amazon Resource Name (ARN) of the recommendation job.
@@ -130,32 +91,13 @@ type CreateInferenceRecommendationsJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateInferenceRecommendationsJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateInferenceRecommendationsJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateInferenceRecommendationsJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobArn != nil {
-		s.WriteString(schemas.CreateInferenceRecommendationsJobResponse_JobArn, *v.JobArn)
-	}
-}
-func (v *CreateInferenceRecommendationsJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateInferenceRecommendationsJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateInferenceRecommendationsJobResponse_JobArn:
-			v.JobArn = new(string)
-			return d.ReadString(schemas.CreateInferenceRecommendationsJobResponse_JobArn, v.JobArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateInferenceRecommendationsJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateInferenceRecommendationsJob, schemas.CreateInferenceRecommendationsJobRequest, schemas.CreateInferenceRecommendationsJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateInferenceRecommendationsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateInferenceRecommendationsJob, schemas.CreateInferenceRecommendationsJobRequest, schemas.CreateInferenceRecommendationsJobResponse), output: &CreateInferenceRecommendationsJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateInferenceRecommendationsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

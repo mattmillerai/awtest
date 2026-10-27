@@ -5,8 +5,6 @@ package lambda
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -45,24 +43,6 @@ type ListFunctionsByCodeSigningConfigInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListFunctionsByCodeSigningConfigInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListFunctionsByCodeSigningConfigRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListFunctionsByCodeSigningConfigInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CodeSigningConfigArn != nil {
-		s.WriteString(schemas.ListFunctionsByCodeSigningConfigRequest_CodeSigningConfigArn, *v.CodeSigningConfigArn)
-	}
-	if v.Marker != nil {
-		s.WriteString(schemas.ListFunctionsByCodeSigningConfigRequest_Marker, *v.Marker)
-	}
-	if v.MaxItems != nil {
-		s.WriteInt32(schemas.ListFunctionsByCodeSigningConfigRequest_MaxItems, *v.MaxItems)
-	}
-}
-
 type ListFunctionsByCodeSigningConfigOutput struct {
 
 	// The function ARNs.
@@ -77,35 +57,13 @@ type ListFunctionsByCodeSigningConfigOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListFunctionsByCodeSigningConfigOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListFunctionsByCodeSigningConfigResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListFunctionsByCodeSigningConfigOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeFunctionArnList(s, schemas.ListFunctionsByCodeSigningConfigResponse_FunctionArns, v.FunctionArns)
-	if v.NextMarker != nil {
-		s.WriteString(schemas.ListFunctionsByCodeSigningConfigResponse_NextMarker, *v.NextMarker)
-	}
-}
-func (v *ListFunctionsByCodeSigningConfigOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListFunctionsByCodeSigningConfigResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListFunctionsByCodeSigningConfigResponse_FunctionArns:
-			return deserializeFunctionArnList(d, schemas.ListFunctionsByCodeSigningConfigResponse_FunctionArns, &v.FunctionArns)
-		case schemas.ListFunctionsByCodeSigningConfigResponse_NextMarker:
-			v.NextMarker = new(string)
-			return d.ReadString(schemas.ListFunctionsByCodeSigningConfigResponse_NextMarker, v.NextMarker)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListFunctionsByCodeSigningConfigMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListFunctionsByCodeSigningConfig, schemas.ListFunctionsByCodeSigningConfigRequest, schemas.ListFunctionsByCodeSigningConfigResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListFunctionsByCodeSigningConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListFunctionsByCodeSigningConfig, schemas.ListFunctionsByCodeSigningConfigRequest, schemas.ListFunctionsByCodeSigningConfigResponse), output: &ListFunctionsByCodeSigningConfigOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListFunctionsByCodeSigningConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

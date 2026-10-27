@@ -4,20 +4,12 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
-//
 // Stops a specified import.
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 func (c *Client) StopImport(ctx context.Context, params *StopImportInput, optFns ...func(*Options)) (*StopImportOutput, error) {
 	if params == nil {
 		params = &StopImportInput{}
@@ -41,18 +33,6 @@ type StopImportInput struct {
 	ImportId *string
 
 	noSmithyDocumentSerde
-}
-
-func (v *StopImportInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopImportRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopImportInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ImportId != nil {
-		s.WriteString(schemas.StopImportRequest_ImportId, *v.ImportId)
-	}
 }
 
 type StopImportOutput struct {
@@ -92,85 +72,13 @@ type StopImportOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopImportOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopImportResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopImportOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CreatedTimestamp != nil {
-		s.WriteTime(schemas.StopImportResponse_CreatedTimestamp, *v.CreatedTimestamp)
-	}
-	serializeImportDestinations(s, schemas.StopImportResponse_Destinations, v.Destinations)
-	if v.EndEventTime != nil {
-		s.WriteTime(schemas.StopImportResponse_EndEventTime, *v.EndEventTime)
-	}
-	if v.ImportId != nil {
-		s.WriteString(schemas.StopImportResponse_ImportId, *v.ImportId)
-	}
-	if v.ImportSource != nil {
-		s.WriteStruct(schemas.StopImportResponse_ImportSource)
-		v.ImportSource.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.ImportStatistics != nil {
-		s.WriteStruct(schemas.StopImportResponse_ImportStatistics)
-		v.ImportStatistics.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.ImportStatus != "" {
-		s.WriteString(schemas.StopImportResponse_ImportStatus, string(v.ImportStatus))
-	}
-	if v.StartEventTime != nil {
-		s.WriteTime(schemas.StopImportResponse_StartEventTime, *v.StartEventTime)
-	}
-	if v.UpdatedTimestamp != nil {
-		s.WriteTime(schemas.StopImportResponse_UpdatedTimestamp, *v.UpdatedTimestamp)
-	}
-}
-func (v *StopImportOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StopImportResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StopImportResponse_CreatedTimestamp:
-			v.CreatedTimestamp = new(time.Time)
-			return d.ReadTime(schemas.StopImportResponse_CreatedTimestamp, v.CreatedTimestamp)
-		case schemas.StopImportResponse_Destinations:
-			return deserializeImportDestinations(d, schemas.StopImportResponse_Destinations, &v.Destinations)
-		case schemas.StopImportResponse_EndEventTime:
-			v.EndEventTime = new(time.Time)
-			return d.ReadTime(schemas.StopImportResponse_EndEventTime, v.EndEventTime)
-		case schemas.StopImportResponse_ImportId:
-			v.ImportId = new(string)
-			return d.ReadString(schemas.StopImportResponse_ImportId, v.ImportId)
-		case schemas.StopImportResponse_ImportSource:
-			v.ImportSource = &types.ImportSource{}
-			return v.ImportSource.Deserialize(d)
-		case schemas.StopImportResponse_ImportStatistics:
-			v.ImportStatistics = &types.ImportStatistics{}
-			return v.ImportStatistics.Deserialize(d)
-		case schemas.StopImportResponse_ImportStatus:
-			var ev string
-			if err := d.ReadString(schemas.StopImportResponse_ImportStatus, &ev); err != nil {
-				return err
-			}
-			v.ImportStatus = types.ImportStatus(ev)
-			return nil
-		case schemas.StopImportResponse_StartEventTime:
-			v.StartEventTime = new(time.Time)
-			return d.ReadTime(schemas.StopImportResponse_StartEventTime, v.StartEventTime)
-		case schemas.StopImportResponse_UpdatedTimestamp:
-			v.UpdatedTimestamp = new(time.Time)
-			return d.ReadTime(schemas.StopImportResponse_UpdatedTimestamp, v.UpdatedTimestamp)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopImportMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopImport, schemas.StopImportRequest, schemas.StopImportResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopImport{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopImport, schemas.StopImportRequest, schemas.StopImportResponse), output: &StopImportOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopImport{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

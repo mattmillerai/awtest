@@ -5,9 +5,7 @@ package ssm
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type ValidateCloudConnectorInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ValidateCloudConnectorInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ValidateCloudConnectorRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ValidateCloudConnectorInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CloudConnectorId != nil {
-		s.WriteString(schemas.ValidateCloudConnectorRequest_CloudConnectorId, *v.CloudConnectorId)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ValidateCloudConnectorRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ValidateCloudConnectorRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ValidateCloudConnectorOutput struct {
 
 	// The token to use when requesting the next set of items.
@@ -76,35 +56,13 @@ type ValidateCloudConnectorOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ValidateCloudConnectorOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ValidateCloudConnectorResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ValidateCloudConnectorOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ValidateCloudConnectorResult_NextToken, *v.NextToken)
-	}
-	serializeValidationFindingList(s, schemas.ValidateCloudConnectorResult_ValidationFindings, v.ValidationFindings)
-}
-func (v *ValidateCloudConnectorOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ValidateCloudConnectorResult, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ValidateCloudConnectorResult_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ValidateCloudConnectorResult_NextToken, v.NextToken)
-		case schemas.ValidateCloudConnectorResult_ValidationFindings:
-			return deserializeValidationFindingList(d, schemas.ValidateCloudConnectorResult_ValidationFindings, &v.ValidationFindings)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationValidateCloudConnectorMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ValidateCloudConnector, schemas.ValidateCloudConnectorRequest, schemas.ValidateCloudConnectorResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpValidateCloudConnector{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ValidateCloudConnector, schemas.ValidateCloudConnectorRequest, schemas.ValidateCloudConnectorResult), output: &ValidateCloudConnectorOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpValidateCloudConnector{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

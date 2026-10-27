@@ -4,8 +4,6 @@ package sqs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -62,19 +60,6 @@ type TagQueueInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TagQueueInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TagQueueRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TagQueueInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.QueueUrl != nil {
-		s.WriteString(schemas.TagQueueRequest_QueueUrl, *v.QueueUrl)
-	}
-	serializeTagMap(s, schemas.TagQueueRequest_Tags, v.Tags)
-}
-
 type TagQueueOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -82,26 +67,13 @@ type TagQueueOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TagQueueOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TagQueueOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *TagQueueOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationTagQueueMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TagQueue, schemas.TagQueueRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpTagQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TagQueue, schemas.TagQueueRequest, nil), output: &TagQueueOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpTagQueue{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

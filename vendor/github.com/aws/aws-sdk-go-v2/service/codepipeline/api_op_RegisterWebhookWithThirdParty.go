@@ -4,8 +4,6 @@ package codepipeline
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codepipeline/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type RegisterWebhookWithThirdPartyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RegisterWebhookWithThirdPartyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RegisterWebhookWithThirdPartyInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RegisterWebhookWithThirdPartyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.WebhookName != nil {
-		s.WriteString(schemas.RegisterWebhookWithThirdPartyInput_webhookName, *v.WebhookName)
-	}
-}
-
 type RegisterWebhookWithThirdPartyOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,29 +40,19 @@ type RegisterWebhookWithThirdPartyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RegisterWebhookWithThirdPartyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RegisterWebhookWithThirdPartyOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RegisterWebhookWithThirdPartyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RegisterWebhookWithThirdPartyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.RegisterWebhookWithThirdPartyOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRegisterWebhookWithThirdPartyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RegisterWebhookWithThirdParty, schemas.RegisterWebhookWithThirdPartyInput, schemas.RegisterWebhookWithThirdPartyOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRegisterWebhookWithThirdParty{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RegisterWebhookWithThirdParty, schemas.RegisterWebhookWithThirdPartyInput, schemas.RegisterWebhookWithThirdPartyOutput), output: &RegisterWebhookWithThirdPartyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRegisterWebhookWithThirdParty{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

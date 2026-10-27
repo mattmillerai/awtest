@@ -59,6 +59,93 @@ A complete service implementation template is provided at `cmd/awtest/services/_
 
 See `cmd/awtest/services/_template/README.md` for detailed instructions and `example_calls.go.reference` for an annotated real-world example.
 
+## Pinned aws-sdk-go-v2 service modules
+
+Recent releases of many `github.com/aws/aws-sdk-go-v2/service/*` modules include a `schemas` package whose `init()` builds the whole API shape schema at program start. The linker cannot dead-code-eliminate it, so awtest (which links only ~176 of the ~6,000 SDK operations) pays for every operation of every service. Measured on linux/amd64 with release flags (`-trimpath -ldflags "-s -w"`):
+
+| | binary | `-version` startup | `-version` RSS |
+|---|---|---|---|
+| Latest service modules | 48.3 MB | 41.9 ms | 65 MB |
+| Pinned (below) | 33.9 MB | 9.9 ms | 21 MB |
+
+Upstream tracking issue: [aws/aws-sdk-go-v2#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601).
+
+So every service module below is pinned to the **last release that has no `schemas` package**. Modules not listed (for example `s3`, `iam`, `ec2`, `sts`, `rds`, `sns`) have no schema-bearing release yet and track upstream normally. `aws-sdk-go-v2` core (`v1.47.4`), `config`, `credentials`, `smithy-go` and `aws/protocol/eventstream` are pinned separately and must not move with these.
+
+Guards:
+
+- Dependabot ignores each pinned module (see `.github/dependabot.yml`).
+- `TestNoSDKSchemasPackages` (`cmd/awtest/awsv2/schemas_guard_test.go`) fails if any vendored service module contains a `schemas` package.
+- The `size-guard` CI job (`internal/sizeguard`, run locally with `AWTEST_SIZE_GUARD=1 go test -count=1 -v ./internal/sizeguard/`) builds a release-flag linux/amd64 binary and fails above 36 MB, or if `awtest -version` uses more than 40 MB RSS.
+
+Notes: `cloudwatch` is also held back because v1.53+ uses the CBOR protocol, which the replay fixtures cannot speak; `cloudwatchlogs`/`kinesis` newer than the pins also need an eventstream bump.
+
+### Adding or bumping a service module
+
+Pick the newest version of the module that has no `schemas` directory in its module zip (`go mod download -json <module>@<version>`, then check `<Dir>/schemas`). Then run `go get <module>@<version>`, `go mod tidy`, `go mod vendor`, and verify the core/config/credentials/smithy pins in `go.mod` did not move.
+
+### Unpinning
+
+When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (schemas become dead-code-eliminable), or a security fix requires a newer release:
+
+1. `go get` the newer version, `go mod tidy`, `go mod vendor`.
+2. Add the service to `allowedSchemas` in `cmd/awtest/awsv2/schemas_guard_test.go` with a reason (or empty the map and delete the guard once upstream is fixed).
+3. Re-run `AWTEST_SIZE_GUARD=1 go test -count=1 -v ./internal/sizeguard/`; raise the limit in `internal/sizeguard/sizeguard_test.go` only deliberately.
+4. Remove the module from the `ignore:` list in `.github/dependabot.yml` and from the table below.
+
+### Pin table
+
+| Module (`github.com/aws/aws-sdk-go-v2/service/...`) | Pinned version |
+|---|---|
+| `acm` | `v1.46.1` |
+| `amplify` | `v1.44.1` |
+| `apigateway` | `v1.47.0` |
+| `appsync` | `v1.61.0` |
+| `athena` | `v1.62.1` |
+| `backup` | `v1.65.0` |
+| `batch` | `v1.76.0` |
+| `cloudtrail` | `v1.60.1` |
+| `cloudwatch` | `v1.52.8` |
+| `cloudwatchlogs` | `v1.87.0` |
+| `codebuild` | `v1.72.7` |
+| `codecommit` | `v1.36.5` |
+| `codedeploy` | `v1.40.1` |
+| `codepipeline` | `v1.49.7` |
+| `cognitoidentity` | `v1.38.1` |
+| `cognitoidentityprovider` | `v1.70.0` |
+| `configservice` | `v1.70.1` |
+| `directconnect` | `v1.51.0` |
+| `dynamodb` | `v1.68.0` |
+| `ecr` | `v1.56.0` |
+| `ecs` | `v1.98.0` |
+| `efs` | `v1.49.4` |
+| `eks` | `v1.99.0` |
+| `emr` | `v1.66.1` |
+| `eventbridge` | `v1.48.7` |
+| `glacier` | `v1.37.1` |
+| `glue` | `v1.160.0` |
+| `guardduty` | `v1.93.0` |
+| `iot` | `v1.80.1` |
+| `ivs` | `v1.55.7` |
+| `ivschat` | `v1.29.4` |
+| `ivsrealtime` | `v1.37.7` |
+| `kinesis` | `v1.54.0` |
+| `kms` | `v1.52.0` |
+| `lambda` | `v1.108.0` |
+| `mediaconvert` | `v1.104.0` |
+| `opensearch` | `v1.80.0` |
+| `organizations` | `v1.56.1` |
+| `rekognition` | `v1.60.3` |
+| `sagemaker` | `v1.270.1` |
+| `secretsmanager` | `v1.49.0` |
+| `securityhub` | `v1.81.0` |
+| `sfn` | `v1.50.0` |
+| `sqs` | `v1.48.1` |
+| `ssm` | `v1.79.3` |
+| `transcribe` | `v1.60.1` |
+| `waf` | `v1.38.4` |
+
+
 ## Code Standards
 
 ### Naming Conventions

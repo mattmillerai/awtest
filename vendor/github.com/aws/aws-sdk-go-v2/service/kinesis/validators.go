@@ -690,26 +690,6 @@ func (m *validateOpUpdateStreamMode) HandleInitialize(ctx context.Context, in mi
 	return next.HandleInitialize(ctx, in)
 }
 
-type validateOpUpdateStreamRecordDistributionStrategy struct {
-}
-
-func (*validateOpUpdateStreamRecordDistributionStrategy) ID() string {
-	return "OperationInputValidation"
-}
-
-func (m *validateOpUpdateStreamRecordDistributionStrategy) HandleInitialize(ctx context.Context, in middleware.InitializeInput, next middleware.InitializeHandler) (
-	out middleware.InitializeOutput, metadata middleware.Metadata, err error,
-) {
-	input, ok := in.Parameters.(*UpdateStreamRecordDistributionStrategyInput)
-	if !ok {
-		return out, metadata, fmt.Errorf("unknown input parameters type %T", in.Parameters)
-	}
-	if err := validateOpUpdateStreamRecordDistributionStrategyInput(input); err != nil {
-		return out, metadata, err
-	}
-	return next.HandleInitialize(ctx, in)
-}
-
 type validateOpUpdateStreamWarmThroughput struct {
 }
 
@@ -864,10 +844,6 @@ func addOpUpdateShardCountValidationMiddleware(stack *middleware.Stack) error {
 
 func addOpUpdateStreamModeValidationMiddleware(stack *middleware.Stack) error {
 	return stack.Initialize.Add(&validateOpUpdateStreamMode{}, middleware.After)
-}
-
-func addOpUpdateStreamRecordDistributionStrategyValidationMiddleware(stack *middleware.Stack) error {
-	return stack.Initialize.Add(&validateOpUpdateStreamRecordDistributionStrategy{}, middleware.After)
 }
 
 func addOpUpdateStreamWarmThroughputValidationMiddleware(stack *middleware.Stack) error {
@@ -1093,6 +1069,9 @@ func validatePutRecordsRequestEntry(v *types.PutRecordsRequestEntry) error {
 	invalidParams := smithy.InvalidParamsError{Context: "PutRecordsRequestEntry"}
 	if v.Data == nil {
 		invalidParams.Add(smithy.NewErrParamRequired("Data"))
+	}
+	if v.PartitionKey == nil {
+		invalidParams.Add(smithy.NewErrParamRequired("PartitionKey"))
 	}
 	if invalidParams.Len() > 0 {
 		return invalidParams
@@ -1680,6 +1659,9 @@ func validateOpPutRecordInput(v *PutRecordInput) error {
 	if v.Data == nil {
 		invalidParams.Add(smithy.NewErrParamRequired("Data"))
 	}
+	if v.PartitionKey == nil {
+		invalidParams.Add(smithy.NewErrParamRequired("PartitionKey"))
+	}
 	if invalidParams.Len() > 0 {
 		return invalidParams
 	} else {
@@ -1968,24 +1950,6 @@ func validateOpUpdateStreamModeInput(v *UpdateStreamModeInput) error {
 		if err := validateStreamModeDetails(v.StreamModeDetails); err != nil {
 			invalidParams.AddNested("StreamModeDetails", err.(smithy.InvalidParamsError))
 		}
-	}
-	if invalidParams.Len() > 0 {
-		return invalidParams
-	} else {
-		return nil
-	}
-}
-
-func validateOpUpdateStreamRecordDistributionStrategyInput(v *UpdateStreamRecordDistributionStrategyInput) error {
-	if v == nil {
-		return nil
-	}
-	invalidParams := smithy.InvalidParamsError{Context: "UpdateStreamRecordDistributionStrategyInput"}
-	if v.StreamARN == nil {
-		invalidParams.Add(smithy.NewErrParamRequired("StreamARN"))
-	}
-	if len(v.RecordDistributionStrategy) == 0 {
-		invalidParams.Add(smithy.NewErrParamRequired("RecordDistributionStrategy"))
 	}
 	if invalidParams.Len() > 0 {
 		return invalidParams

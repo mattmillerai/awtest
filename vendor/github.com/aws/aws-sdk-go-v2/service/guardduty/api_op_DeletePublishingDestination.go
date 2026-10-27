@@ -4,8 +4,6 @@ package guardduty
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/guardduty/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,21 +44,6 @@ type DeletePublishingDestinationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePublishingDestinationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePublishingDestinationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePublishingDestinationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DestinationId != nil {
-		s.WriteString(schemas.DeletePublishingDestinationRequest_DestinationId, *v.DestinationId)
-	}
-	if v.DetectorId != nil {
-		s.WriteString(schemas.DeletePublishingDestinationRequest_DetectorId, *v.DetectorId)
-	}
-}
-
 type DeletePublishingDestinationOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -68,26 +51,13 @@ type DeletePublishingDestinationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePublishingDestinationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePublishingDestinationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePublishingDestinationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeletePublishingDestinationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeletePublishingDestinationResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeletePublishingDestinationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePublishingDestination, schemas.DeletePublishingDestinationRequest, schemas.DeletePublishingDestinationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeletePublishingDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePublishingDestination, schemas.DeletePublishingDestinationRequest, schemas.DeletePublishingDestinationResponse), output: &DeletePublishingDestinationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeletePublishingDestination{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type ListIntegrationsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListIntegrationsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListIntegrationsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListIntegrationsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.IntegrationNamePrefix != nil {
-		s.WriteString(schemas.ListIntegrationsRequest_integrationNamePrefix, *v.IntegrationNamePrefix)
-	}
-	if v.IntegrationStatus != "" {
-		s.WriteString(schemas.ListIntegrationsRequest_integrationStatus, string(v.IntegrationStatus))
-	}
-	if v.IntegrationType != "" {
-		s.WriteString(schemas.ListIntegrationsRequest_integrationType, string(v.IntegrationType))
-	}
-}
-
 type ListIntegrationsOutput struct {
 
 	// An array, where each object in the array contains information about one
@@ -74,29 +54,13 @@ type ListIntegrationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListIntegrationsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListIntegrationsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListIntegrationsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeIntegrationSummaries(s, schemas.ListIntegrationsResponse_integrationSummaries, v.IntegrationSummaries)
-}
-func (v *ListIntegrationsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListIntegrationsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListIntegrationsResponse_integrationSummaries:
-			return deserializeIntegrationSummaries(d, schemas.ListIntegrationsResponse_integrationSummaries, &v.IntegrationSummaries)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListIntegrationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListIntegrations, schemas.ListIntegrationsRequest, schemas.ListIntegrationsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListIntegrations{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListIntegrations, schemas.ListIntegrationsRequest, schemas.ListIntegrationsResponse), output: &ListIntegrationsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListIntegrations{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

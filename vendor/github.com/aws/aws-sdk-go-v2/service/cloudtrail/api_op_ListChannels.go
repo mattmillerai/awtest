@@ -5,19 +5,11 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
-//
 // Lists the channels in the current account, and their source names.
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 func (c *Client) ListChannels(ctx context.Context, params *ListChannelsInput, optFns ...func(*Options)) (*ListChannelsOutput, error) {
 	if params == nil {
 		params = &ListChannelsInput{}
@@ -48,21 +40,6 @@ type ListChannelsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListChannelsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListChannelsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListChannelsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListChannelsRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListChannelsRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListChannelsOutput struct {
 
 	//  The list of channels in the account.
@@ -77,35 +54,13 @@ type ListChannelsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListChannelsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListChannelsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListChannelsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeChannels(s, schemas.ListChannelsResponse_Channels, v.Channels)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListChannelsResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListChannelsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListChannelsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListChannelsResponse_Channels:
-			return deserializeChannels(d, schemas.ListChannelsResponse_Channels, &v.Channels)
-		case schemas.ListChannelsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListChannelsResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListChannelsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListChannels, schemas.ListChannelsRequest, schemas.ListChannelsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListChannels{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListChannels, schemas.ListChannelsRequest, schemas.ListChannelsResponse), output: &ListChannelsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListChannels{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

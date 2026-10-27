@@ -5,9 +5,7 @@ package transcribe
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/transcribe/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	smithytime "github.com/aws/smithy-go/time"
 	smithywaiter "github.com/aws/smithy-go/waiter"
@@ -55,18 +53,6 @@ type GetCallAnalyticsJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetCallAnalyticsJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetCallAnalyticsJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetCallAnalyticsJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CallAnalyticsJobName != nil {
-		s.WriteString(schemas.GetCallAnalyticsJobRequest_CallAnalyticsJobName, *v.CallAnalyticsJobName)
-	}
-}
-
 type GetCallAnalyticsJobOutput struct {
 
 	// Provides detailed information about the specified Call Analytics job, including
@@ -79,34 +65,13 @@ type GetCallAnalyticsJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetCallAnalyticsJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetCallAnalyticsJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetCallAnalyticsJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CallAnalyticsJob != nil {
-		s.WriteStruct(schemas.GetCallAnalyticsJobResponse_CallAnalyticsJob)
-		v.CallAnalyticsJob.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetCallAnalyticsJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetCallAnalyticsJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetCallAnalyticsJobResponse_CallAnalyticsJob:
-			v.CallAnalyticsJob = &types.CallAnalyticsJob{}
-			return v.CallAnalyticsJob.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetCallAnalyticsJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetCallAnalyticsJob, schemas.GetCallAnalyticsJobRequest, schemas.GetCallAnalyticsJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetCallAnalyticsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetCallAnalyticsJob, schemas.GetCallAnalyticsJobRequest, schemas.GetCallAnalyticsJobResponse), output: &GetCallAnalyticsJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetCallAnalyticsJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

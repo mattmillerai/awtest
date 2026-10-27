@@ -4,8 +4,6 @@ package appsync
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteGraphqlApiInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteGraphqlApiInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteGraphqlApiRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteGraphqlApiInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApiId != nil {
-		s.WriteString(schemas.DeleteGraphqlApiRequest_apiId, *v.ApiId)
-	}
-}
-
 type DeleteGraphqlApiOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteGraphqlApiOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteGraphqlApiOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteGraphqlApiResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteGraphqlApiOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteGraphqlApiOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteGraphqlApiResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteGraphqlApiMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteGraphqlApi, schemas.DeleteGraphqlApiRequest, schemas.DeleteGraphqlApiResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteGraphqlApi{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteGraphqlApi, schemas.DeleteGraphqlApiRequest, schemas.DeleteGraphqlApiResponse), output: &DeleteGraphqlApiOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteGraphqlApi{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

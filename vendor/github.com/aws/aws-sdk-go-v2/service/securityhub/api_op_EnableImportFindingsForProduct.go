@@ -4,8 +4,6 @@ package securityhub
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/securityhub/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type EnableImportFindingsForProductInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableImportFindingsForProductInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.EnableImportFindingsForProductRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableImportFindingsForProductInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ProductArn != nil {
-		s.WriteString(schemas.EnableImportFindingsForProductRequest_ProductArn, *v.ProductArn)
-	}
-}
-
 type EnableImportFindingsForProductOutput struct {
 
 	// The ARN of your subscription to the product to enable integrations for.
@@ -62,32 +48,13 @@ type EnableImportFindingsForProductOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *EnableImportFindingsForProductOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.EnableImportFindingsForProductResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *EnableImportFindingsForProductOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ProductSubscriptionArn != nil {
-		s.WriteString(schemas.EnableImportFindingsForProductResponse_ProductSubscriptionArn, *v.ProductSubscriptionArn)
-	}
-}
-func (v *EnableImportFindingsForProductOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.EnableImportFindingsForProductResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.EnableImportFindingsForProductResponse_ProductSubscriptionArn:
-			v.ProductSubscriptionArn = new(string)
-			return d.ReadString(schemas.EnableImportFindingsForProductResponse_ProductSubscriptionArn, v.ProductSubscriptionArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationEnableImportFindingsForProductMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableImportFindingsForProduct, schemas.EnableImportFindingsForProductRequest, schemas.EnableImportFindingsForProductResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpEnableImportFindingsForProduct{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.EnableImportFindingsForProduct, schemas.EnableImportFindingsForProductRequest, schemas.EnableImportFindingsForProductResponse), output: &EnableImportFindingsForProductOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpEnableImportFindingsForProduct{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

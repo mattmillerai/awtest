@@ -5,9 +5,7 @@ package sagemaker
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -77,45 +75,6 @@ type ListCompilationJobsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListCompilationJobsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListCompilationJobsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListCompilationJobsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CreationTimeAfter != nil {
-		s.WriteTime(schemas.ListCompilationJobsRequest_CreationTimeAfter, *v.CreationTimeAfter)
-	}
-	if v.CreationTimeBefore != nil {
-		s.WriteTime(schemas.ListCompilationJobsRequest_CreationTimeBefore, *v.CreationTimeBefore)
-	}
-	if v.LastModifiedTimeAfter != nil {
-		s.WriteTime(schemas.ListCompilationJobsRequest_LastModifiedTimeAfter, *v.LastModifiedTimeAfter)
-	}
-	if v.LastModifiedTimeBefore != nil {
-		s.WriteTime(schemas.ListCompilationJobsRequest_LastModifiedTimeBefore, *v.LastModifiedTimeBefore)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListCompilationJobsRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NameContains != nil {
-		s.WriteString(schemas.ListCompilationJobsRequest_NameContains, *v.NameContains)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListCompilationJobsRequest_NextToken, *v.NextToken)
-	}
-	if v.SortBy != "" {
-		s.WriteString(schemas.ListCompilationJobsRequest_SortBy, string(v.SortBy))
-	}
-	if v.SortOrder != "" {
-		s.WriteString(schemas.ListCompilationJobsRequest_SortOrder, string(v.SortOrder))
-	}
-	if v.StatusEquals != "" {
-		s.WriteString(schemas.ListCompilationJobsRequest_StatusEquals, string(v.StatusEquals))
-	}
-}
-
 type ListCompilationJobsOutput struct {
 
 	// An array of [CompilationJobSummary] objects, each describing a model compilation job.
@@ -136,35 +95,13 @@ type ListCompilationJobsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListCompilationJobsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListCompilationJobsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListCompilationJobsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeCompilationJobSummaries(s, schemas.ListCompilationJobsResponse_CompilationJobSummaries, v.CompilationJobSummaries)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListCompilationJobsResponse_NextToken, *v.NextToken)
-	}
-}
-func (v *ListCompilationJobsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListCompilationJobsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListCompilationJobsResponse_CompilationJobSummaries:
-			return deserializeCompilationJobSummaries(d, schemas.ListCompilationJobsResponse_CompilationJobSummaries, &v.CompilationJobSummaries)
-		case schemas.ListCompilationJobsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListCompilationJobsResponse_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListCompilationJobsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListCompilationJobs, schemas.ListCompilationJobsRequest, schemas.ListCompilationJobsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListCompilationJobs{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListCompilationJobs, schemas.ListCompilationJobsRequest, schemas.ListCompilationJobsResponse), output: &ListCompilationJobsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListCompilationJobs{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

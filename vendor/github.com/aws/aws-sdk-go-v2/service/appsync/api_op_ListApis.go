@@ -5,9 +5,7 @@ package appsync
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/appsync/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -42,21 +40,6 @@ type ListApisInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListApisInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListApisRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListApisInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != 0 {
-		s.WriteInt32(schemas.ListApisRequest_maxResults, v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListApisRequest_nextToken, *v.NextToken)
-	}
-}
-
 type ListApisOutput struct {
 
 	// The Api objects.
@@ -72,35 +55,13 @@ type ListApisOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListApisOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListApisResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListApisOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeApis(s, schemas.ListApisResponse_apis, v.Apis)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListApisResponse_nextToken, *v.NextToken)
-	}
-}
-func (v *ListApisOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListApisResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListApisResponse_apis:
-			return deserializeApis(d, schemas.ListApisResponse_apis, &v.Apis)
-		case schemas.ListApisResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListApisResponse_nextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListApisMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListApis, schemas.ListApisRequest, schemas.ListApisResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListApis{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListApis, schemas.ListApisRequest, schemas.ListApisResponse), output: &ListApisOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListApis{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

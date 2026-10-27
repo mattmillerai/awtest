@@ -4,8 +4,6 @@ package glue
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/glue/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type GetFormTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetFormTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetFormTypeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetFormTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Identifier != nil {
-		s.WriteString(schemas.GetFormTypeRequest_Identifier, *v.Identifier)
-	}
-}
-
 type GetFormTypeOutput struct {
 
 	// The identifier of the form type.
@@ -64,44 +50,13 @@ type GetFormTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetFormTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetFormTypeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetFormTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Id != nil {
-		s.WriteString(schemas.GetFormTypeResponse_Id, *v.Id)
-	}
-	if v.Name != nil {
-		s.WriteString(schemas.GetFormTypeResponse_Name, *v.Name)
-	}
-	if v.Schema != nil {
-		s.WriteString(schemas.GetFormTypeResponse_Schema, *v.Schema)
-	}
-}
-func (v *GetFormTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetFormTypeResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetFormTypeResponse_Id:
-			v.Id = new(string)
-			return d.ReadString(schemas.GetFormTypeResponse_Id, v.Id)
-		case schemas.GetFormTypeResponse_Name:
-			v.Name = new(string)
-			return d.ReadString(schemas.GetFormTypeResponse_Name, v.Name)
-		case schemas.GetFormTypeResponse_Schema:
-			v.Schema = new(string)
-			return d.ReadString(schemas.GetFormTypeResponse_Schema, v.Schema)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetFormTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetFormType, schemas.GetFormTypeRequest, schemas.GetFormTypeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetFormType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetFormType, schemas.GetFormTypeRequest, schemas.GetFormTypeResponse), output: &GetFormTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetFormType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

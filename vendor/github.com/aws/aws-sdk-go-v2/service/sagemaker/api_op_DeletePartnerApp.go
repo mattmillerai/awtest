@@ -5,8 +5,6 @@ package sagemaker
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,21 +37,6 @@ type DeletePartnerAppInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePartnerAppInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePartnerAppRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePartnerAppInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Arn != nil {
-		s.WriteString(schemas.DeletePartnerAppRequest_Arn, *v.Arn)
-	}
-	if v.ClientToken != nil {
-		s.WriteString(schemas.DeletePartnerAppRequest_ClientToken, *v.ClientToken)
-	}
-}
-
 type DeletePartnerAppOutput struct {
 
 	// The ARN of the SageMaker Partner AI App that was deleted.
@@ -65,32 +48,13 @@ type DeletePartnerAppOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeletePartnerAppOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeletePartnerAppResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeletePartnerAppOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Arn != nil {
-		s.WriteString(schemas.DeletePartnerAppResponse_Arn, *v.Arn)
-	}
-}
-func (v *DeletePartnerAppOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeletePartnerAppResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeletePartnerAppResponse_Arn:
-			v.Arn = new(string)
-			return d.ReadString(schemas.DeletePartnerAppResponse_Arn, v.Arn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeletePartnerAppMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePartnerApp, schemas.DeletePartnerAppRequest, schemas.DeletePartnerAppResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeletePartnerApp{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeletePartnerApp, schemas.DeletePartnerAppRequest, schemas.DeletePartnerAppResponse), output: &DeletePartnerAppOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeletePartnerApp{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

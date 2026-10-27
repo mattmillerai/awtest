@@ -4,8 +4,6 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,18 +39,6 @@ type DeleteDeliveryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDeliveryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteDeliveryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDeliveryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Id != nil {
-		s.WriteString(schemas.DeleteDeliveryRequest_id, *v.Id)
-	}
-}
-
 type DeleteDeliveryOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -60,26 +46,13 @@ type DeleteDeliveryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDeliveryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDeliveryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteDeliveryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteDeliveryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDelivery, schemas.DeleteDeliveryRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteDelivery{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDelivery, schemas.DeleteDeliveryRequest, nil), output: &DeleteDeliveryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteDelivery{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

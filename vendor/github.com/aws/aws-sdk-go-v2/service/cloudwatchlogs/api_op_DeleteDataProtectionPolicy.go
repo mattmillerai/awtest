@@ -4,8 +4,6 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,18 +38,6 @@ type DeleteDataProtectionPolicyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDataProtectionPolicyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteDataProtectionPolicyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDataProtectionPolicyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LogGroupIdentifier != nil {
-		s.WriteString(schemas.DeleteDataProtectionPolicyRequest_logGroupIdentifier, *v.LogGroupIdentifier)
-	}
-}
-
 type DeleteDataProtectionPolicyOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -59,26 +45,13 @@ type DeleteDataProtectionPolicyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteDataProtectionPolicyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteDataProtectionPolicyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteDataProtectionPolicyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteDataProtectionPolicyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDataProtectionPolicy, schemas.DeleteDataProtectionPolicyRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteDataProtectionPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteDataProtectionPolicy, schemas.DeleteDataProtectionPolicyRequest, nil), output: &DeleteDataProtectionPolicyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteDataProtectionPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

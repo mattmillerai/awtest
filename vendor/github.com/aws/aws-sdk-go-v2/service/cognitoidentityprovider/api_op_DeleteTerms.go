@@ -4,8 +4,6 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -55,21 +53,6 @@ type DeleteTermsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTermsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTermsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTermsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TermsId != nil {
-		s.WriteString(schemas.DeleteTermsRequest_TermsId, *v.TermsId)
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.DeleteTermsRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 type DeleteTermsOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -77,26 +60,13 @@ type DeleteTermsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTermsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTermsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteTermsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteTermsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTerms, schemas.DeleteTermsRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteTerms{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTerms, schemas.DeleteTermsRequest, nil), output: &DeleteTermsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteTerms{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

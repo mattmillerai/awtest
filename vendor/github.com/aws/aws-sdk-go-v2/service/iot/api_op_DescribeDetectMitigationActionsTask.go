@@ -4,9 +4,7 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -47,18 +45,6 @@ type DescribeDetectMitigationActionsTaskInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDetectMitigationActionsTaskInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDetectMitigationActionsTaskRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDetectMitigationActionsTaskInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TaskId != nil {
-		s.WriteString(schemas.DescribeDetectMitigationActionsTaskRequest_taskId, *v.TaskId)
-	}
-}
-
 type DescribeDetectMitigationActionsTaskOutput struct {
 
 	//  The description of a task.
@@ -70,34 +56,13 @@ type DescribeDetectMitigationActionsTaskOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeDetectMitigationActionsTaskOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeDetectMitigationActionsTaskResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeDetectMitigationActionsTaskOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TaskSummary != nil {
-		s.WriteStruct(schemas.DescribeDetectMitigationActionsTaskResponse_taskSummary)
-		v.TaskSummary.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeDetectMitigationActionsTaskOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeDetectMitigationActionsTaskResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeDetectMitigationActionsTaskResponse_taskSummary:
-			v.TaskSummary = &types.DetectMitigationActionsTaskSummary{}
-			return v.TaskSummary.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeDetectMitigationActionsTaskMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDetectMitigationActionsTask, schemas.DescribeDetectMitigationActionsTaskRequest, schemas.DescribeDetectMitigationActionsTaskResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDescribeDetectMitigationActionsTask{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeDetectMitigationActionsTask, schemas.DescribeDetectMitigationActionsTaskRequest, schemas.DescribeDetectMitigationActionsTaskResponse), output: &DescribeDetectMitigationActionsTaskOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDescribeDetectMitigationActionsTask{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

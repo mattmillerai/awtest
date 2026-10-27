@@ -4,9 +4,7 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,24 +42,6 @@ type StartCommandExecutionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCommandExecutionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCommandExecutionInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCommandExecutionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Command != nil {
-		s.WriteString(schemas.StartCommandExecutionInput_command, *v.Command)
-	}
-	if v.SandboxId != nil {
-		s.WriteString(schemas.StartCommandExecutionInput_sandboxId, *v.SandboxId)
-	}
-	if v.Type != "" {
-		s.WriteString(schemas.StartCommandExecutionInput_type, string(v.Type))
-	}
-}
-
 type StartCommandExecutionOutput struct {
 
 	// Information about the requested command executions.
@@ -73,37 +53,19 @@ type StartCommandExecutionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartCommandExecutionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartCommandExecutionOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartCommandExecutionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CommandExecution != nil {
-		s.WriteStruct(schemas.StartCommandExecutionOutput_commandExecution)
-		v.CommandExecution.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *StartCommandExecutionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartCommandExecutionOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StartCommandExecutionOutput_commandExecution:
-			v.CommandExecution = &types.CommandExecution{}
-			return v.CommandExecution.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartCommandExecutionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCommandExecution, schemas.StartCommandExecutionInput, schemas.StartCommandExecutionOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStartCommandExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartCommandExecution, schemas.StartCommandExecutionInput, schemas.StartCommandExecutionOutput), output: &StartCommandExecutionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStartCommandExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

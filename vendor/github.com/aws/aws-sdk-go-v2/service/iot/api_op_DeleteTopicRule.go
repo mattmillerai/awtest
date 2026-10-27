@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,18 +38,6 @@ type DeleteTopicRuleInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTopicRuleInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteTopicRuleRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTopicRuleInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RuleName != nil {
-		s.WriteString(schemas.DeleteTopicRuleRequest_ruleName, *v.RuleName)
-	}
-}
-
 type DeleteTopicRuleOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -59,26 +45,13 @@ type DeleteTopicRuleOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteTopicRuleOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteTopicRuleOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteTopicRuleOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteTopicRuleMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTopicRule, schemas.DeleteTopicRuleRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteTopicRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteTopicRule, schemas.DeleteTopicRuleRequest, nil), output: &DeleteTopicRuleOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteTopicRule{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

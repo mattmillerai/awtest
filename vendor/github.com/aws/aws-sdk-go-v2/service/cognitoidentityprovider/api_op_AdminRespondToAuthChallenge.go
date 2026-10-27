@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -329,39 +327,6 @@ type AdminRespondToAuthChallengeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AdminRespondToAuthChallengeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AdminRespondToAuthChallengeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AdminRespondToAuthChallengeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AnalyticsMetadata != nil {
-		s.WriteStruct(schemas.AdminRespondToAuthChallengeRequest_AnalyticsMetadata)
-		v.AnalyticsMetadata.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.ChallengeName != "" {
-		s.WriteString(schemas.AdminRespondToAuthChallengeRequest_ChallengeName, string(v.ChallengeName))
-	}
-	serializeChallengeResponsesType(s, schemas.AdminRespondToAuthChallengeRequest_ChallengeResponses, v.ChallengeResponses)
-	if v.ClientId != nil {
-		s.WriteString(schemas.AdminRespondToAuthChallengeRequest_ClientId, *v.ClientId)
-	}
-	serializeClientMetadataType(s, schemas.AdminRespondToAuthChallengeRequest_ClientMetadata, v.ClientMetadata)
-	if v.ContextData != nil {
-		s.WriteStruct(schemas.AdminRespondToAuthChallengeRequest_ContextData)
-		v.ContextData.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.Session != nil {
-		s.WriteString(schemas.AdminRespondToAuthChallengeRequest_Session, *v.Session)
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.AdminRespondToAuthChallengeRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 // Responds to the authentication challenge, as an administrator.
 type AdminRespondToAuthChallengeOutput struct {
 
@@ -369,14 +334,6 @@ type AdminRespondToAuthChallengeOutput struct {
 	// passed all challenges, Amazon Cognito returns an AuthenticationResult with the
 	// JSON web tokens (JWTs) that indicate successful sign-in.
 	AuthenticationResult *types.AuthenticationResultType
-
-	// This response parameter lists the available authentication challenges that
-	// users can select from in [choice-based authentication]. For example, they might be able to choose between
-	// passkey authentication, a one-time password from an SMS message, and a
-	// traditional password.
-	//
-	// [choice-based authentication]: https://docs.aws.amazon.com/cognito/latest/developerguide/authentication-flows-selection-sdk.html#authentication-flows-selection-choice
-	AvailableChallenges []types.ChallengeNameType
 
 	// The name of the next challenge that you must respond to.
 	//
@@ -476,56 +433,13 @@ type AdminRespondToAuthChallengeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AdminRespondToAuthChallengeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AdminRespondToAuthChallengeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AdminRespondToAuthChallengeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AuthenticationResult != nil {
-		s.WriteStruct(schemas.AdminRespondToAuthChallengeResponse_AuthenticationResult)
-		v.AuthenticationResult.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	serializeAvailableChallengeListType(s, schemas.AdminRespondToAuthChallengeResponse_AvailableChallenges, v.AvailableChallenges)
-	if v.ChallengeName != "" {
-		s.WriteString(schemas.AdminRespondToAuthChallengeResponse_ChallengeName, string(v.ChallengeName))
-	}
-	serializeChallengeParametersType(s, schemas.AdminRespondToAuthChallengeResponse_ChallengeParameters, v.ChallengeParameters)
-	if v.Session != nil {
-		s.WriteString(schemas.AdminRespondToAuthChallengeResponse_Session, *v.Session)
-	}
-}
-func (v *AdminRespondToAuthChallengeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.AdminRespondToAuthChallengeResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.AdminRespondToAuthChallengeResponse_AuthenticationResult:
-			v.AuthenticationResult = &types.AuthenticationResultType{}
-			return v.AuthenticationResult.Deserialize(d)
-		case schemas.AdminRespondToAuthChallengeResponse_AvailableChallenges:
-			return deserializeAvailableChallengeListType(d, schemas.AdminRespondToAuthChallengeResponse_AvailableChallenges, &v.AvailableChallenges)
-		case schemas.AdminRespondToAuthChallengeResponse_ChallengeName:
-			var ev string
-			if err := d.ReadString(schemas.AdminRespondToAuthChallengeResponse_ChallengeName, &ev); err != nil {
-				return err
-			}
-			v.ChallengeName = types.ChallengeNameType(ev)
-			return nil
-		case schemas.AdminRespondToAuthChallengeResponse_ChallengeParameters:
-			return deserializeChallengeParametersType(d, schemas.AdminRespondToAuthChallengeResponse_ChallengeParameters, &v.ChallengeParameters)
-		case schemas.AdminRespondToAuthChallengeResponse_Session:
-			v.Session = new(string)
-			return d.ReadString(schemas.AdminRespondToAuthChallengeResponse_Session, v.Session)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAdminRespondToAuthChallengeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AdminRespondToAuthChallenge, schemas.AdminRespondToAuthChallengeRequest, schemas.AdminRespondToAuthChallengeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpAdminRespondToAuthChallenge{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AdminRespondToAuthChallenge, schemas.AdminRespondToAuthChallengeRequest, schemas.AdminRespondToAuthChallengeResponse), output: &AdminRespondToAuthChallengeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpAdminRespondToAuthChallenge{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

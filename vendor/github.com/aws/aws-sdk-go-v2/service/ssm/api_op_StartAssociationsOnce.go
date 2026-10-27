@@ -4,8 +4,6 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,16 +34,6 @@ type StartAssociationsOnceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartAssociationsOnceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartAssociationsOnceRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartAssociationsOnceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeAssociationIdList(s, schemas.StartAssociationsOnceRequest_AssociationIds, v.AssociationIds)
-}
-
 type StartAssociationsOnceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -53,26 +41,13 @@ type StartAssociationsOnceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartAssociationsOnceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartAssociationsOnceResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartAssociationsOnceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StartAssociationsOnceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartAssociationsOnceResult, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartAssociationsOnceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartAssociationsOnce, schemas.StartAssociationsOnceRequest, schemas.StartAssociationsOnceResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStartAssociationsOnce{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartAssociationsOnce, schemas.StartAssociationsOnceRequest, schemas.StartAssociationsOnceResult), output: &StartAssociationsOnceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStartAssociationsOnce{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

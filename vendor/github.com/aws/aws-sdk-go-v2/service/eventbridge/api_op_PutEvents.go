@@ -5,16 +5,14 @@ package eventbridge
 import (
 	"context"
 	ebcust "github.com/aws/aws-sdk-go-v2/service/eventbridge/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
 // Sends custom events to Amazon EventBridge so that they can be matched to rules.
 //
 // You can batch multiple event entries into one request for efficiency. However,
-// the total entry size must be less than 1MB. You can calculate the entry size
+// the total entry size must be less than 256KB. You can calculate the entry size
 // before you send the events. For more information, see [Calculating PutEvents event entry size]in the Amazon EventBridge
 // User Guide .
 //
@@ -59,18 +57,6 @@ type PutEventsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutEventsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutEventsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutEventsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EndpointId != nil {
-		s.WriteString(schemas.PutEventsRequest_EndpointId, *v.EndpointId)
-	}
-	serializePutEventsRequestEntryList(s, schemas.PutEventsRequest_Entries, v.Entries)
-}
 func (in *PutEventsInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.EndpointId = in.EndpointId
@@ -96,37 +82,19 @@ type PutEventsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutEventsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutEventsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutEventsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializePutEventsResultEntryList(s, schemas.PutEventsResponse_Entries, v.Entries)
-	if v.FailedEntryCount != 0 {
-		s.WriteInt32(schemas.PutEventsResponse_FailedEntryCount, v.FailedEntryCount)
-	}
-}
-func (v *PutEventsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutEventsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.PutEventsResponse_Entries:
-			return deserializePutEventsResultEntryList(d, schemas.PutEventsResponse_Entries, &v.Entries)
-		case schemas.PutEventsResponse_FailedEntryCount:
-			return d.ReadInt32(schemas.PutEventsResponse_FailedEntryCount, &v.FailedEntryCount)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutEventsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutEvents, schemas.PutEventsRequest, schemas.PutEventsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutEvents{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutEvents, schemas.PutEventsRequest, schemas.PutEventsResponse), output: &PutEventsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutEvents{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

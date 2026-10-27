@@ -4,9 +4,7 @@ package ecs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ecs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -52,21 +50,6 @@ type DeleteAccountSettingInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccountSettingInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAccountSettingRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccountSettingInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != "" {
-		s.WriteString(schemas.DeleteAccountSettingRequest_name, string(v.Name))
-	}
-	if v.PrincipalArn != nil {
-		s.WriteString(schemas.DeleteAccountSettingRequest_principalArn, *v.PrincipalArn)
-	}
-}
-
 type DeleteAccountSettingOutput struct {
 
 	// The account setting for the specified principal ARN.
@@ -78,34 +61,13 @@ type DeleteAccountSettingOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccountSettingOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAccountSettingResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccountSettingOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Setting != nil {
-		s.WriteStruct(schemas.DeleteAccountSettingResponse_setting)
-		v.Setting.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeleteAccountSettingOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteAccountSettingResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteAccountSettingResponse_setting:
-			v.Setting = &types.Setting{}
-			return v.Setting.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteAccountSettingMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccountSetting, schemas.DeleteAccountSettingRequest, schemas.DeleteAccountSettingResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteAccountSetting{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccountSetting, schemas.DeleteAccountSettingRequest, schemas.DeleteAccountSettingResponse), output: &DeleteAccountSettingOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteAccountSetting{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,15 +4,15 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
 // Issues an access token for machine-to-machine (M2M) authorization. Your app
 // client provides its client ID and secret, and receives an access token that
-// authorizes requests to your resource servers.
+// authorizes requests to your resource servers. GetClientToken provides the same
+// functionality as the OAuth2 client-credentials grant; both authorize an
+// application rather than a user.
 //
 // To use this operation, you must configure the app client with a client secret
 // and enable the ALLOW_CLIENT_TOKEN_AUTH authentication flow. The
@@ -94,23 +94,6 @@ type GetClientTokenInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetClientTokenInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetClientTokenRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetClientTokenInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientId != nil {
-		s.WriteString(schemas.GetClientTokenRequest_ClientId, *v.ClientId)
-	}
-	serializeClientMetadataType(s, schemas.GetClientTokenRequest_ClientMetadata, v.ClientMetadata)
-	serializeScopeListType(s, schemas.GetClientTokenRequest_Scopes, v.Scopes)
-	if v.Secret != nil {
-		s.WriteString(schemas.GetClientTokenRequest_Secret, *v.Secret)
-	}
-}
-
 type GetClientTokenOutput struct {
 
 	// The access token that Amazon Cognito issues for the app client, and its
@@ -123,34 +106,13 @@ type GetClientTokenOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetClientTokenOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetClientTokenResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetClientTokenOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientAuthenticationResult != nil {
-		s.WriteStruct(schemas.GetClientTokenResponse_ClientAuthenticationResult)
-		v.ClientAuthenticationResult.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetClientTokenOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetClientTokenResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetClientTokenResponse_ClientAuthenticationResult:
-			v.ClientAuthenticationResult = &types.ClientAuthenticationResultType{}
-			return v.ClientAuthenticationResult.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetClientTokenMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetClientToken, schemas.GetClientTokenRequest, schemas.GetClientTokenResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetClientToken{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetClientToken, schemas.GetClientTokenRequest, schemas.GetClientTokenResponse), output: &GetClientTokenOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetClientToken{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

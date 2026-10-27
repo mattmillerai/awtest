@@ -4,8 +4,6 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -38,18 +36,6 @@ type DeleteEvaluationResultsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteEvaluationResultsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteEvaluationResultsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteEvaluationResultsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ConfigRuleName != nil {
-		s.WriteString(schemas.DeleteEvaluationResultsRequest_ConfigRuleName, *v.ConfigRuleName)
-	}
-}
-
 // The output when you delete the evaluation results for the specified Config rule.
 type DeleteEvaluationResultsOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -58,26 +44,13 @@ type DeleteEvaluationResultsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteEvaluationResultsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteEvaluationResultsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteEvaluationResultsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteEvaluationResultsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteEvaluationResultsResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteEvaluationResultsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteEvaluationResults, schemas.DeleteEvaluationResultsRequest, schemas.DeleteEvaluationResultsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteEvaluationResults{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteEvaluationResults, schemas.DeleteEvaluationResultsRequest, schemas.DeleteEvaluationResultsResponse), output: &DeleteEvaluationResultsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteEvaluationResults{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -5,9 +5,7 @@ package guardduty
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/guardduty/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/guardduty/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,25 +48,6 @@ type CreateCustomDetectionRuleAssociationInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateCustomDetectionRuleAssociationInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateCustomDetectionRuleAssociationRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateCustomDetectionRuleAssociationInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientToken != nil {
-		s.WriteString(schemas.CreateCustomDetectionRuleAssociationRequest_ClientToken, *v.ClientToken)
-	}
-	if v.Mode != "" {
-		s.WriteString(schemas.CreateCustomDetectionRuleAssociationRequest_Mode, string(v.Mode))
-	}
-	if v.RuleId != nil {
-		s.WriteString(schemas.CreateCustomDetectionRuleAssociationRequest_RuleId, *v.RuleId)
-	}
-	serializeTagMap(s, schemas.CreateCustomDetectionRuleAssociationRequest_Tags, v.Tags)
-}
-
 type CreateCustomDetectionRuleAssociationOutput struct {
 
 	// The details of the newly created custom detection rule association.
@@ -82,34 +61,13 @@ type CreateCustomDetectionRuleAssociationOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateCustomDetectionRuleAssociationOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateCustomDetectionRuleAssociationResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateCustomDetectionRuleAssociationOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RuleAssociation != nil {
-		s.WriteStruct(schemas.CreateCustomDetectionRuleAssociationResponse_RuleAssociation)
-		v.RuleAssociation.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *CreateCustomDetectionRuleAssociationOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateCustomDetectionRuleAssociationResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateCustomDetectionRuleAssociationResponse_RuleAssociation:
-			v.RuleAssociation = &types.AssociationDetail{}
-			return v.RuleAssociation.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateCustomDetectionRuleAssociationMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateCustomDetectionRuleAssociation, schemas.CreateCustomDetectionRuleAssociationRequest, schemas.CreateCustomDetectionRuleAssociationResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpCreateCustomDetectionRuleAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateCustomDetectionRuleAssociation, schemas.CreateCustomDetectionRuleAssociationRequest, schemas.CreateCustomDetectionRuleAssociationResponse), output: &CreateCustomDetectionRuleAssociationOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpCreateCustomDetectionRuleAssociation{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package emr
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/emr/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/emr/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -46,23 +44,6 @@ type ModifyInstanceFleetInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ModifyInstanceFleetInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ModifyInstanceFleetInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ModifyInstanceFleetInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterId != nil {
-		s.WriteString(schemas.ModifyInstanceFleetInput_ClusterId, *v.ClusterId)
-	}
-	if v.InstanceFleet != nil {
-		s.WriteStruct(schemas.ModifyInstanceFleetInput_InstanceFleet)
-		v.InstanceFleet.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-
 type ModifyInstanceFleetOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -70,26 +51,13 @@ type ModifyInstanceFleetOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ModifyInstanceFleetOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ModifyInstanceFleetOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *ModifyInstanceFleetOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationModifyInstanceFleetMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ModifyInstanceFleet, schemas.ModifyInstanceFleetInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpModifyInstanceFleet{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ModifyInstanceFleet, schemas.ModifyInstanceFleetInput, nil), output: &ModifyInstanceFleetOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpModifyInstanceFleet{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

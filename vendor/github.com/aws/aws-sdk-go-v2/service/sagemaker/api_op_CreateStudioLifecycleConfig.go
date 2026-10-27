@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -52,25 +50,6 @@ type CreateStudioLifecycleConfigInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateStudioLifecycleConfigInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateStudioLifecycleConfigRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateStudioLifecycleConfigInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.StudioLifecycleConfigAppType != "" {
-		s.WriteString(schemas.CreateStudioLifecycleConfigRequest_StudioLifecycleConfigAppType, string(v.StudioLifecycleConfigAppType))
-	}
-	if v.StudioLifecycleConfigContent != nil {
-		s.WriteString(schemas.CreateStudioLifecycleConfigRequest_StudioLifecycleConfigContent, *v.StudioLifecycleConfigContent)
-	}
-	if v.StudioLifecycleConfigName != nil {
-		s.WriteString(schemas.CreateStudioLifecycleConfigRequest_StudioLifecycleConfigName, *v.StudioLifecycleConfigName)
-	}
-	serializeTagList(s, schemas.CreateStudioLifecycleConfigRequest_Tags, v.Tags)
-}
-
 type CreateStudioLifecycleConfigOutput struct {
 
 	// The ARN of your created Lifecycle Configuration.
@@ -82,32 +61,13 @@ type CreateStudioLifecycleConfigOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateStudioLifecycleConfigOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateStudioLifecycleConfigResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateStudioLifecycleConfigOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.StudioLifecycleConfigArn != nil {
-		s.WriteString(schemas.CreateStudioLifecycleConfigResponse_StudioLifecycleConfigArn, *v.StudioLifecycleConfigArn)
-	}
-}
-func (v *CreateStudioLifecycleConfigOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateStudioLifecycleConfigResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateStudioLifecycleConfigResponse_StudioLifecycleConfigArn:
-			v.StudioLifecycleConfigArn = new(string)
-			return d.ReadString(schemas.CreateStudioLifecycleConfigResponse_StudioLifecycleConfigArn, v.StudioLifecycleConfigArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateStudioLifecycleConfigMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateStudioLifecycleConfig, schemas.CreateStudioLifecycleConfigRequest, schemas.CreateStudioLifecycleConfigResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateStudioLifecycleConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateStudioLifecycleConfig, schemas.CreateStudioLifecycleConfigRequest, schemas.CreateStudioLifecycleConfigResponse), output: &CreateStudioLifecycleConfigOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateStudioLifecycleConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

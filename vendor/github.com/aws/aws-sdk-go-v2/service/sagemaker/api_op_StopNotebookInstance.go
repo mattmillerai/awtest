@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,18 +41,6 @@ type StopNotebookInstanceInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopNotebookInstanceInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopNotebookInstanceInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopNotebookInstanceInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NotebookInstanceName != nil {
-		s.WriteString(schemas.StopNotebookInstanceInput_NotebookInstanceName, *v.NotebookInstanceName)
-	}
-}
-
 type StopNotebookInstanceOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -62,26 +48,13 @@ type StopNotebookInstanceOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopNotebookInstanceOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopNotebookInstanceOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopNotebookInstanceOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopNotebookInstanceMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopNotebookInstance, schemas.StopNotebookInstanceInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopNotebookInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopNotebookInstance, schemas.StopNotebookInstanceInput, nil), output: &StopNotebookInstanceOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopNotebookInstance{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

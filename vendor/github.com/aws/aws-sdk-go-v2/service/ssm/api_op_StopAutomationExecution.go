@@ -4,9 +4,7 @@ package ssm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ssm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,21 +38,6 @@ type StopAutomationExecutionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopAutomationExecutionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopAutomationExecutionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopAutomationExecutionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AutomationExecutionId != nil {
-		s.WriteString(schemas.StopAutomationExecutionRequest_AutomationExecutionId, *v.AutomationExecutionId)
-	}
-	if v.Type != "" {
-		s.WriteString(schemas.StopAutomationExecutionRequest_Type, string(v.Type))
-	}
-}
-
 type StopAutomationExecutionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -62,26 +45,13 @@ type StopAutomationExecutionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopAutomationExecutionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopAutomationExecutionResult)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopAutomationExecutionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopAutomationExecutionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StopAutomationExecutionResult, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopAutomationExecutionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopAutomationExecution, schemas.StopAutomationExecutionRequest, schemas.StopAutomationExecutionResult)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopAutomationExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopAutomationExecution, schemas.StopAutomationExecutionRequest, schemas.StopAutomationExecutionResult), output: &StopAutomationExecutionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopAutomationExecution{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

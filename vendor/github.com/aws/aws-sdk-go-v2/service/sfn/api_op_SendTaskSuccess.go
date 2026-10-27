@@ -4,8 +4,6 @@ package sfn
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sfn/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,21 +48,6 @@ type SendTaskSuccessInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SendTaskSuccessInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SendTaskSuccessInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SendTaskSuccessInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Output != nil {
-		s.WriteString(schemas.SendTaskSuccessInput_output, *v.Output)
-	}
-	if v.TaskToken != nil {
-		s.WriteString(schemas.SendTaskSuccessInput_taskToken, *v.TaskToken)
-	}
-}
-
 type SendTaskSuccessOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -72,26 +55,13 @@ type SendTaskSuccessOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *SendTaskSuccessOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.SendTaskSuccessOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *SendTaskSuccessOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *SendTaskSuccessOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.SendTaskSuccessOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationSendTaskSuccessMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SendTaskSuccess, schemas.SendTaskSuccessInput, schemas.SendTaskSuccessOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson10_serializeOpSendTaskSuccess{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.SendTaskSuccess, schemas.SendTaskSuccessInput, schemas.SendTaskSuccessOutput), output: &SendTaskSuccessOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson10_deserializeOpSendTaskSuccess{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

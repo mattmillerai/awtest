@@ -4,8 +4,6 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,18 +38,6 @@ type RegisterOrganizationDelegatedAdminInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RegisterOrganizationDelegatedAdminInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RegisterOrganizationDelegatedAdminRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RegisterOrganizationDelegatedAdminInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MemberAccountId != nil {
-		s.WriteString(schemas.RegisterOrganizationDelegatedAdminRequest_MemberAccountId, *v.MemberAccountId)
-	}
-}
-
 // Returns the following response if successful. Otherwise, returns an error.
 type RegisterOrganizationDelegatedAdminOutput struct {
 	// Metadata pertaining to the operation's result.
@@ -60,26 +46,13 @@ type RegisterOrganizationDelegatedAdminOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RegisterOrganizationDelegatedAdminOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RegisterOrganizationDelegatedAdminResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RegisterOrganizationDelegatedAdminOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RegisterOrganizationDelegatedAdminOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.RegisterOrganizationDelegatedAdminResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRegisterOrganizationDelegatedAdminMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RegisterOrganizationDelegatedAdmin, schemas.RegisterOrganizationDelegatedAdminRequest, schemas.RegisterOrganizationDelegatedAdminResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpRegisterOrganizationDelegatedAdmin{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RegisterOrganizationDelegatedAdmin, schemas.RegisterOrganizationDelegatedAdminRequest, schemas.RegisterOrganizationDelegatedAdminResponse), output: &RegisterOrganizationDelegatedAdminOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpRegisterOrganizationDelegatedAdmin{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

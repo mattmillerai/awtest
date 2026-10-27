@@ -4,9 +4,7 @@ package athena
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/athena/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/athena/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -58,30 +56,6 @@ type UpdateNotebookInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateNotebookInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateNotebookInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateNotebookInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClientRequestToken != nil {
-		s.WriteString(schemas.UpdateNotebookInput_ClientRequestToken, *v.ClientRequestToken)
-	}
-	if v.NotebookId != nil {
-		s.WriteString(schemas.UpdateNotebookInput_NotebookId, *v.NotebookId)
-	}
-	if v.Payload != nil {
-		s.WriteString(schemas.UpdateNotebookInput_Payload, *v.Payload)
-	}
-	if v.SessionId != nil {
-		s.WriteString(schemas.UpdateNotebookInput_SessionId, *v.SessionId)
-	}
-	if v.Type != "" {
-		s.WriteString(schemas.UpdateNotebookInput_Type, string(v.Type))
-	}
-}
-
 type UpdateNotebookOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -89,26 +63,13 @@ type UpdateNotebookOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateNotebookOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateNotebookOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateNotebookOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *UpdateNotebookOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateNotebookOutput, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateNotebookMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateNotebook, schemas.UpdateNotebookInput, schemas.UpdateNotebookOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateNotebook{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateNotebook, schemas.UpdateNotebookInput, schemas.UpdateNotebookOutput), output: &UpdateNotebookOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateNotebook{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

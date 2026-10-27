@@ -4,8 +4,6 @@ package eks
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eks/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type DeleteAccessEntryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccessEntryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAccessEntryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccessEntryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterName != nil {
-		s.WriteString(schemas.DeleteAccessEntryRequest_clusterName, *v.ClusterName)
-	}
-	if v.PrincipalArn != nil {
-		s.WriteString(schemas.DeleteAccessEntryRequest_principalArn, *v.PrincipalArn)
-	}
-}
-
 type DeleteAccessEntryOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -66,26 +49,13 @@ type DeleteAccessEntryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccessEntryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAccessEntryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccessEntryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteAccessEntryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteAccessEntryResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteAccessEntryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccessEntry, schemas.DeleteAccessEntryRequest, schemas.DeleteAccessEntryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteAccessEntry{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccessEntry, schemas.DeleteAccessEntryRequest, schemas.DeleteAccessEntryResponse), output: &DeleteAccessEntryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteAccessEntry{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

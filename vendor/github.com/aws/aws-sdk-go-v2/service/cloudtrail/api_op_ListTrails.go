@@ -5,9 +5,7 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type ListTrailsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListTrailsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListTrailsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListTrailsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListTrailsRequest_NextToken, *v.NextToken)
-	}
-}
-
 type ListTrailsOutput struct {
 
 	// The token to use to get the next page of results after a previous API call. If
@@ -69,35 +55,13 @@ type ListTrailsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListTrailsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListTrailsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListTrailsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListTrailsResponse_NextToken, *v.NextToken)
-	}
-	serializeTrails(s, schemas.ListTrailsResponse_Trails, v.Trails)
-}
-func (v *ListTrailsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListTrailsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListTrailsResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListTrailsResponse_NextToken, v.NextToken)
-		case schemas.ListTrailsResponse_Trails:
-			return deserializeTrails(d, schemas.ListTrailsResponse_Trails, &v.Trails)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListTrailsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListTrails, schemas.ListTrailsRequest, schemas.ListTrailsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListTrails{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListTrails, schemas.ListTrailsRequest, schemas.ListTrailsResponse), output: &ListTrailsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListTrails{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,9 +4,7 @@ package transcribe
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/transcribe/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"time"
 )
@@ -71,10 +69,8 @@ type CreateVocabularyFilterInput struct {
 
 	// The Amazon Resource Name (ARN) of an IAM role that has permissions to access
 	// the Amazon S3 bucket that contains your input files (in this case, your custom
-	// vocabulary filter). If you include EncryptionConfiguration in your request,
-	// this role must also have permissions to access the specified KMS key. If the
-	// role that you specify doesn’t have the appropriate permissions, your request
-	// fails.
+	// vocabulary filter). If the role that you specify doesn’t have the appropriate
+	// permissions to access the specified Amazon S3 location, your request fails.
 	//
 	// IAM role ARNs have the format
 	// arn:partition:iam::account:role/role-name-with-path . For example:
@@ -84,11 +80,6 @@ type CreateVocabularyFilterInput struct {
 	//
 	// [IAM ARNs]: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
 	DataAccessRoleArn *string
-
-	// Specifies the encryption configuration for your custom vocabulary filter. Your
-	// vocabulary filter artifacts are encrypted with the specified KMS key or with an
-	// AWS-owned key if a key is not supplied.
-	EncryptionConfiguration *types.EncryptionConfiguration
 
 	// Adds one or more custom tags, each in the form of a key:value pair, to a new
 	// custom vocabulary filter at the time you create this new vocabulary filter.
@@ -127,34 +118,6 @@ type CreateVocabularyFilterInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateVocabularyFilterInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateVocabularyFilterRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateVocabularyFilterInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DataAccessRoleArn != nil {
-		s.WriteString(schemas.CreateVocabularyFilterRequest_DataAccessRoleArn, *v.DataAccessRoleArn)
-	}
-	if v.EncryptionConfiguration != nil {
-		s.WriteStruct(schemas.CreateVocabularyFilterRequest_EncryptionConfiguration)
-		v.EncryptionConfiguration.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.LanguageCode != "" {
-		s.WriteString(schemas.CreateVocabularyFilterRequest_LanguageCode, string(v.LanguageCode))
-	}
-	serializeTagList(s, schemas.CreateVocabularyFilterRequest_Tags, v.Tags)
-	if v.VocabularyFilterFileUri != nil {
-		s.WriteString(schemas.CreateVocabularyFilterRequest_VocabularyFilterFileUri, *v.VocabularyFilterFileUri)
-	}
-	if v.VocabularyFilterName != nil {
-		s.WriteString(schemas.CreateVocabularyFilterRequest_VocabularyFilterName, *v.VocabularyFilterName)
-	}
-	serializeWords(s, schemas.CreateVocabularyFilterRequest_Words, v.Words)
-}
-
 type CreateVocabularyFilterOutput struct {
 
 	// The language code you selected for your custom vocabulary filter.
@@ -175,48 +138,13 @@ type CreateVocabularyFilterOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateVocabularyFilterOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateVocabularyFilterResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateVocabularyFilterOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LanguageCode != "" {
-		s.WriteString(schemas.CreateVocabularyFilterResponse_LanguageCode, string(v.LanguageCode))
-	}
-	if v.LastModifiedTime != nil {
-		s.WriteTime(schemas.CreateVocabularyFilterResponse_LastModifiedTime, *v.LastModifiedTime)
-	}
-	if v.VocabularyFilterName != nil {
-		s.WriteString(schemas.CreateVocabularyFilterResponse_VocabularyFilterName, *v.VocabularyFilterName)
-	}
-}
-func (v *CreateVocabularyFilterOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateVocabularyFilterResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateVocabularyFilterResponse_LanguageCode:
-			var ev string
-			if err := d.ReadString(schemas.CreateVocabularyFilterResponse_LanguageCode, &ev); err != nil {
-				return err
-			}
-			v.LanguageCode = types.LanguageCode(ev)
-			return nil
-		case schemas.CreateVocabularyFilterResponse_LastModifiedTime:
-			v.LastModifiedTime = new(time.Time)
-			return d.ReadTime(schemas.CreateVocabularyFilterResponse_LastModifiedTime, v.LastModifiedTime)
-		case schemas.CreateVocabularyFilterResponse_VocabularyFilterName:
-			v.VocabularyFilterName = new(string)
-			return d.ReadString(schemas.CreateVocabularyFilterResponse_VocabularyFilterName, v.VocabularyFilterName)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateVocabularyFilterMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateVocabularyFilter, schemas.CreateVocabularyFilterRequest, schemas.CreateVocabularyFilterResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpCreateVocabularyFilter{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateVocabularyFilter, schemas.CreateVocabularyFilterRequest, schemas.CreateVocabularyFilterResponse), output: &CreateVocabularyFilterOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpCreateVocabularyFilter{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

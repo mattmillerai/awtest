@@ -4,9 +4,7 @@ package configservice
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/configservice/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,18 +34,6 @@ type GetStoredQueryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetStoredQueryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetStoredQueryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetStoredQueryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.QueryName != nil {
-		s.WriteString(schemas.GetStoredQueryRequest_QueryName, *v.QueryName)
-	}
-}
-
 type GetStoredQueryOutput struct {
 
 	// Returns a StoredQuery object.
@@ -59,34 +45,13 @@ type GetStoredQueryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *GetStoredQueryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.GetStoredQueryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *GetStoredQueryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.StoredQuery != nil {
-		s.WriteStruct(schemas.GetStoredQueryResponse_StoredQuery)
-		v.StoredQuery.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *GetStoredQueryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.GetStoredQueryResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.GetStoredQueryResponse_StoredQuery:
-			v.StoredQuery = &types.StoredQuery{}
-			return v.StoredQuery.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationGetStoredQueryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetStoredQuery, schemas.GetStoredQueryRequest, schemas.GetStoredQueryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpGetStoredQuery{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.GetStoredQuery, schemas.GetStoredQueryRequest, schemas.GetStoredQueryResponse), output: &GetStoredQueryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpGetStoredQuery{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

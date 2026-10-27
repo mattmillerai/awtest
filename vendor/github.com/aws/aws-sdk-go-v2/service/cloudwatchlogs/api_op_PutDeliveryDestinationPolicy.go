@@ -4,9 +4,7 @@ package cloudwatchlogs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -69,21 +67,6 @@ type PutDeliveryDestinationPolicyInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDeliveryDestinationPolicyInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDeliveryDestinationPolicyRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDeliveryDestinationPolicyInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeliveryDestinationName != nil {
-		s.WriteString(schemas.PutDeliveryDestinationPolicyRequest_deliveryDestinationName, *v.DeliveryDestinationName)
-	}
-	if v.DeliveryDestinationPolicy != nil {
-		s.WriteString(schemas.PutDeliveryDestinationPolicyRequest_deliveryDestinationPolicy, *v.DeliveryDestinationPolicy)
-	}
-}
-
 type PutDeliveryDestinationPolicyOutput struct {
 
 	// The contents of the policy that you just created.
@@ -95,34 +78,13 @@ type PutDeliveryDestinationPolicyOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutDeliveryDestinationPolicyOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutDeliveryDestinationPolicyResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutDeliveryDestinationPolicyOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Policy != nil {
-		s.WriteStruct(schemas.PutDeliveryDestinationPolicyResponse_policy)
-		v.Policy.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *PutDeliveryDestinationPolicyOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.PutDeliveryDestinationPolicyResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.PutDeliveryDestinationPolicyResponse_policy:
-			v.Policy = &types.Policy{}
-			return v.Policy.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutDeliveryDestinationPolicyMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDeliveryDestinationPolicy, schemas.PutDeliveryDestinationPolicyRequest, schemas.PutDeliveryDestinationPolicyResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpPutDeliveryDestinationPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutDeliveryDestinationPolicy, schemas.PutDeliveryDestinationPolicyRequest, schemas.PutDeliveryDestinationPolicyResponse), output: &PutDeliveryDestinationPolicyOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpPutDeliveryDestinationPolicy{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

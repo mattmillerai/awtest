@@ -4,15 +4,9 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
-//
 // Starts a CloudTrail Lake query. Use the QueryStatement parameter to provide
 // your SQL query, enclosed in single quotation marks. Use the optional
 // DeliveryS3Uri parameter to deliver the query results to an S3 bucket.
@@ -21,8 +15,6 @@ import (
 // QueryAlias and any QueryParameters . In the current release, the QueryAlias and
 // QueryParameters parameters are used only for the queries that populate the
 // CloudTrail Lake dashboards.
-//
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 func (c *Client) StartQuery(ctx context.Context, params *StartQueryInput, optFns ...func(*Options)) (*StartQueryOutput, error) {
 	if params == nil {
 		params = &StartQueryInput{}
@@ -58,28 +50,6 @@ type StartQueryInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartQueryInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartQueryRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartQueryInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DeliveryS3Uri != nil {
-		s.WriteString(schemas.StartQueryRequest_DeliveryS3Uri, *v.DeliveryS3Uri)
-	}
-	if v.EventDataStoreOwnerAccountId != nil {
-		s.WriteString(schemas.StartQueryRequest_EventDataStoreOwnerAccountId, *v.EventDataStoreOwnerAccountId)
-	}
-	if v.QueryAlias != nil {
-		s.WriteString(schemas.StartQueryRequest_QueryAlias, *v.QueryAlias)
-	}
-	serializeQueryParameters(s, schemas.StartQueryRequest_QueryParameters, v.QueryParameters)
-	if v.QueryStatement != nil {
-		s.WriteString(schemas.StartQueryRequest_QueryStatement, *v.QueryStatement)
-	}
-}
-
 type StartQueryOutput struct {
 
 	//  The account ID of the event data store owner.
@@ -94,38 +64,13 @@ type StartQueryOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartQueryOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartQueryResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartQueryOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.EventDataStoreOwnerAccountId != nil {
-		s.WriteString(schemas.StartQueryResponse_EventDataStoreOwnerAccountId, *v.EventDataStoreOwnerAccountId)
-	}
-	if v.QueryId != nil {
-		s.WriteString(schemas.StartQueryResponse_QueryId, *v.QueryId)
-	}
-}
-func (v *StartQueryOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartQueryResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StartQueryResponse_EventDataStoreOwnerAccountId:
-			v.EventDataStoreOwnerAccountId = new(string)
-			return d.ReadString(schemas.StartQueryResponse_EventDataStoreOwnerAccountId, v.EventDataStoreOwnerAccountId)
-		case schemas.StartQueryResponse_QueryId:
-			v.QueryId = new(string)
-			return d.ReadString(schemas.StartQueryResponse_QueryId, v.QueryId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartQueryMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartQuery, schemas.StartQueryRequest, schemas.StartQueryResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStartQuery{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartQuery, schemas.StartQueryRequest, schemas.StartQueryResponse), output: &StartQueryOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStartQuery{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

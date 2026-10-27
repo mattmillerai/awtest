@@ -5,9 +5,7 @@ package iot
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/iot/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,29 +38,10 @@ type ListV2LoggingLevelsInput struct {
 	// response; otherwise null to receive the first set of results.
 	NextToken *string
 
-	// The type of resource for which you are configuring logging. Must be DEFAULT ,
-	// THING_GROUP , CLIENT_ID , SOURCE_IP , or PRINCIPAL_ID .
+	// The type of resource for which you are configuring logging. Must be THING_Group .
 	TargetType types.LogTargetType
 
 	noSmithyDocumentSerde
-}
-
-func (v *ListV2LoggingLevelsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListV2LoggingLevelsRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListV2LoggingLevelsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListV2LoggingLevelsRequest_maxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListV2LoggingLevelsRequest_nextToken, *v.NextToken)
-	}
-	if v.TargetType != "" {
-		s.WriteString(schemas.ListV2LoggingLevelsRequest_targetType, string(v.TargetType))
-	}
 }
 
 type ListV2LoggingLevelsOutput struct {
@@ -80,35 +59,13 @@ type ListV2LoggingLevelsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListV2LoggingLevelsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListV2LoggingLevelsResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListV2LoggingLevelsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeLogTargetConfigurations(s, schemas.ListV2LoggingLevelsResponse_logTargetConfigurations, v.LogTargetConfigurations)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListV2LoggingLevelsResponse_nextToken, *v.NextToken)
-	}
-}
-func (v *ListV2LoggingLevelsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListV2LoggingLevelsResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListV2LoggingLevelsResponse_logTargetConfigurations:
-			return deserializeLogTargetConfigurations(d, schemas.ListV2LoggingLevelsResponse_logTargetConfigurations, &v.LogTargetConfigurations)
-		case schemas.ListV2LoggingLevelsResponse_nextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListV2LoggingLevelsResponse_nextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListV2LoggingLevelsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListV2LoggingLevels, schemas.ListV2LoggingLevelsRequest, schemas.ListV2LoggingLevelsResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListV2LoggingLevels{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListV2LoggingLevels, schemas.ListV2LoggingLevelsRequest, schemas.ListV2LoggingLevelsResponse), output: &ListV2LoggingLevelsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListV2LoggingLevels{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

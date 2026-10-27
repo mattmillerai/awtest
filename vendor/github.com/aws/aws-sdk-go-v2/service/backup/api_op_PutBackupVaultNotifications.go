@@ -4,9 +4,7 @@ package backup
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/backup/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -53,22 +51,6 @@ type PutBackupVaultNotificationsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutBackupVaultNotificationsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.PutBackupVaultNotificationsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutBackupVaultNotificationsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeBackupVaultEvents(s, schemas.PutBackupVaultNotificationsInput_BackupVaultEvents, v.BackupVaultEvents)
-	if v.BackupVaultName != nil {
-		s.WriteString(schemas.PutBackupVaultNotificationsInput_BackupVaultName, *v.BackupVaultName)
-	}
-	if v.SNSTopicArn != nil {
-		s.WriteString(schemas.PutBackupVaultNotificationsInput_SNSTopicArn, *v.SNSTopicArn)
-	}
-}
-
 type PutBackupVaultNotificationsOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -76,26 +58,13 @@ type PutBackupVaultNotificationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *PutBackupVaultNotificationsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *PutBackupVaultNotificationsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *PutBackupVaultNotificationsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationPutBackupVaultNotificationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutBackupVaultNotifications, schemas.PutBackupVaultNotificationsInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpPutBackupVaultNotifications{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.PutBackupVaultNotifications, schemas.PutBackupVaultNotificationsInput, nil), output: &PutBackupVaultNotificationsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpPutBackupVaultNotifications{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

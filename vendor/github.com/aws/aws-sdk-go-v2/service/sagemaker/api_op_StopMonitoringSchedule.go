@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type StopMonitoringScheduleInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopMonitoringScheduleInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopMonitoringScheduleRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopMonitoringScheduleInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MonitoringScheduleName != nil {
-		s.WriteString(schemas.StopMonitoringScheduleRequest_MonitoringScheduleName, *v.MonitoringScheduleName)
-	}
-}
-
 type StopMonitoringScheduleOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type StopMonitoringScheduleOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopMonitoringScheduleOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopMonitoringScheduleOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopMonitoringScheduleOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopMonitoringScheduleMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopMonitoringSchedule, schemas.StopMonitoringScheduleRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopMonitoringSchedule{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopMonitoringSchedule, schemas.StopMonitoringScheduleRequest, nil), output: &StopMonitoringScheduleOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopMonitoringSchedule{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

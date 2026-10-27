@@ -4,9 +4,7 @@ package codebuild
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/codebuild/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -36,16 +34,6 @@ type BatchGetReportsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetReportsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetReportsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetReportsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeReportArns(s, schemas.BatchGetReportsInput_reportArns, v.ReportArns)
-}
-
 type BatchGetReportsOutput struct {
 
 	//  The array of Report objects returned by BatchGetReports .
@@ -61,35 +49,19 @@ type BatchGetReportsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *BatchGetReportsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.BatchGetReportsOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *BatchGetReportsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeReports(s, schemas.BatchGetReportsOutput_reports, v.Reports)
-	serializeReportArns(s, schemas.BatchGetReportsOutput_reportsNotFound, v.ReportsNotFound)
-}
-func (v *BatchGetReportsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.BatchGetReportsOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.BatchGetReportsOutput_reports:
-			return deserializeReports(d, schemas.BatchGetReportsOutput_reports, &v.Reports)
-		case schemas.BatchGetReportsOutput_reportsNotFound:
-			return deserializeReportArns(d, schemas.BatchGetReportsOutput_reportsNotFound, &v.ReportsNotFound)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationBatchGetReportsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetReports, schemas.BatchGetReportsInput, schemas.BatchGetReportsOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpBatchGetReports{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.BatchGetReports, schemas.BatchGetReportsInput, schemas.BatchGetReportsOutput), output: &BatchGetReportsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpBatchGetReports{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

@@ -4,9 +4,7 @@ package cognitoidentityprovider
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -44,21 +42,6 @@ type DescribeUserImportJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeUserImportJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeUserImportJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeUserImportJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.JobId != nil {
-		s.WriteString(schemas.DescribeUserImportJobRequest_JobId, *v.JobId)
-	}
-	if v.UserPoolId != nil {
-		s.WriteString(schemas.DescribeUserImportJobRequest_UserPoolId, *v.UserPoolId)
-	}
-}
-
 // Represents the response from the server to the request to describe the user
 // import job.
 type DescribeUserImportJobOutput struct {
@@ -73,34 +56,13 @@ type DescribeUserImportJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeUserImportJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeUserImportJobResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeUserImportJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.UserImportJob != nil {
-		s.WriteStruct(schemas.DescribeUserImportJobResponse_UserImportJob)
-		v.UserImportJob.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeUserImportJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeUserImportJobResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeUserImportJobResponse_UserImportJob:
-			v.UserImportJob = &types.UserImportJobType{}
-			return v.UserImportJob.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeUserImportJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeUserImportJob, schemas.DescribeUserImportJobRequest, schemas.DescribeUserImportJobResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDescribeUserImportJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeUserImportJob, schemas.DescribeUserImportJobRequest, schemas.DescribeUserImportJobResponse), output: &DescribeUserImportJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDescribeUserImportJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -5,9 +5,7 @@ package sagemaker
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -56,33 +54,6 @@ type ListSpacesInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListSpacesInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListSpacesRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListSpacesInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DomainIdEquals != nil {
-		s.WriteString(schemas.ListSpacesRequest_DomainIdEquals, *v.DomainIdEquals)
-	}
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListSpacesRequest_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListSpacesRequest_NextToken, *v.NextToken)
-	}
-	if v.SortBy != "" {
-		s.WriteString(schemas.ListSpacesRequest_SortBy, string(v.SortBy))
-	}
-	if v.SortOrder != "" {
-		s.WriteString(schemas.ListSpacesRequest_SortOrder, string(v.SortOrder))
-	}
-	if v.SpaceNameContains != nil {
-		s.WriteString(schemas.ListSpacesRequest_SpaceNameContains, *v.SpaceNameContains)
-	}
-}
-
 type ListSpacesOutput struct {
 
 	// If the previous response was truncated, you will receive this token. Use it in
@@ -98,35 +69,13 @@ type ListSpacesOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListSpacesOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListSpacesResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListSpacesOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListSpacesResponse_NextToken, *v.NextToken)
-	}
-	serializeSpaceList(s, schemas.ListSpacesResponse_Spaces, v.Spaces)
-}
-func (v *ListSpacesOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListSpacesResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListSpacesResponse_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListSpacesResponse_NextToken, v.NextToken)
-		case schemas.ListSpacesResponse_Spaces:
-			return deserializeSpaceList(d, schemas.ListSpacesResponse_Spaces, &v.Spaces)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListSpacesMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListSpaces, schemas.ListSpacesRequest, schemas.ListSpacesResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListSpaces{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListSpaces, schemas.ListSpacesRequest, schemas.ListSpacesResponse), output: &ListSpacesOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListSpaces{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

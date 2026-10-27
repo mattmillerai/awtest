@@ -4,8 +4,6 @@ package efs
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/efs/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,18 +39,6 @@ type DeleteAccessPointInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccessPointInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAccessPointRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccessPointInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccessPointId != nil {
-		s.WriteString(schemas.DeleteAccessPointRequest_AccessPointId, *v.AccessPointId)
-	}
-}
-
 type DeleteAccessPointOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -60,26 +46,13 @@ type DeleteAccessPointOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAccessPointOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAccessPointOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteAccessPointOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteAccessPointMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccessPoint, schemas.DeleteAccessPointRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteAccessPoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAccessPoint, schemas.DeleteAccessPointRequest, nil), output: &DeleteAccessPointOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteAccessPoint{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

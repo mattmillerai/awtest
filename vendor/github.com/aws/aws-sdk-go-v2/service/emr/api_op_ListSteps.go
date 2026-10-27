@@ -5,9 +5,7 @@ package emr
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/emr/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/emr/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -56,23 +54,6 @@ type ListStepsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListStepsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListStepsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListStepsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterId != nil {
-		s.WriteString(schemas.ListStepsInput_ClusterId, *v.ClusterId)
-	}
-	if v.Marker != nil {
-		s.WriteString(schemas.ListStepsInput_Marker, *v.Marker)
-	}
-	serializeXmlStringList(s, schemas.ListStepsInput_StepIds, v.StepIds)
-	serializeStepStateList(s, schemas.ListStepsInput_StepStates, v.StepStates)
-}
-
 // This output contains the list of steps returned in reverse order. This means
 // that the last step is the first element in the list.
 type ListStepsOutput struct {
@@ -92,35 +73,13 @@ type ListStepsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListStepsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListStepsOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListStepsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Marker != nil {
-		s.WriteString(schemas.ListStepsOutput_Marker, *v.Marker)
-	}
-	serializeStepSummaryList(s, schemas.ListStepsOutput_Steps, v.Steps)
-}
-func (v *ListStepsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListStepsOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListStepsOutput_Marker:
-			v.Marker = new(string)
-			return d.ReadString(schemas.ListStepsOutput_Marker, v.Marker)
-		case schemas.ListStepsOutput_Steps:
-			return deserializeStepSummaryList(d, schemas.ListStepsOutput_Steps, &v.Steps)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListStepsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListSteps, schemas.ListStepsInput, schemas.ListStepsOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListSteps{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListSteps, schemas.ListStepsInput, schemas.ListStepsOutput), output: &ListStepsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListSteps{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

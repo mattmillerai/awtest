@@ -5,8 +5,6 @@ package glacier
 import (
 	"context"
 	glaciercust "github.com/aws/aws-sdk-go-v2/service/glacier/internal/customizations"
-	"github.com/aws/aws-sdk-go-v2/service/glacier/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -62,21 +60,6 @@ type AbortVaultLockInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AbortVaultLockInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.AbortVaultLockInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AbortVaultLockInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.AccountId != nil {
-		s.WriteString(schemas.AbortVaultLockInput_accountId, *v.AccountId)
-	}
-	if v.VaultName != nil {
-		s.WriteString(schemas.AbortVaultLockInput_vaultName, *v.VaultName)
-	}
-}
-
 type AbortVaultLockOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -84,26 +67,13 @@ type AbortVaultLockOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *AbortVaultLockOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *AbortVaultLockOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *AbortVaultLockOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationAbortVaultLockMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AbortVaultLock, schemas.AbortVaultLockInput, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpAbortVaultLock{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.AbortVaultLock, schemas.AbortVaultLockInput, nil), output: &AbortVaultLockOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpAbortVaultLock{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

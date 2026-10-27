@@ -4,16 +4,10 @@ package cloudtrail
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
-// CloudTrail Lake will no longer be open to new customers starting May 31, 2026.
-// If you would like to use CloudTrail Lake, sign up prior to that date. Existing
-// customers can continue to use the service as normal. For more information, see [CloudTrail Lake availability change].
-//
-// Starts a refresh of the specified dashboard.
+//	Starts a refresh of the specified dashboard.
 //
 // Each time a dashboard is refreshed, CloudTrail runs queries to populate the
 // dashboard's widgets. CloudTrail must be granted permissions to run the
@@ -21,7 +15,6 @@ import (
 // PutResourcePolicy operation to attach a resource-based policy to each event data
 // store. For more information, see [Example: Allow CloudTrail to run queries to populate a dashboard]in the CloudTrail User Guide.
 //
-// [CloudTrail Lake availability change]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-service-availability-change.html
 // [Example: Allow CloudTrail to run queries to populate a dashboard]: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/security_iam_resource-based-policy-examples.html#security_iam_resource-based-policy-examples-eds-dashboard
 func (c *Client) StartDashboardRefresh(ctx context.Context, params *StartDashboardRefreshInput, optFns ...func(*Options)) (*StartDashboardRefreshOutput, error) {
 	if params == nil {
@@ -58,19 +51,6 @@ type StartDashboardRefreshInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartDashboardRefreshInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartDashboardRefreshRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartDashboardRefreshInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DashboardId != nil {
-		s.WriteString(schemas.StartDashboardRefreshRequest_DashboardId, *v.DashboardId)
-	}
-	serializeQueryParameterValues(s, schemas.StartDashboardRefreshRequest_QueryParameterValues, v.QueryParameterValues)
-}
-
 type StartDashboardRefreshOutput struct {
 
 	//  The refresh ID for the dashboard.
@@ -82,32 +62,13 @@ type StartDashboardRefreshOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StartDashboardRefreshOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StartDashboardRefreshResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StartDashboardRefreshOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RefreshId != nil {
-		s.WriteString(schemas.StartDashboardRefreshResponse_RefreshId, *v.RefreshId)
-	}
-}
-func (v *StartDashboardRefreshOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StartDashboardRefreshResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.StartDashboardRefreshResponse_RefreshId:
-			v.RefreshId = new(string)
-			return d.ReadString(schemas.StartDashboardRefreshResponse_RefreshId, v.RefreshId)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStartDashboardRefreshMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartDashboardRefresh, schemas.StartDashboardRefreshRequest, schemas.StartDashboardRefreshResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStartDashboardRefresh{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StartDashboardRefresh, schemas.StartDashboardRefreshRequest, schemas.StartDashboardRefreshResponse), output: &StartDashboardRefreshOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStartDashboardRefresh{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

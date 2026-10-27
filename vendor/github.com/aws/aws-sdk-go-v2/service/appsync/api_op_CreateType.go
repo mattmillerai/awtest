@@ -4,9 +4,7 @@ package appsync
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/appsync/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/appsync/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -50,24 +48,6 @@ type CreateTypeInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateTypeInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateTypeRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateTypeInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ApiId != nil {
-		s.WriteString(schemas.CreateTypeRequest_apiId, *v.ApiId)
-	}
-	if v.Definition != nil {
-		s.WriteString(schemas.CreateTypeRequest_definition, *v.Definition)
-	}
-	if v.Format != "" {
-		s.WriteString(schemas.CreateTypeRequest_format, string(v.Format))
-	}
-}
-
 type CreateTypeOutput struct {
 
 	// The Type object.
@@ -79,34 +59,13 @@ type CreateTypeOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *CreateTypeOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.CreateTypeResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *CreateTypeOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Type != nil {
-		s.WriteStruct(schemas.CreateTypeResponse_type)
-		v.Type.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *CreateTypeOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.CreateTypeResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.CreateTypeResponse_type:
-			v.Type = &types.Type{}
-			return v.Type.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationCreateTypeMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateType, schemas.CreateTypeRequest, schemas.CreateTypeResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpCreateType{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.CreateType, schemas.CreateTypeRequest, schemas.CreateTypeResponse), output: &CreateTypeOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpCreateType{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

@@ -4,8 +4,6 @@ package eventbridge
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eventbridge/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -65,21 +63,6 @@ type TestEventPatternInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TestEventPatternInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TestEventPatternRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TestEventPatternInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Event != nil {
-		s.WriteString(schemas.TestEventPatternRequest_Event, *v.Event)
-	}
-	if v.EventPattern != nil {
-		s.WriteString(schemas.TestEventPatternRequest_EventPattern, *v.EventPattern)
-	}
-}
-
 type TestEventPatternOutput struct {
 
 	// Indicates whether the event matches the event pattern.
@@ -91,34 +74,19 @@ type TestEventPatternOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *TestEventPatternOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.TestEventPatternResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *TestEventPatternOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Result != false {
-		s.WriteBool(schemas.TestEventPatternResponse_Result, v.Result)
-	}
-}
-func (v *TestEventPatternOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.TestEventPatternResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.TestEventPatternResponse_Result:
-			return d.ReadBool(schemas.TestEventPatternResponse_Result, &v.Result)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationTestEventPatternMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TestEventPattern, schemas.TestEventPatternRequest, schemas.TestEventPatternResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpTestEventPattern{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.TestEventPattern, schemas.TestEventPatternRequest, schemas.TestEventPatternResponse), output: &TestEventPatternOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpTestEventPattern{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
+	if err = addComputeContentLength(stack); err != nil {
+		return err
+	}
 	if err = addResolveEndpointMiddleware(stack, options); err != nil {
 		return err
 	}

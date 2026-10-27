@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -60,24 +58,6 @@ type UpdateModelCardInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateModelCardInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateModelCardRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateModelCardInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Content != nil {
-		s.WriteString(schemas.UpdateModelCardRequest_Content, *v.Content)
-	}
-	if v.ModelCardName != nil {
-		s.WriteString(schemas.UpdateModelCardRequest_ModelCardName, *v.ModelCardName)
-	}
-	if v.ModelCardStatus != "" {
-		s.WriteString(schemas.UpdateModelCardRequest_ModelCardStatus, string(v.ModelCardStatus))
-	}
-}
-
 type UpdateModelCardOutput struct {
 
 	// The Amazon Resource Name (ARN) of the updated model card.
@@ -91,32 +71,13 @@ type UpdateModelCardOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateModelCardOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateModelCardResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateModelCardOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ModelCardArn != nil {
-		s.WriteString(schemas.UpdateModelCardResponse_ModelCardArn, *v.ModelCardArn)
-	}
-}
-func (v *UpdateModelCardOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateModelCardResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateModelCardResponse_ModelCardArn:
-			v.ModelCardArn = new(string)
-			return d.ReadString(schemas.UpdateModelCardResponse_ModelCardArn, v.ModelCardArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateModelCardMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateModelCard, schemas.UpdateModelCardRequest, schemas.UpdateModelCardResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateModelCard{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateModelCard, schemas.UpdateModelCardRequest, schemas.UpdateModelCardResponse), output: &UpdateModelCardOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateModelCard{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

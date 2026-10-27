@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,18 +39,6 @@ type StopTrainingJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopTrainingJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopTrainingJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopTrainingJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TrainingJobName != nil {
-		s.WriteString(schemas.StopTrainingJobRequest_TrainingJobName, *v.TrainingJobName)
-	}
-}
-
 type StopTrainingJobOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -60,26 +46,13 @@ type StopTrainingJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopTrainingJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopTrainingJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopTrainingJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopTrainingJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopTrainingJob, schemas.StopTrainingJobRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopTrainingJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopTrainingJob, schemas.StopTrainingJobRequest, nil), output: &StopTrainingJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopTrainingJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

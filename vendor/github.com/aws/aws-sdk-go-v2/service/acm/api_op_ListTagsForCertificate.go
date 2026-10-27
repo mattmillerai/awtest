@@ -4,9 +4,7 @@ package acm
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/acm/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/acm/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	"github.com/aws/smithy-go/ptr"
 )
@@ -49,17 +47,6 @@ type ListTagsForCertificateInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListTagsForCertificateInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListTagsForCertificateRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListTagsForCertificateInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.CertificateArn != nil {
-		s.WriteString(schemas.ListTagsForCertificateRequest_CertificateArn, *v.CertificateArn)
-	}
-}
 func (in *ListTagsForCertificateInput) bindEndpointParams(p *EndpointParameters) {
 
 	p.ServiceType = ptr.String("ACM")
@@ -76,29 +63,13 @@ type ListTagsForCertificateOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListTagsForCertificateOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListTagsForCertificateResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListTagsForCertificateOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeTagList(s, schemas.ListTagsForCertificateResponse_Tags, v.Tags)
-}
-func (v *ListTagsForCertificateOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListTagsForCertificateResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListTagsForCertificateResponse_Tags:
-			return deserializeTagList(d, schemas.ListTagsForCertificateResponse_Tags, &v.Tags)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListTagsForCertificateMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListTagsForCertificate, schemas.ListTagsForCertificateRequest, schemas.ListTagsForCertificateResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpListTagsForCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListTagsForCertificate, schemas.ListTagsForCertificateRequest, schemas.ListTagsForCertificateResponse), output: &ListTagsForCertificateOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpListTagsForCertificate{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

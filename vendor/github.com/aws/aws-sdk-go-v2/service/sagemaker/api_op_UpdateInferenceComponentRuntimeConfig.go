@@ -4,9 +4,7 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,23 +39,6 @@ type UpdateInferenceComponentRuntimeConfigInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateInferenceComponentRuntimeConfigInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateInferenceComponentRuntimeConfigInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateInferenceComponentRuntimeConfigInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.DesiredRuntimeConfig != nil {
-		s.WriteStruct(schemas.UpdateInferenceComponentRuntimeConfigInput_DesiredRuntimeConfig)
-		v.DesiredRuntimeConfig.SerializeMembers(s)
-		s.CloseStruct()
-	}
-	if v.InferenceComponentName != nil {
-		s.WriteString(schemas.UpdateInferenceComponentRuntimeConfigInput_InferenceComponentName, *v.InferenceComponentName)
-	}
-}
-
 type UpdateInferenceComponentRuntimeConfigOutput struct {
 
 	// The Amazon Resource Name (ARN) of the inference component.
@@ -71,32 +52,13 @@ type UpdateInferenceComponentRuntimeConfigOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *UpdateInferenceComponentRuntimeConfigOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.UpdateInferenceComponentRuntimeConfigOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *UpdateInferenceComponentRuntimeConfigOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.InferenceComponentArn != nil {
-		s.WriteString(schemas.UpdateInferenceComponentRuntimeConfigOutput_InferenceComponentArn, *v.InferenceComponentArn)
-	}
-}
-func (v *UpdateInferenceComponentRuntimeConfigOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.UpdateInferenceComponentRuntimeConfigOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.UpdateInferenceComponentRuntimeConfigOutput_InferenceComponentArn:
-			v.InferenceComponentArn = new(string)
-			return d.ReadString(schemas.UpdateInferenceComponentRuntimeConfigOutput_InferenceComponentArn, v.InferenceComponentArn)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationUpdateInferenceComponentRuntimeConfigMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateInferenceComponentRuntimeConfig, schemas.UpdateInferenceComponentRuntimeConfigInput, schemas.UpdateInferenceComponentRuntimeConfigOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpUpdateInferenceComponentRuntimeConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.UpdateInferenceComponentRuntimeConfig, schemas.UpdateInferenceComponentRuntimeConfigInput, schemas.UpdateInferenceComponentRuntimeConfigOutput), output: &UpdateInferenceComponentRuntimeConfigOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpUpdateInferenceComponentRuntimeConfig{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

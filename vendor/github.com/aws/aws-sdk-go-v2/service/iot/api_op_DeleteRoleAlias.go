@@ -4,8 +4,6 @@ package iot
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iot/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -39,18 +37,6 @@ type DeleteRoleAliasInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRoleAliasInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteRoleAliasRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRoleAliasInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.RoleAlias != nil {
-		s.WriteString(schemas.DeleteRoleAliasRequest_roleAlias, *v.RoleAlias)
-	}
-}
-
 type DeleteRoleAliasOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -58,26 +44,13 @@ type DeleteRoleAliasOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRoleAliasOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteRoleAliasResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRoleAliasOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteRoleAliasOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteRoleAliasResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteRoleAliasMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRoleAlias, schemas.DeleteRoleAliasRequest, schemas.DeleteRoleAliasResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteRoleAlias{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRoleAlias, schemas.DeleteRoleAliasRequest, schemas.DeleteRoleAliasResponse), output: &DeleteRoleAliasOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteRoleAlias{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

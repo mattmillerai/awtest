@@ -4,8 +4,6 @@ package securityhub
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/securityhub/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -35,18 +33,6 @@ type DeleteAutomationRuleV2Input struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAutomationRuleV2Input) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAutomationRuleV2Request)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAutomationRuleV2Input) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Identifier != nil {
-		s.WriteString(schemas.DeleteAutomationRuleV2Request_Identifier, *v.Identifier)
-	}
-}
-
 type DeleteAutomationRuleV2Output struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -54,26 +40,13 @@ type DeleteAutomationRuleV2Output struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteAutomationRuleV2Output) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteAutomationRuleV2Response)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteAutomationRuleV2Output) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *DeleteAutomationRuleV2Output) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteAutomationRuleV2Response, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteAutomationRuleV2Middlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAutomationRuleV2, schemas.DeleteAutomationRuleV2Request, schemas.DeleteAutomationRuleV2Response)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeleteAutomationRuleV2{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteAutomationRuleV2, schemas.DeleteAutomationRuleV2Request, schemas.DeleteAutomationRuleV2Response), output: &DeleteAutomationRuleV2Output{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeleteAutomationRuleV2{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

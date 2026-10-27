@@ -6,9 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/eks/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 	smithytime "github.com/aws/smithy-go/time"
 	smithywaiter "github.com/aws/smithy-go/waiter"
@@ -46,21 +44,6 @@ type DescribeNodegroupInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeNodegroupInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeNodegroupRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeNodegroupInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ClusterName != nil {
-		s.WriteString(schemas.DescribeNodegroupRequest_clusterName, *v.ClusterName)
-	}
-	if v.NodegroupName != nil {
-		s.WriteString(schemas.DescribeNodegroupRequest_nodegroupName, *v.NodegroupName)
-	}
-}
-
 type DescribeNodegroupOutput struct {
 
 	// The full description of your node group.
@@ -72,34 +55,13 @@ type DescribeNodegroupOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DescribeNodegroupOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DescribeNodegroupResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DescribeNodegroupOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Nodegroup != nil {
-		s.WriteStruct(schemas.DescribeNodegroupResponse_nodegroup)
-		v.Nodegroup.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DescribeNodegroupOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DescribeNodegroupResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DescribeNodegroupResponse_nodegroup:
-			v.Nodegroup = &types.Nodegroup{}
-			return v.Nodegroup.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDescribeNodegroupMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeNodegroup, schemas.DescribeNodegroupRequest, schemas.DescribeNodegroupResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDescribeNodegroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DescribeNodegroup, schemas.DescribeNodegroupRequest, schemas.DescribeNodegroupResponse), output: &DescribeNodegroupOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDescribeNodegroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

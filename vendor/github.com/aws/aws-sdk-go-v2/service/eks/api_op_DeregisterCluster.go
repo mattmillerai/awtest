@@ -4,9 +4,7 @@ package eks
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/eks/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,18 +39,6 @@ type DeregisterClusterInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeregisterClusterInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeregisterClusterRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeregisterClusterInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.DeregisterClusterRequest_name, *v.Name)
-	}
-}
-
 type DeregisterClusterOutput struct {
 
 	// An object representing an Amazon EKS cluster.
@@ -64,34 +50,13 @@ type DeregisterClusterOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeregisterClusterOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeregisterClusterResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeregisterClusterOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Cluster != nil {
-		s.WriteStruct(schemas.DeregisterClusterResponse_cluster)
-		v.Cluster.SerializeMembers(s)
-		s.CloseStruct()
-	}
-}
-func (v *DeregisterClusterOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeregisterClusterResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeregisterClusterResponse_cluster:
-			v.Cluster = &types.Cluster{}
-			return v.Cluster.Deserialize(d)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeregisterClusterMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeregisterCluster, schemas.DeregisterClusterRequest, schemas.DeregisterClusterResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpDeregisterCluster{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeregisterCluster, schemas.DeregisterClusterRequest, schemas.DeregisterClusterResponse), output: &DeregisterClusterOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpDeregisterCluster{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

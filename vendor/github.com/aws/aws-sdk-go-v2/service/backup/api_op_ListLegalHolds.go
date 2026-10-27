@@ -5,9 +5,7 @@ package backup
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/backup/schemas"
 	"github.com/aws/aws-sdk-go-v2/service/backup/types"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -41,21 +39,6 @@ type ListLegalHoldsInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListLegalHoldsInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListLegalHoldsInput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListLegalHoldsInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.MaxResults != nil {
-		s.WriteInt32(schemas.ListLegalHoldsInput_MaxResults, *v.MaxResults)
-	}
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListLegalHoldsInput_NextToken, *v.NextToken)
-	}
-}
-
 type ListLegalHoldsOutput struct {
 
 	// This is an array of returned legal holds, both active and previous.
@@ -73,35 +56,13 @@ type ListLegalHoldsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *ListLegalHoldsOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.ListLegalHoldsOutput)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *ListLegalHoldsOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	serializeLegalHoldsList(s, schemas.ListLegalHoldsOutput_LegalHolds, v.LegalHolds)
-	if v.NextToken != nil {
-		s.WriteString(schemas.ListLegalHoldsOutput_NextToken, *v.NextToken)
-	}
-}
-func (v *ListLegalHoldsOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.ListLegalHoldsOutput, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.ListLegalHoldsOutput_LegalHolds:
-			return deserializeLegalHoldsList(d, schemas.ListLegalHoldsOutput_LegalHolds, &v.LegalHolds)
-		case schemas.ListLegalHoldsOutput_NextToken:
-			v.NextToken = new(string)
-			return d.ReadString(schemas.ListLegalHoldsOutput_NextToken, v.NextToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationListLegalHoldsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListLegalHolds, schemas.ListLegalHoldsInput, schemas.ListLegalHoldsOutput)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpListLegalHolds{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.ListLegalHolds, schemas.ListLegalHoldsInput, schemas.ListLegalHoldsOutput), output: &ListLegalHoldsOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpListLegalHolds{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

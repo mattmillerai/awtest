@@ -4,8 +4,6 @@ package sagemaker
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/sagemaker/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -40,18 +38,6 @@ type StopTransformJobInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopTransformJobInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopTransformJobRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopTransformJobInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.TransformJobName != nil {
-		s.WriteString(schemas.StopTransformJobRequest_TransformJobName, *v.TransformJobName)
-	}
-}
-
 type StopTransformJobOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -59,26 +45,13 @@ type StopTransformJobOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopTransformJobOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopTransformJobOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopTransformJobOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopTransformJobMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopTransformJob, schemas.StopTransformJobRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopTransformJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopTransformJob, schemas.StopTransformJobRequest, nil), output: &StopTransformJobOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopTransformJob{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

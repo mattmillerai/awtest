@@ -4,8 +4,6 @@ package rekognition
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/rekognition/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -43,18 +41,6 @@ type StopStreamProcessorInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopStreamProcessorInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopStreamProcessorRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopStreamProcessorInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.Name != nil {
-		s.WriteString(schemas.StopStreamProcessorRequest_Name, *v.Name)
-	}
-}
-
 type StopStreamProcessorOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -62,26 +48,13 @@ type StopStreamProcessorOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *StopStreamProcessorOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.StopStreamProcessorResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *StopStreamProcessorOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *StopStreamProcessorOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.StopStreamProcessorResponse, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationStopStreamProcessorMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopStreamProcessor, schemas.StopStreamProcessorRequest, schemas.StopStreamProcessorResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpStopStreamProcessor{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.StopStreamProcessor, schemas.StopStreamProcessorRequest, schemas.StopStreamProcessorResponse), output: &StopStreamProcessorOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpStopStreamProcessor{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

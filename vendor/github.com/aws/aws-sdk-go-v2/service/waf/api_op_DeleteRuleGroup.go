@@ -4,8 +4,6 @@ package waf
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/waf/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -63,21 +61,6 @@ type DeleteRuleGroupInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRuleGroupInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteRuleGroupRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRuleGroupInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChangeToken != nil {
-		s.WriteString(schemas.DeleteRuleGroupRequest_ChangeToken, *v.ChangeToken)
-	}
-	if v.RuleGroupId != nil {
-		s.WriteString(schemas.DeleteRuleGroupRequest_RuleGroupId, *v.RuleGroupId)
-	}
-}
-
 type DeleteRuleGroupOutput struct {
 
 	// The ChangeToken that you used to submit the DeleteRuleGroup request. You can
@@ -91,32 +74,13 @@ type DeleteRuleGroupOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *DeleteRuleGroupOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.DeleteRuleGroupResponse)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *DeleteRuleGroupOutput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.ChangeToken != nil {
-		s.WriteString(schemas.DeleteRuleGroupResponse_ChangeToken, *v.ChangeToken)
-	}
-}
-func (v *DeleteRuleGroupOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, schemas.DeleteRuleGroupResponse, func(s *smithy.Schema) error {
-		switch s {
-		case schemas.DeleteRuleGroupResponse_ChangeToken:
-			v.ChangeToken = new(string)
-			return d.ReadString(schemas.DeleteRuleGroupResponse_ChangeToken, v.ChangeToken)
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationDeleteRuleGroupMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRuleGroup, schemas.DeleteRuleGroupRequest, schemas.DeleteRuleGroupResponse)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsAwsjson11_serializeOpDeleteRuleGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.DeleteRuleGroup, schemas.DeleteRuleGroupRequest, schemas.DeleteRuleGroupResponse), output: &DeleteRuleGroupOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsAwsjson11_deserializeOpDeleteRuleGroup{}, middleware.After)
+	if err != nil {
 		return err
 	}
 

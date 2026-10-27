@@ -4,8 +4,6 @@ package lambda
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/lambda/schemas"
-	smithy "github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
 )
 
@@ -52,27 +50,6 @@ type RemoveLayerVersionPermissionInput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveLayerVersionPermissionInput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(schemas.RemoveLayerVersionPermissionRequest)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveLayerVersionPermissionInput) SerializeMembers(s smithy.ShapeSerializer) {
-	if v.LayerName != nil {
-		s.WriteString(schemas.RemoveLayerVersionPermissionRequest_LayerName, *v.LayerName)
-	}
-	if v.RevisionId != nil {
-		s.WriteString(schemas.RemoveLayerVersionPermissionRequest_RevisionId, *v.RevisionId)
-	}
-	if v.StatementId != nil {
-		s.WriteString(schemas.RemoveLayerVersionPermissionRequest_StatementId, *v.StatementId)
-	}
-	if v.VersionNumber != nil {
-		s.WriteInt64(schemas.RemoveLayerVersionPermissionRequest_VersionNumber, *v.VersionNumber)
-	}
-}
-
 type RemoveLayerVersionPermissionOutput struct {
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -80,26 +57,13 @@ type RemoveLayerVersionPermissionOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (v *RemoveLayerVersionPermissionOutput) Serialize(s smithy.ShapeSerializer) {
-	s.WriteStruct(nil)
-	v.SerializeMembers(s)
-	s.CloseStruct()
-}
-
-func (v *RemoveLayerVersionPermissionOutput) SerializeMembers(s smithy.ShapeSerializer) {
-}
-func (v *RemoveLayerVersionPermissionOutput) Deserialize(d smithy.ShapeDeserializer) error {
-	return smithy.ReadStruct(d, nil, func(s *smithy.Schema) error {
-		switch s {
-		}
-		return nil
-	})
-}
 func (c *Client) addOperationRemoveLayerVersionPermissionMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	if err := stack.Serialize.Add(&serializeRequestMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveLayerVersionPermission, schemas.RemoveLayerVersionPermissionRequest, nil)}, middleware.After); err != nil {
+	err = stack.Serialize.Add(&awsRestjson1_serializeOpRemoveLayerVersionPermission{}, middleware.After)
+	if err != nil {
 		return err
 	}
-	if err := stack.Deserialize.Add(&deserializeResponseMiddleware{options: &options, operationSchema: smithy.NewOperationSchema(schemas.RemoveLayerVersionPermission, schemas.RemoveLayerVersionPermissionRequest, nil), output: &RemoveLayerVersionPermissionOutput{}}, middleware.After); err != nil {
+	err = stack.Deserialize.Add(&awsRestjson1_deserializeOpRemoveLayerVersionPermission{}, middleware.After)
+	if err != nil {
 		return err
 	}
 
