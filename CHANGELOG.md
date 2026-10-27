@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.7.0](https://github.com/Miller-Media/awtest-private/compare/v1.6.0...v1.7.0) (2026-10-27)
+
+
+### Features
+
+* migrate all AWS service checks to aws-sdk-go-v2 ([#46](https://github.com/Miller-Media/awtest-private/issues/46)) ([7161fb1](https://github.com/Miller-Media/awtest-private/commit/7161fb108cc4cf768204f6b91014d5336bdaa0fa))
+
+### Notes
+
+* **AWS SDK for Go v2:** awtest now uses the AWS SDK for Go v2. The v1 SDK reached end of support on 31 Jul 2025 and has been removed. All 59 services are still covered.
+* **Error text changed:** AWS errors are now printed as `<code>: <message>` with no request-ID or struct-dump suffix. SQS errors now use JSON-protocol codes such as `AccessDeniedException`.
+* **Retries:** each call makes up to 4 attempts in total. Throttling is left to awtest's own backoff.
+* **Credential chain isolation:** the credential chain ignores ambient `AWS_ENDPOINT_URL*` settings. Remaining exceptions: IMDS and `credential_process`.
+* **Empty values now print as 0/false:** a few optional numeric and boolean fields now print `0` or `false` instead of an empty value.
+* **Connection fix:** a new HTTP client wrapper fixes an error caused by a closed request body.
+* **Larger binary:** the release binary is about 33.9 MB on linux/amd64 (v1.6.0 was 25.0 MB, about +36%), and the release archive is about 10.8 MB (v1.6.0 was 6.8 MB).
+* **Pinned SDK modules:** the cloudwatch, cloudwatchlogs and kinesis modules are pinned to specific v2 versions, and the service modules are pinned to pre-schema SDK releases (see CONTRIBUTING). Startup time is unchanged for practical purposes.
+
 ## [1.6.0](https://github.com/Miller-Media/awtest-private/compare/v1.5.1...v1.6.0) (2026-10-25)
 
 
