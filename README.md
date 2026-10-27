@@ -55,6 +55,7 @@ awtest --speed=fast --format=json -o results.json
 - **Session Token Support** -- Works with temporary credentials (STS)
 - **Signed macOS Binaries** -- Code-signed and Apple-notarized, no Gatekeeper warnings
 - **Cross-Platform** -- Pre-built binaries for macOS, Linux, and Windows
+- **Supported AWS SDK** -- Built on the AWS SDK for Go v2 (aws-sdk-go v1 reached end of support on 31 Jul 2025)
 
 ## Installation
 
