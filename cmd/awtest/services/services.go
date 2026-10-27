@@ -1,8 +1,11 @@
 package services
 
 import (
+	"github.com/mattmillerai/awtest/cmd/awtest/services/accessanalyzer"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/account"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/amplify"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/apigateway"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/apigatewayv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/appsync"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/athena"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/backup"
@@ -26,9 +29,10 @@ import (
 	"github.com/mattmillerai/awtest/cmd/awtest/services/ecs"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/efs"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/eks"
-	"github.com/mattmillerai/awtest/cmd/awtest/services/emr"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/elasticache"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/elasticbeanstalk"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/elasticloadbalancingv2"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/emr"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/eventbridge"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/fargate"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/glacier"
@@ -50,6 +54,7 @@ import (
 	"github.com/mattmillerai/awtest/cmd/awtest/services/rds"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/redshift"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/rekognition"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/resourcegroupstaggingapi"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/route53"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/s3"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/sagemaker"
@@ -64,6 +69,7 @@ import (
 	"github.com/mattmillerai/awtest/cmd/awtest/services/transcribe"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/vpc"
 	"github.com/mattmillerai/awtest/cmd/awtest/services/waf"
+	"github.com/mattmillerai/awtest/cmd/awtest/services/wafv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
 )
 
@@ -71,8 +77,11 @@ func AllServices() []types.AWSService {
 	var allServices []types.AWSService
 
 	allServices = append(allServices, sts.STSCalls...)
+	allServices = append(allServices, accessanalyzer.AccessAnalyzerCalls...)
+	allServices = append(allServices, account.AccountCalls...)
 	allServices = append(allServices, amplify.AmplifyCalls...)
 	allServices = append(allServices, apigateway.APIGatewayCalls...)
+	allServices = append(allServices, apigatewayv2.APIGatewayV2Calls...)
 	allServices = append(allServices, appsync.AppSyncCalls...)
 	allServices = append(allServices, athena.AthenaCalls...)
 	allServices = append(allServices, backup.BackupCalls...)
@@ -99,6 +108,7 @@ func AllServices() []types.AWSService {
 	allServices = append(allServices, emr.EMRCalls...)
 	allServices = append(allServices, elasticache.ElastiCacheCalls...)
 	allServices = append(allServices, elasticbeanstalk.ElasticBeanstalkCalls...)
+	allServices = append(allServices, elasticloadbalancingv2.ELBv2Calls...)
 	allServices = append(allServices, eventbridge.EventbridgeCalls...)
 	allServices = append(allServices, fargate.FargateCalls...)
 	allServices = append(allServices, glacier.GlacierCalls...)
@@ -120,6 +130,7 @@ func AllServices() []types.AWSService {
 	allServices = append(allServices, rds.RDSCalls...)
 	allServices = append(allServices, redshift.RedshiftCalls...)
 	allServices = append(allServices, rekognition.RekognitionCalls...)
+	allServices = append(allServices, resourcegroupstaggingapi.ResourceGroupsTaggingAPICalls...)
 	allServices = append(allServices, route53.Route53Calls...)
 	allServices = append(allServices, s3.S3Calls...)
 	allServices = append(allServices, sagemaker.SageMakerCalls...)
@@ -133,6 +144,7 @@ func AllServices() []types.AWSService {
 	allServices = append(allServices, transcribe.TranscribeCalls...)
 	allServices = append(allServices, vpc.VpcCalls...)
 	allServices = append(allServices, waf.WafCalls...)
+	allServices = append(allServices, wafv2.WAFv2Calls...)
 
 	return allServices
 }

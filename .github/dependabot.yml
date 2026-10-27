@@ -21,9 +21,12 @@ updates:
       # (~+14 MB binary, +30 ms startup): https://github.com/aws/aws-sdk-go-v2/issues/3601
       # To unpin: see CONTRIBUTING.md "Pinned aws-sdk-go-v2 service modules" (remove the
       # entry here and the module from the pin table once upstream fixes the issue).
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/account"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/acm"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/amplify"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/apigateway"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/apigatewayv2"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/appsync"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/athena"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/backup"
@@ -44,6 +47,7 @@ updates:
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/ecs"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/efs"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/eks"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/emr"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/eventbridge"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/glacier"
@@ -60,6 +64,7 @@ updates:
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/opensearch"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/organizations"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/rekognition"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/sagemaker"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/secretsmanager"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/securityhub"
@@ -68,6 +73,7 @@ updates:
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/ssm"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/transcribe"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/waf"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/wafv2"
     commit-message:
       prefix: "deps"
 

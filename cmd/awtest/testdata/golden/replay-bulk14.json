@@ -1,0 +1,171 @@
+[
+  {
+    "details": {
+      "Arn": "arn:aws:access-analyzer:us-west-2:123456789012:analyzer/example-analyzer",
+      "Status": "ACTIVE",
+      "Type": "ACCOUNT"
+    },
+    "methodName": "accessanalyzer:ListAnalyzers",
+    "resourceName": "example-analyzer",
+    "resourceType": "analyzer",
+    "serviceName": "Access Analyzer"
+  },
+  {
+    "details": {
+      "AnalyzerArn": "arn:aws:access-analyzer:us-west-2:123456789012:analyzer/example-analyzer",
+      "Resource": "arn:aws:s3:::example-bucket",
+      "Status": "ACTIVE"
+    },
+    "methodName": "accessanalyzer:ListFindingsV2",
+    "resourceName": "example-finding-1",
+    "resourceType": "finding",
+    "serviceName": "Access Analyzer"
+  },
+  {
+    "details": {
+      "RegionOptStatus": "ENABLED_BY_DEFAULT"
+    },
+    "methodName": "account:ListRegions",
+    "resourceName": "us-east-1",
+    "resourceType": "region",
+    "serviceName": "Account"
+  },
+  {
+    "details": {
+      "RegionOptStatus": "ENABLED_BY_DEFAULT"
+    },
+    "methodName": "account:ListRegions",
+    "resourceName": "us-west-2",
+    "resourceType": "region",
+    "serviceName": "Account"
+  },
+  {
+    "details": {
+      "RegionOptStatus": "DISABLED"
+    },
+    "methodName": "account:ListRegions",
+    "resourceName": "af-south-1",
+    "resourceType": "region",
+    "serviceName": "Account"
+  },
+  {
+    "details": {
+      "CompanyName": "Example Co",
+      "CountryCode": "US"
+    },
+    "methodName": "account:GetContactInformation",
+    "resourceName": "Example User",
+    "resourceType": "contact-information",
+    "serviceName": "Account"
+  },
+  {
+    "details": {
+      "ApiId": "a1b2c3d4e5",
+      "ProtocolType": "HTTP"
+    },
+    "methodName": "apigatewayv2:GetApis",
+    "resourceName": "example-http-api",
+    "resourceType": "api",
+    "serviceName": "API Gateway V2"
+  },
+  {
+    "details": {},
+    "methodName": "apigatewayv2:GetDomainNames",
+    "resourceName": "api.example.com",
+    "resourceType": "domain-name",
+    "serviceName": "API Gateway V2"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/example-alb/50dc6c495c0c9188",
+      "DNSName": "example-alb-1234567890.us-west-2.elb.amazonaws.com",
+      "Scheme": "internet-facing",
+      "Type": "application"
+    },
+    "methodName": "elbv2:DescribeLoadBalancers",
+    "resourceName": "example-alb",
+    "resourceType": "load-balancer",
+    "serviceName": "ELBv2"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:elasticloadbalancing:us-west-2:123456789012:targetgroup/example-tg/73e2d6bc24d8a067",
+      "Port": 80,
+      "Protocol": "HTTP",
+      "VpcId": "vpc-0example1234"
+    },
+    "methodName": "elbv2:DescribeTargetGroups",
+    "resourceName": "example-tg",
+    "resourceType": "target-group",
+    "serviceName": "ELBv2"
+  },
+  {
+    "details": {
+      "LoadBalancerArn": "arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/example-alb/50dc6c495c0c9188",
+      "Port": 443,
+      "Protocol": "HTTPS"
+    },
+    "methodName": "elbv2:DescribeListeners",
+    "resourceName": "arn:aws:elasticloadbalancing:us-west-2:123456789012:listener/app/example-alb/50dc6c495c0c9188/f2f7dc8efc522ab2",
+    "resourceType": "listener",
+    "serviceName": "ELBv2"
+  },
+  {
+    "details": {
+      "TagCount": 2
+    },
+    "methodName": "tag:GetResources",
+    "resourceName": "arn:aws:s3:::example-bucket",
+    "resourceType": "tagged-resource",
+    "serviceName": "Resource Groups Tagging API"
+  },
+  {
+    "details": {
+      "TagCount": 1
+    },
+    "methodName": "tag:GetResources",
+    "resourceName": "arn:aws:lambda:us-west-2:123456789012:function:example-function",
+    "resourceType": "tagged-resource",
+    "serviceName": "Resource Groups Tagging API"
+  },
+  {
+    "details": {
+      "Region": "us-west-2"
+    },
+    "methodName": "tag:GetTagKeys",
+    "resourceName": "env",
+    "resourceType": "tag-key",
+    "serviceName": "Resource Groups Tagging API"
+  },
+  {
+    "details": {
+      "Region": "us-west-2"
+    },
+    "methodName": "tag:GetTagKeys",
+    "resourceName": "team",
+    "resourceType": "tag-key",
+    "serviceName": "Resource Groups Tagging API"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:wafv2:us-west-2:123456789012:regional/webacl/example-web-acl/11111111-2222-3333-4444-555555555555",
+      "Id": "11111111-2222-3333-4444-555555555555",
+      "Scope": "REGIONAL"
+    },
+    "methodName": "wafv2:ListWebACLs",
+    "resourceName": "example-web-acl",
+    "resourceType": "web-acl",
+    "serviceName": "WAFv2"
+  },
+  {
+    "details": {
+      "Arn": "arn:aws:wafv2:us-west-2:123456789012:regional/ipset/example-ip-set/66666666-7777-8888-9999-000000000000",
+      "Id": "66666666-7777-8888-9999-000000000000",
+      "Scope": "REGIONAL"
+    },
+    "methodName": "wafv2:ListIPSets",
+    "resourceName": "example-ip-set",
+    "resourceType": "ip-set",
+    "serviceName": "WAFv2"
+  }
+]

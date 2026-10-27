@@ -1,0 +1,1 @@
+{"ResourceTagMappingList":[{"ResourceARN":"arn:aws:s3:::example-bucket","Tags":[{"Key":"env","Value":"demo"},{"Key":"team","Value":"example-team"}]},{"ResourceARN":"arn:aws:lambda:us-west-2:123456789012:function:example-function","Tags":[{"Key":"env","Value":"demo"}]}]}

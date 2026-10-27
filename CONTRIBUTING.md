@@ -97,9 +97,12 @@ When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (s
 
 | Module (`github.com/aws/aws-sdk-go-v2/service/...`) | Pinned version |
 |---|---|
+| `accessanalyzer` | `v1.56.0` |
+| `account` | `v1.35.7` |
 | `acm` | `v1.46.1` |
 | `amplify` | `v1.44.1` |
 | `apigateway` | `v1.47.0` |
+| `apigatewayv2` | `v1.42.0` |
 | `appsync` | `v1.61.0` |
 | `athena` | `v1.62.1` |
 | `backup` | `v1.65.0` |
@@ -120,6 +123,7 @@ When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (s
 | `ecs` | `v1.98.0` |
 | `efs` | `v1.49.4` |
 | `eks` | `v1.99.0` |
+| `elasticloadbalancingv2` | `v1.63.5` |
 | `emr` | `v1.66.1` |
 | `eventbridge` | `v1.48.7` |
 | `glacier` | `v1.37.1` |
@@ -136,6 +140,7 @@ When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (s
 | `opensearch` | `v1.80.0` |
 | `organizations` | `v1.56.1` |
 | `rekognition` | `v1.60.3` |
+| `resourcegroupstaggingapi` | `v1.35.5` |
 | `sagemaker` | `v1.270.1` |
 | `secretsmanager` | `v1.49.0` |
 | `securityhub` | `v1.81.0` |
@@ -144,6 +149,7 @@ When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (s
 | `ssm` | `v1.79.3` |
 | `transcribe` | `v1.60.1` |
 | `waf` | `v1.38.4` |
+| `wafv2` | `v1.77.7` |
 
 
 ## Code Standards

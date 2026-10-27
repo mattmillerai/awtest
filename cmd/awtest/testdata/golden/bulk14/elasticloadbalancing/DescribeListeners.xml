@@ -1,0 +1,1 @@
+<DescribeListenersResponse xmlns="https://elasticloadbalancing.amazonaws.com/doc/2015-12-01/"><DescribeListenersResult><Listeners></Listeners></DescribeListenersResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></DescribeListenersResponse>

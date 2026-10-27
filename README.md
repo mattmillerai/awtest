@@ -27,7 +27,7 @@
 
 ## What It Does
 
-AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **63 AWS services** with **120 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
+AWTest quickly enumerates the permissions of AWS credentials by performing read-only list/describe operations across **69 AWS services** with **133 API calls**. Hand it a set of AWS keys and in seconds you'll know exactly what those credentials can access — S3 buckets, EC2 instances, IAM users, Lambda functions, databases, secrets, and dozens more. Built for pentesters, red teamers, and cloud security assessors who need fast, comprehensive credential reconnaissance.
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ awtest --speed=fast --format=json -o results.json
 
 ## Features
 
-- **Broad AWS Coverage** -- 63 services, 120 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
+- **Broad AWS Coverage** -- 69 services, 133 API calls covering S3, EC2, IAM, Lambda, EKS, RDS, DynamoDB, GuardDuty, Security Hub, and more
 - **Speed Presets** -- `--speed` presets (`safe`, `fast`, `insane`) for OPSEC-aware concurrent scanning, or fine-grained `--concurrency` control
 - **Multiple Output Formats** -- Text, JSON, YAML, CSV, and table output with `--output-file` export
 - **Service Filtering** -- Include or exclude specific services with `--services` and `--exclude-services`
@@ -121,9 +121,9 @@ awtest --speed=insane --format=json --output-file=results.json
 Scan Summary
 ========================================
 Duration:           12s
-Total Services:     63
+Total Services:     69
 Accessible:         8
-Access Denied:      55
+Access Denied:      61
 Resources Found:    11
 ========================================
 ```
@@ -230,7 +230,7 @@ AWTest provides named speed presets that control scan parallelism. Choose the ri
 |---|---|---|---|
 | `safe` | 1 worker | Minimal footprint -- sequential calls resemble normal console usage | Stealth engagements, red team ops, production infrastructure |
 | `fast` | 5 workers | Moderate density -- more events in a shorter window, within normal operational patterns | Time-sensitive pentests where speed matters more than stealth |
-| `insane` | 20 workers | Dense burst -- all 63 services hammered simultaneously, visible API call spike | Lab environments, time-critical bug bounty, OPSEC not a concern |
+| `insane` | 20 workers | Dense burst -- all 69 services hammered simultaneously, visible API call spike | Lab environments, time-critical bug bounty, OPSEC not a concern |
 
 **Default behavior:** Running `awtest` with no `--speed` flag defaults to `safe` (sequential scanning, identical to Phase 1 behavior).
 
@@ -348,10 +348,10 @@ awtest --aki=AKIAEXAMPLE --sak=YourSecretKey --speed=safe --timeout=2m
 
 AWTest shows the credentials only have access to CloudWatch logs and one S3 log bucket -- no customer data exposed, no emergency escalation needed.
 
-## Supported AWS Services (63 services, 120 API calls)
+## Supported AWS Services (69 services, 133 API calls)
 
 <details>
-<summary>Click to expand full service list (63 services, 120 API calls)</summary>
+<summary>Click to expand full service list (69 services, 133 API calls)</summary>
 
 ### Compute & Containers
 
@@ -362,6 +362,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | ECS | ListClusters |
 | EKS | ListClusters |
 | Elastic Beanstalk | DescribeApplications, DescribeEvents |
+| ELBv2 | DescribeLoadBalancers, DescribeTargetGroups, DescribeListeners |
 | EMR | ListClusters, ListInstanceGroups, ListSecurityConfigurations |
 | Fargate | ListFargateTasks |
 | Lambda | ListFunctions |
@@ -381,6 +382,8 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 
 | Service | API Calls |
 |---|---|
+| Access Analyzer | ListAnalyzers, ListFindingsV2 |
+| Account | ListRegions, GetContactInformation |
 | Certificate Manager (ACM) | ListCertificates |
 | Cognito Identity | ListIdentityPools |
 | Cognito User Pools | ListUserPools |
@@ -394,6 +397,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | Security Hub | GetEnabledStandards, GetFindings, ListEnabledProductsForImport |
 | STS | GetCallerIdentity |
 | WAF | ListWebACLs |
+| WAFv2 | ListWebACLs, ListIPSets |
 
 ### Storage
 
@@ -409,6 +413,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | Service | API Calls |
 |---|---|
 | API Gateway | RestApis, GetApiKeys, GetDomainNames |
+| API Gateway V2 | GetApis, GetDomainNames |
 | CloudFront | ListDistributions |
 | Direct Connect | DescribeConnections, DescribeVirtualInterfaces, DescribeDirectConnectGateways |
 | Route53 | ListHostedZones, ListHealthChecks |
@@ -423,6 +428,7 @@ AWTest shows the credentials only have access to CloudWatch logs and one S3 log 
 | CloudWatch | DescribeAlarms |
 | CloudWatch Logs | DescribeLogGroupsAndStreams, ListMetrics |
 | Config | DescribeConfigurationRecorders |
+| Resource Groups Tagging API | GetResources (capped at 500 resources), GetTagKeys |
 | Systems Manager (SSM) | DescribeParameters |
 
 ### Application Services

@@ -1,0 +1,1 @@
+{"findings":[{"id":"example-finding-1","status":"ACTIVE","resource":"arn:aws:s3:::example-bucket","resourceType":"AWS::S3::Bucket","resourceOwnerAccount":"123456789012","analyzedAt":"2024-01-01T00:00:00Z","createdAt":"2024-01-01T00:00:00Z","updatedAt":"2024-01-01T00:00:00Z","findingType":"ExternalAccess"}]}

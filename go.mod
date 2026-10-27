@@ -8,9 +8,12 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.47.4
 	github.com/aws/aws-sdk-go-v2/config v1.33.10
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.10
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.56.0
+	github.com/aws/aws-sdk-go-v2/service/account v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/acm v1.46.1
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.44.1
 	github.com/aws/aws-sdk-go-v2/service/apigateway v1.47.0
+	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/appsync v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/athena v1.62.1
 	github.com/aws/aws-sdk-go-v2/service/backup v1.65.0
@@ -36,6 +39,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.99.0
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk v1.43.5
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.5
 	github.com/aws/aws-sdk-go-v2/service/emr v1.66.1
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.48.7
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.37.1
@@ -57,6 +61,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1
 	github.com/aws/aws-sdk-go-v2/service/redshift v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/rekognition v1.60.3
+	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.35.5
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.70.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.270.1
@@ -70,6 +75,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.5
 	github.com/aws/aws-sdk-go-v2/service/transcribe v1.60.1
 	github.com/aws/aws-sdk-go-v2/service/waf v1.38.4
+	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.77.7
 	github.com/aws/smithy-go v1.28.6
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/olekukonko/tablewriter v0.0.5

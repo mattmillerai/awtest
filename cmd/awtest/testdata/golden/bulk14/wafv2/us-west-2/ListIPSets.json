@@ -1,0 +1,1 @@
+{"IPSets":[{"ARN":"arn:aws:wafv2:us-west-2:123456789012:regional/ipset/example-ip-set/66666666-7777-8888-9999-000000000000","Id":"66666666-7777-8888-9999-000000000000","Name":"example-ip-set","Description":"Fictional IP set","LockToken":"00000000-0000-0000-0000-000000000000"}]}

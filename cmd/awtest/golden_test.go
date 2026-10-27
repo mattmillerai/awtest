@@ -29,6 +29,7 @@ const (
 	goldenBulk11Path = "testdata/golden/replay-bulk11.json"
 	goldenBulk12Path = "testdata/golden/replay-bulk12.json"
 	goldenBulk13Path = "testdata/golden/replay-bulk13.json"
+	goldenBulk14Path = "testdata/golden/replay-bulk14.json"
 )
 
 // v1TransportSuffix is the aws-sdk-go v1 error noise the v2 migration drops.
@@ -262,6 +263,10 @@ func TestGoldenReplaySample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	bulk14Dir, err := filepath.Abs("testdata/golden/bulk14")
+	if err != nil {
+		t.Fatal(err)
+	}
 	cases := []struct {
 		name       string
 		args       []string
@@ -289,13 +294,17 @@ func TestGoldenReplaySample(t *testing.T) {
 		// Prefixes: mediaconvert, neptune, opensearch, organizations, sagemaker; none occurs inside another prefix.
 		{"bulk9", []string{"-replay", bulk9Dir, "-services", "mediaconvert,neptune,opensearch,organizations,sagemaker", "-quiet", "-format", "json"}, goldenBulk9Path},
 		// Prefixes: securityhub, apigateway, sns, iam; none occurs inside another prefix.
-		{"bulk10", []string{"-replay", bulk10Dir, "-services", "securityhub,apigateway,sns,iam", "-quiet", "-format", "json"}, goldenBulk10Path},
+		// "apigateway" is also inside apigatewayv2, which bulk14 covers.
+		{"bulk10", []string{"-replay", bulk10Dir, "-services", "securityhub,apigateway,sns,iam", "-exclude-services", "apigatewayv2", "-quiet", "-format", "json"}, goldenBulk10Path},
 		// Prefixes: route53, cloudfront, cloudwatch, cloudwatchlogs ("cloudwatch" selects both CloudWatch services); none occurs inside another prefix.
 		{"bulk11", []string{"-replay", bulk11Dir, "-services", "route53,cloudfront,cloudwatch", "-quiet", "-format", "json"}, goldenBulk11Path},
 		// Prefix: ec2 (the ec2 and vpc services both use the "ec2:" call prefix); no other service prefix contains "ec2".
 		{"bulk12", []string{"-replay", bulk12Dir, "-services", "ec2", "-quiet", "-format", "json"}, goldenBulk12Path},
 		// Prefixes: sqs, waf, ivs (substring "ivs" also selects ivsChat and ivsRealtime); no other service prefix contains sqs, waf or ivs.
-		{"bulk13", []string{"-replay", bulk13Dir, "-services", "sqs,waf,ivs", "-quiet", "-format", "json"}, goldenBulk13Path},
+		// "waf" is also inside wafv2, which bulk14 covers.
+		{"bulk13", []string{"-replay", bulk13Dir, "-services", "sqs,waf,ivs", "-exclude-services", "wafv2", "-quiet", "-format", "json"}, goldenBulk13Path},
+		// Prefixes: elbv2, wafv2, tag (Resource Groups Tagging API), accessanalyzer, account, apigatewayv2; each is unique as a substring across all service prefixes.
+		{"bulk14", []string{"-replay", bulk14Dir, "-services", "elbv2,wafv2,tag,accessanalyzer,account,apigatewayv2", "-quiet", "-format", "json"}, goldenBulk14Path},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

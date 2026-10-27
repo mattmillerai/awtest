@@ -4,9 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
+	"github.com/aws/aws-sdk-go-v2/service/account"
 	"github.com/aws/aws-sdk-go-v2/service/acm"
 	"github.com/aws/aws-sdk-go-v2/service/amplify"
 	"github.com/aws/aws-sdk-go-v2/service/apigateway"
+	"github.com/aws/aws-sdk-go-v2/service/apigatewayv2"
 	"github.com/aws/aws-sdk-go-v2/service/appsync"
 	"github.com/aws/aws-sdk-go-v2/service/athena"
 	"github.com/aws/aws-sdk-go-v2/service/backup"
@@ -32,6 +35,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/elasticache"
 	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/emr"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
@@ -53,6 +57,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/redshift"
 	"github.com/aws/aws-sdk-go-v2/service/rekognition"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
@@ -66,6 +71,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/transcribe"
 	"github.com/aws/aws-sdk-go-v2/service/waf"
+	"github.com/aws/aws-sdk-go-v2/service/wafv2"
 )
 
 // How to add a migrated (CallV2) service to the endpoint guards:
@@ -174,6 +180,14 @@ var v2EnvSuffix = map[string][]string{
 	"ivs":         {"IVS"},
 	"ivsChat":     {"IVSCHAT"},
 	"ivsRealtime": {"IVS_REALTIME"},
+
+	// "tag" is the Resource Groups Tagging API call prefix (tag:GetResources).
+	"elbv2":          {"ELASTIC_LOAD_BALANCING_V2"},
+	"wafv2":          {"WAFV2"},
+	"tag":            {"RESOURCE_GROUPS_TAGGING_API"},
+	"accessanalyzer": {"ACCESSANALYZER"},
+	"account":        {"ACCOUNT"},
+	"apigatewayv2":   {"APIGATEWAYV2"},
 }
 
 // v2ServiceIDs maps the same prefixes to the ServiceID constants of the v2
@@ -254,6 +268,13 @@ var v2ServiceIDs = map[string][]string{
 	"ivs":         {ivs.ServiceID},
 	"ivsChat":     {ivschat.ServiceID},
 	"ivsRealtime": {ivsrealtime.ServiceID},
+
+	"elbv2":          {elasticloadbalancingv2.ServiceID},
+	"wafv2":          {wafv2.ServiceID},
+	"tag":            {resourcegroupstaggingapi.ServiceID},
+	"accessanalyzer": {accessanalyzer.ServiceID},
+	"account":        {account.ServiceID},
+	"apigatewayv2":   {apigatewayv2.ServiceID},
 }
 
 // sdkEnvSuffix is how the SDK turns a ServiceID into the AWS_ENDPOINT_URL_<SVC>

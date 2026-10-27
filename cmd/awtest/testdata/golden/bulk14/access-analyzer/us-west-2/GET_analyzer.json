@@ -1,0 +1,1 @@
+{"analyzers":[{"arn":"arn:aws:access-analyzer:us-west-2:123456789012:analyzer/example-analyzer","name":"example-analyzer","type":"ACCOUNT","status":"ACTIVE","createdAt":"2024-01-01T00:00:00Z"}]}
