@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.8.0](https://github.com/Miller-Media/awtest-private/compare/v1.7.0...v1.8.0) (2026-10-27)
+
+
+### Features
+
+* add depth checks for STS, IAM, S3, ECS and EKS ([#52](https://github.com/Miller-Media/awtest-private/issues/52)) ([f393e11](https://github.com/Miller-Media/awtest-private/commit/f393e113959c80216b9d863a77b181fb55b66c64))
+* add ELBv2, WAFv2, Resource Groups Tagging, Access Analyzer, Account and API Gateway V2 checks ([#50](https://github.com/Miller-Media/awtest-private/issues/50)) ([854fefb](https://github.com/Miller-Media/awtest-private/commit/854fefb70fe5f4028313bb4e443e7cd24a704bc9))
+
+### Notes
+
+* **Six new services:** ELBv2, WAFv2, Resource Groups Tagging API, IAM Access Analyzer, Account and API Gateway V2 checks (all read-only). awtest now covers 69 services with 143 API calls (was 63 services and 120 calls in 1.7.0).
+* **Depth checks:** new read-only calls: `sts:GetAccessKeyInfo`; IAM instance profiles, OpenID Connect providers, SAML providers, account summary, account password policy and MFA devices; ECS services and task definitions; EKS nodegroups. S3 bucket scans now also call `GetBucketEncryption` and `GetBucketVersioning` for each bucket (up to 500 buckets).
+* **More API calls:** a full scan makes more API calls than 1.7.0 (143 call types versus 120), plus the extra per-bucket S3 calls above.
+* **Larger binary:** the release binary is about 35.9 MB on linux/amd64 (1.7.0 was 33.9 MB, 1.6.0 was 25.0 MB), and the release archive is about 11.4 MB (1.7.0 was 10.9 MB). The CI size guard stays at 36 MB.
+
 ## [1.7.0](https://github.com/Miller-Media/awtest-private/compare/v1.6.0...v1.7.0) (2026-10-27)
 
 
