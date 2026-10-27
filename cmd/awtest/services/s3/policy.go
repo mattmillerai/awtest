@@ -56,6 +56,20 @@ func statusFromError(err error, noneCode, noneStatus string) (status string, ok 
 	return "", false
 }
 
+// statusFromCodes is statusFromError for configurations that have several
+// "not configured" error codes.
+func statusFromCodes(err error, noneStatus string, noneCodes ...string) (status string, ok bool) {
+	if isDeniedCode(err) {
+		return statusDenied, true
+	}
+	for _, c := range noneCodes {
+		if errCode(err) == c {
+			return noneStatus, true
+		}
+	}
+	return "", false
+}
+
 type policyDoc struct {
 	Statement json.RawMessage `json:"Statement"`
 }

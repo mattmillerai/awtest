@@ -11,7 +11,9 @@ import (
 )
 
 func TestServicesAreV2Only(t *testing.T) {
-	want := []string{"iam:ListUsers", "iam:ListRoles", "iam:ListGroups", "iam:ListPolicies"}
+	want := []string{"iam:ListUsers", "iam:ListRoles", "iam:ListGroups", "iam:ListPolicies",
+		"iam:ListInstanceProfiles", "iam:ListOpenIDConnectProviders", "iam:ListSAMLProviders",
+		"iam:GetAccountSummary", "iam:GetAccountPasswordPolicy", "iam:ListMFADevices"}
 	if len(IAMCalls) != len(want) {
 		t.Fatalf("got %d services, want %d", len(IAMCalls), len(want))
 	}

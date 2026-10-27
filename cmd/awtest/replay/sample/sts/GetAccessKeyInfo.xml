@@ -1,0 +1,1 @@
+<GetAccessKeyInfoResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/"><GetAccessKeyInfoResult><Account>123456789012</Account></GetAccessKeyInfoResult><ResponseMetadata><RequestId>00000000-0000-0000-0000-000000000000</RequestId></ResponseMetadata></GetAccessKeyInfoResponse>

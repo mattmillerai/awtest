@@ -194,7 +194,7 @@ func (f *fakeS3) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bucket := strings.Trim(r.URL.Path, "/")
-	for _, k := range []string{"location", "policyStatus", "policy", "acl", "publicAccessBlock"} {
+	for _, k := range []string{"location", "policyStatus", "policy", "acl", "publicAccessBlock", "encryption", "versioning"} {
 		if _, ok := q[k]; ok {
 			rc.op = k
 			break
@@ -253,6 +253,13 @@ func (f *fakeS3) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if rp, ok := f.resp[key]; ok {
 		w.WriteHeader(rp.code)
 		_, _ = w.Write([]byte(rp.body))
+		return
+	}
+	switch rc.op {
+	case "encryption", "versioning":
+		// Not configured by a test: reads as a soft "denied" status.
+		w.WriteHeader(403)
+		_, _ = w.Write([]byte(`<Error><Code>AccessDenied</Code><Message>m</Message></Error>`))
 		return
 	}
 	w.WriteHeader(500)
@@ -400,8 +407,8 @@ func TestGetBucketPolicyFunctional(t *testing.T) {
 	ctx := newEnv(t, f)
 	res := runPolicy(t, ctx)
 
-	if len(res) != 12 {
-		t.Fatalf("want 12 results (3 buckets x 4 calls), got %d", len(res))
+	if len(res) != 18 {
+		t.Fatalf("want 18 results (3 buckets x 6 calls), got %d", len(res))
 	}
 	for _, r := range res {
 		if r.ResourceType != "bucket" || r.ServiceName != "S3" {
@@ -462,10 +469,12 @@ func TestGetBucketPolicyFunctional(t *testing.T) {
 	for _, r := range res {
 		order = append(order, r.ResourceName+"/"+r.MethodName)
 	}
-	wantOrder := []string{
-		"open/s3:GetBucketPolicy", "open/s3:GetBucketPolicyStatus", "open/s3:GetBucketAcl", "open/s3:GetPublicAccessBlock",
-		"locked/s3:GetBucketPolicy", "locked/s3:GetBucketPolicyStatus", "locked/s3:GetBucketAcl", "locked/s3:GetPublicAccessBlock",
-		"eu-bucket/s3:GetBucketPolicy", "eu-bucket/s3:GetBucketPolicyStatus", "eu-bucket/s3:GetBucketAcl", "eu-bucket/s3:GetPublicAccessBlock",
+	var wantOrder []string
+	for _, b := range []string{"open", "locked", "eu-bucket"} {
+		for _, m := range []string{"GetBucketPolicy", "GetBucketPolicyStatus", "GetBucketAcl", "GetPublicAccessBlock",
+			"GetBucketEncryption", "GetBucketVersioning"} {
+			wantOrder = append(wantOrder, b+"/s3:"+m)
+		}
 	}
 	if !reflect.DeepEqual(order, wantOrder) {
 		t.Errorf("order: %v", order)
@@ -478,9 +487,9 @@ func TestGetBucketPolicyFunctional(t *testing.T) {
 	if r := pick(res, "open", "s3:GetBucketPolicy"); r.Details["region"] != "us-east-1" {
 		t.Errorf("open region: %v", r.Details["region"])
 	}
-	// 1 list + 3 x (location + 4)
-	if n := len(f.reqs); n != 16 {
-		t.Errorf("requests = %d, want 16", n)
+	// 1 list + 3 x (location + 6)
+	if n := len(f.reqs); n != 22 {
+		t.Errorf("requests = %d, want 22", n)
 	}
 	if bad := f.badHosts(); len(bad) > 0 {
 		t.Errorf("requests not sent to the path-style endpoint host: %v", bad)
@@ -502,7 +511,7 @@ func TestGetBucketPolicySignsForBucketRegion(t *testing.T) {
 	}
 	ctx := newEnv(t, f)
 	res := runPolicy(t, ctx)
-	if len(res) != 16 {
+	if len(res) != 24 {
 		t.Fatalf("results: %d", len(res))
 	}
 	want := map[string]string{"eu": "eu-west-1", "legacy-eu": "eu-west-1", "east": "us-east-1", "ap": "ap-south-1"}
@@ -534,7 +543,7 @@ func TestGetBucketPolicyLocationFailure(t *testing.T) {
 	}}
 	ctx := newEnv(t, f)
 	res := runPolicy(t, ctx)
-	if len(res) != 4 {
+	if len(res) != 6 {
 		t.Fatalf("results: %d", len(res))
 	}
 	if r := pick(res, "b", "s3:GetBucketAcl"); r.Error == nil || r.Details["status"] != "error" {
@@ -578,6 +587,52 @@ func TestProcessWithError(t *testing.T) {
 		if len(res) != 1 || res[0].Error == nil || res[0].MethodName != e.Name {
 			t.Errorf("%s: res: %+v", e.Name, res)
 		}
+	}
+}
+
+func TestGetBucketConfigDepthChecks(t *testing.T) {
+	f := &fakeS3{
+		buckets:  []string{"full", "bare", "odd"},
+		location: map[string]string{},
+		resp: map[string]fakeResp{
+			"full|encryption": {200, `<ServerSideEncryptionConfiguration ` + s3NS + `><Rule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>aws:kms</SSEAlgorithm><KMSMasterKeyID>key-1</KMSMasterKeyID></ApplyServerSideEncryptionByDefault><BucketKeyEnabled>true</BucketKeyEnabled></Rule></ServerSideEncryptionConfiguration>`},
+			"full|versioning": {200, `<VersioningConfiguration ` + s3NS + `><Status>Enabled</Status><MfaDelete>Disabled</MfaDelete></VersioningConfiguration>`},
+
+			"bare|encryption": s3Err(404, "ServerSideEncryptionConfigurationNotFoundError"),
+			"bare|versioning": {200, `<VersioningConfiguration ` + s3NS + `/>`},
+
+			"odd|encryption": s3Err(403, "AccessDenied"),
+			"odd|versioning": {200, `<VersioningConfiguration ` + s3NS + `><Status>Suspended</Status></VersioningConfiguration>`},
+		},
+	}
+	res := runPolicy(t, newEnv(t, f))
+	status := func(b, m string) string {
+		r := pick(res, b, m)
+		if r == nil {
+			t.Fatalf("no result for %s %s", b, m)
+		}
+		s, _ := r.Details["status"].(string)
+		return s
+	}
+	want := []struct{ bucket, method, status string }{
+		{"full", "s3:GetBucketEncryption", "configured"},
+		{"full", "s3:GetBucketVersioning", "enabled"},
+		{"bare", "s3:GetBucketEncryption", "none"},
+		{"bare", "s3:GetBucketVersioning", "disabled"},
+		{"odd", "s3:GetBucketEncryption", "denied"},
+		{"odd", "s3:GetBucketVersioning", "suspended"},
+	}
+	for _, w := range want {
+		if got := status(w.bucket, w.method); got != w.status {
+			t.Errorf("%s %s status = %q, want %q", w.bucket, w.method, got, w.status)
+		}
+		if r := pick(res, w.bucket, w.method); (r.Error != nil) != (w.status == "error") {
+			t.Errorf("%s %s error = %v", w.bucket, w.method, r.Error)
+		}
+	}
+	enc := pick(res, "full", "s3:GetBucketEncryption").Details
+	if !reflect.DeepEqual(enc["algorithms"], []string{"aws:kms"}) || !reflect.DeepEqual(enc["kms_key_ids"], []string{"key-1"}) || enc["bucket_key_enabled"] != true {
+		t.Errorf("encryption details = %+v", enc)
 	}
 }
 

@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,7 +16,8 @@ import (
 
 // S3 bucket listing is global: this entry does not consult the region scope
 // and runs exactly once per scan. Per bucket it makes GetBucketLocation plus
-// GetBucketPolicy, GetBucketPolicyStatus, GetBucketAcl and GetPublicAccessBlock.
+// GetBucketPolicy, GetBucketPolicyStatus, GetBucketAcl, GetPublicAccessBlock,
+// GetBucketEncryption and GetBucketVersioning.
 func init() {
 	S3Calls = append(S3Calls, getBucketPolicyCall)
 }
@@ -78,7 +80,7 @@ var getBucketPolicyCall = types.AWSService{
 	ModuleName: types.DefaultModuleName,
 }
 
-// scanBucket resolves the bucket region and runs the four read-only checks.
+// scanBucket resolves the bucket region and runs the nine read-only checks.
 func scanBucket(ctx context.Context, debug bool, cfg aws.Config, defaultSvc *s3.Client, bucket string) []types.ScanResult {
 	region := "unknown"
 	svc := defaultSvc
@@ -192,5 +194,48 @@ func scanBucket(ctx context.Context, debug bool, cfg aws.Config, defaultSvc *s3.
 			"restrict_public_buckets": aws.ToBool(pab.RestrictPublicBuckets),
 		}, nil)
 	}
+
+	// e. default encryption
+	if out, err := svc.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{Bucket: aws.String(bucket)}); err != nil {
+		if st, ok := statusFromCodes(err, "none", "ServerSideEncryptionConfigurationNotFoundError"); ok {
+			record("s3:GetBucketEncryption", "encryption", st, nil, nil)
+		} else {
+			fail("s3:GetBucketEncryption", err)
+		}
+	} else {
+		algorithms := []string{}
+		kmsKeys := []string{}
+		bucketKey := false
+		if out.ServerSideEncryptionConfiguration != nil {
+			for _, r := range out.ServerSideEncryptionConfiguration.Rules {
+				if d := r.ApplyServerSideEncryptionByDefault; d != nil {
+					algorithms = append(algorithms, string(d.SSEAlgorithm))
+					if d.KMSMasterKeyID != nil {
+						kmsKeys = append(kmsKeys, *d.KMSMasterKeyID)
+					}
+				}
+				bucketKey = bucketKey || aws.ToBool(r.BucketKeyEnabled)
+			}
+		}
+		record("s3:GetBucketEncryption", "encryption", "configured", map[string]interface{}{
+			"algorithms": algorithms, "kms_key_ids": kmsKeys, "bucket_key_enabled": bucketKey,
+		}, nil)
+	}
+
+	// f. versioning
+	if out, err := svc.GetBucketVersioning(ctx, &s3.GetBucketVersioningInput{Bucket: aws.String(bucket)}); err != nil {
+		if st, ok := statusFromError(err, "", ""); ok {
+			record("s3:GetBucketVersioning", "versioning", st, nil, nil)
+		} else {
+			fail("s3:GetBucketVersioning", err)
+		}
+	} else {
+		st := "disabled"
+		if out.Status != "" {
+			st = strings.ToLower(string(out.Status))
+		}
+		record("s3:GetBucketVersioning", "versioning", st, map[string]interface{}{"mfa_delete": string(out.MFADelete)}, nil)
+	}
+
 	return results
 }

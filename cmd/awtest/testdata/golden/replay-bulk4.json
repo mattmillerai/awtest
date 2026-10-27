@@ -25,6 +25,50 @@
   },
   {
     "details": {
+      "cluster": "demo-cluster",
+      "region": "us-west-2",
+      "service": "web",
+      "service_arn": "arn:aws:ecs:us-west-2:123456789012:service/demo-cluster/web"
+    },
+    "methodName": "ecs:ListServices",
+    "resourceName": "demo-cluster/web",
+    "resourceType": "service",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
+      "cluster": "demo-cluster",
+      "region": "us-west-2",
+      "service": "worker",
+      "service_arn": "arn:aws:ecs:us-west-2:123456789012:service/demo-cluster/worker"
+    },
+    "methodName": "ecs:ListServices",
+    "resourceName": "demo-cluster/worker",
+    "resourceType": "service",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:ecs:us-west-2:123456789012:task-definition/web:1",
+      "region": "us-west-2"
+    },
+    "methodName": "ecs:ListTaskDefinitions",
+    "resourceName": "web:1",
+    "resourceType": "task-definition",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:ecs:us-west-2:123456789012:task-definition/web:2",
+      "region": "us-west-2"
+    },
+    "methodName": "ecs:ListTaskDefinitions",
+    "resourceName": "web:2",
+    "resourceType": "task-definition",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {
       "Encrypted": true,
       "LifeCycleState": "available",
       "Name": "demo-share",
@@ -79,6 +123,28 @@
     "methodName": "eks:ListClusters",
     "resourceName": "bare-cluster",
     "resourceType": "cluster",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {
+      "cluster": "demo-cluster",
+      "nodegroup": "demo-ng-general",
+      "region": "us-west-2"
+    },
+    "methodName": "eks:ListNodegroups",
+    "resourceName": "demo-cluster/demo-ng-general",
+    "resourceType": "nodegroup",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {
+      "cluster": "demo-cluster",
+      "nodegroup": "demo-ng-spot",
+      "region": "us-west-2"
+    },
+    "methodName": "eks:ListNodegroups",
+    "resourceName": "demo-cluster/demo-ng-spot",
+    "resourceType": "nodegroup",
     "serviceName": "EKS"
   },
   {

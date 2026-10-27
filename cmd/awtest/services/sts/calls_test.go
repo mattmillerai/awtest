@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/smithy-go"
 	"github.com/mattmillerai/awtest/cmd/awtest/awsv2"
 	"github.com/mattmillerai/awtest/cmd/awtest/types"
@@ -32,6 +33,7 @@ type fakeAWS struct {
 	policiesFor string
 
 	mu      sync.Mutex
+	keyID   string
 	actions []string
 	users   []string
 }
@@ -58,6 +60,15 @@ func (f *fakeAWS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprintf(w, `<GetCallerIdentityResponse xmlns="%s"><GetCallerIdentityResult><Arn>%s</Arn><UserId>AIDAEXAMPLE</UserId><Account>123456789012</Account></GetCallerIdentityResult><ResponseMetadata><RequestId>r-1</RequestId></ResponseMetadata></GetCallerIdentityResponse>`, stsNS, f.arn)
+	case "GetAccessKeyInfo":
+		if f.denySTS {
+			deny("User is not authorized to perform: sts:GetAccessKeyInfo")
+			return
+		}
+		f.mu.Lock()
+		f.keyID = r.PostForm.Get("AccessKeyId")
+		f.mu.Unlock()
+		fmt.Fprintf(w, `<GetAccessKeyInfoResponse xmlns="%s"><GetAccessKeyInfoResult><Account>210987654321</Account></GetAccessKeyInfoResult><ResponseMetadata><RequestId>r-4</RequestId></ResponseMetadata></GetAccessKeyInfoResponse>`, stsNS)
 	case "ListAttachedUserPolicies":
 		if f.denyIAM {
 			deny("not authorized to perform: iam:ListAttachedUserPolicies")
@@ -126,8 +137,11 @@ func run(t *testing.T, ctx context.Context) ([]types.ScanResult, error) {
 }
 
 func TestServiceIsV2Only(t *testing.T) {
-	if len(STSCalls) != 1 {
-		t.Fatalf("expected 1 service, got %d", len(STSCalls))
+	if len(STSCalls) != 2 {
+		t.Fatalf("expected 2 services, got %d", len(STSCalls))
+	}
+	if STSCalls[1].Name != "sts:GetAccessKeyInfo" || STSCalls[1].CallV2 == nil {
+		t.Errorf("second service = %q", STSCalls[1].Name)
 	}
 	svc := STSCalls[0]
 	if svc.CallV2 == nil {
@@ -275,5 +289,43 @@ func TestProcessNilAndMissingInputsDoNotPanic(t *testing.T) {
 	delete(m, "cfg")
 	if got := p(m, nil, false); len(got) != 1 || got[0].ResourceType != "identity" {
 		t.Errorf("results without cfg = %+v", got)
+	}
+}
+
+func TestGetAccessKeyInfo(t *testing.T) {
+	f := &fakeAWS{}
+	ctx := newEnv(t, f)
+	svc := STSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	if len(res) != 1 || res[0].MethodName != "sts:GetAccessKeyInfo" || res[0].ResourceName != "210987654321" ||
+		res[0].Details["account"] != "210987654321" || res[0].Error != nil {
+		t.Fatalf("results = %+v", res)
+	}
+	if f.keyID != "AKIAFAKEFAKEFAKE" {
+		t.Errorf("AccessKeyId sent = %q", f.keyID)
+	}
+}
+
+func TestGetAccessKeyInfoDeniedAndNoCreds(t *testing.T) {
+	ctx := newEnv(t, &fakeAWS{denySTS: true})
+	svc := STSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	if len(res) != 1 || res[0].Error == nil || !strings.HasPrefix(res[0].Error.Error(), "AccessDenied") {
+		t.Fatalf("denied results = %+v", res)
+	}
+
+	// Credentials that cannot be retrieved are a soft skip, not an error.
+	cfg, _ := types.AWSConfigFrom(ctx)
+	cfg.Credentials = aws.CredentialsProviderFunc(func(context.Context) (aws.Credentials, error) {
+		return aws.Credentials{}, errors.New("no creds")
+	})
+	out, err = svc.CallV2(ctx, cfg)
+	if err != nil || out != nil {
+		t.Fatalf("CallV2 = %v, %v; want nil, nil", out, err)
+	}
+	if got := svc.Process(out, err, false); len(got) != 0 {
+		t.Errorf("results = %+v", got)
 	}
 }

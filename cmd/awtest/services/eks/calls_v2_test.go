@@ -31,6 +31,10 @@ type fakeEKS struct {
 	denyList map[string]string
 	// denyDescribe lists "region/name" clusters whose DescribeCluster fails.
 	denyDescribe map[string]bool
+	// nodegroups is keyed "region/cluster"; moreGroups makes ListNodegroups
+	// report a further page.
+	nodegroups map[string][]string
+	moreGroups bool
 
 	mu   sync.Mutex
 	reqs []recorded
@@ -65,6 +69,13 @@ func (f *fakeEKS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		out := map[string]interface{}{"clusters": names}
 		if len(names) > 0 {
 			// v1 ignored the token; so must the migrated code.
+			out["nextToken"] = "more"
+		}
+		_ = json.NewEncoder(w).Encode(out)
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/clusters/") && strings.HasSuffix(r.URL.Path, "/node-groups"):
+		cluster := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/clusters/"), "/node-groups")
+		out := map[string]interface{}{"nodegroups": f.nodegroups[region+"/"+cluster]}
+		if f.moreGroups {
 			out["nextToken"] = "more"
 		}
 		_ = json.NewEncoder(w).Encode(out)
@@ -137,11 +148,75 @@ func names(results []types.ScanResult) []string {
 }
 
 func TestServiceIsV2Only(t *testing.T) {
-	if len(EKSCalls) != 1 || EKSCalls[0].Name != "eks:ListClusters" {
+	want := []string{"eks:ListClusters", "eks:ListNodegroups"}
+	if len(EKSCalls) != len(want) {
 		t.Fatalf("unexpected services: %+v", EKSCalls)
 	}
-	if EKSCalls[0].CallV2 == nil {
-		t.Error("want CallV2 set and Call nil")
+	for i, n := range want {
+		if EKSCalls[i].Name != n || EKSCalls[i].CallV2 == nil {
+			t.Errorf("service %d = %q, want %q with CallV2 set", i, EKSCalls[i].Name, n)
+		}
+	}
+}
+
+func TestListNodegroups(t *testing.T) {
+	f := &fakeEKS{
+		clusters: map[string][]map[string]interface{}{
+			"us-east-1": {{"name": "prod"}, {"name": "empty"}},
+			"us-west-1": {{"name": "dev"}},
+		},
+		nodegroups: map[string][]string{
+			"us-east-1/prod": {"ng-a", "ng-b"},
+			"us-west-1/dev":  {"ng-c"},
+		},
+	}
+	ctx := newEnv(t, f)
+	svc := EKSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	var got []string
+	for _, r := range res {
+		if r.ResourceType == "note" {
+			// The fake reports a further cluster page for every region it lists.
+			continue
+		}
+		if r.Error != nil || r.MethodName != "eks:ListNodegroups" || r.ResourceType != "nodegroup" {
+			t.Errorf("unexpected result %+v", r)
+		}
+		got = append(got, r.Details["region"].(string)+":"+r.ResourceName)
+	}
+	if want := []string{"us-east-1:prod/ng-a", "us-east-1:prod/ng-b", "us-west-1:dev/ng-c"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("nodegroups = %v, want %v", got, want)
+	}
+	if g := f.regionsOf("/clusters/prod/node-groups"); !reflect.DeepEqual(g, []string{"us-east-1"}) {
+		t.Errorf("prod node-groups regions = %v", g)
+	}
+
+	// A further page is noted, not followed.
+	f.moreGroups = true
+	f.reqs = nil
+	out, err = svc.Invoke(ctx)
+	res = svc.Process(out, err, false)
+	notes := 0
+	for _, r := range res {
+		// Per-cluster scopes ("<region>/<cluster>") only.
+		if scope, _ := r.Details["scope"].(string); r.ResourceType == "note" && strings.Contains(scope, "/") {
+			notes++
+		}
+	}
+	if notes != 3 || len(f.regionsOf("/clusters/prod/node-groups")) != 1 {
+		t.Errorf("notes = %d, results = %+v", notes, res)
+	}
+}
+
+func TestListNodegroupsDenied(t *testing.T) {
+	f := &fakeEKS{denyList: map[string]string{"us-east-1": "nope"}}
+	ctx := newEnv(t, f)
+	svc := EKSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	if len(res) != 1 || res[0].Error == nil || !strings.HasPrefix(res[0].Error.Error(), "AccessDeniedException") {
+		t.Errorf("results = %+v", res)
 	}
 }
 

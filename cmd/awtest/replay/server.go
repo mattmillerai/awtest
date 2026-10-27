@@ -223,6 +223,8 @@ func s3Operation(r *http.Request) (action, resource string) {
 			{"policy", "GetBucketPolicy"},
 			{"acl", "GetBucketAcl"},
 			{"publicAccessBlock", "GetPublicAccessBlock"},
+			{"encryption", "GetBucketEncryption"},
+			{"versioning", "GetBucketVersioning"},
 		} {
 			if _, ok := q[sub.param]; ok {
 				return sub.action, bucket

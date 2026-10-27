@@ -10,6 +10,15 @@
     "serviceName": "STS"
   },
   {
+    "details": {
+      "account": "123456789012"
+    },
+    "methodName": "sts:GetAccessKeyInfo",
+    "resourceName": "123456789012",
+    "resourceType": "access-key",
+    "serviceName": "STS"
+  },
+  {
     "details": {},
     "error": "AccessDeniedException: awtest replay: no fixture for access-analyzer:GET_analyzer (region R); expected access-analyzer/GET_analyzer.xml or .json",
     "methodName": "accessanalyzer:ListAnalyzers",
@@ -435,6 +444,22 @@
   },
   {
     "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecs:ListClusters (region R); expected ecs/ListClusters.xml or .json",
+    "methodName": "ecs:ListServices",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for ecs:ListTaskDefinitions (region R); expected ecs/ListTaskDefinitions.xml or .json",
+    "methodName": "ecs:ListTaskDefinitions",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "ECS"
+  },
+  {
+    "details": {},
     "error": "AccessDeniedException: awtest replay: no fixture for elasticfilesystem:GET_2015-02-01_file-systems (region R); expected elasticfilesystem/GET_2015-02-01_file-systems.xml or .json",
     "methodName": "efs:DescribeFileSystems",
     "resourceName": "",
@@ -445,6 +470,14 @@
     "details": {},
     "error": "AccessDeniedException: awtest replay: no fixture for eks:GET_clusters (region R); expected eks/GET_clusters.xml or .json",
     "methodName": "eks:ListClusters",
+    "resourceName": "",
+    "resourceType": "",
+    "serviceName": "EKS"
+  },
+  {
+    "details": {},
+    "error": "AccessDeniedException: awtest replay: no fixture for eks:GET_clusters (region R); expected eks/GET_clusters.xml or .json",
+    "methodName": "eks:ListNodegroups",
     "resourceName": "",
     "resourceType": "",
     "serviceName": "EKS"
@@ -713,6 +746,79 @@
     "methodName": "iam:ListPolicies",
     "resourceName": "example-readonly-policy",
     "resourceType": "policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "arn": "arn:aws:iam::123456789012:instance-profile/example-ec2-profile",
+      "create_date": "2024-03-01T12:00:00Z",
+      "path": "/",
+      "roles": [
+        "example-ec2-instance-role"
+      ]
+    },
+    "methodName": "iam:ListInstanceProfiles",
+    "resourceName": "example-ec2-profile",
+    "resourceType": "instance-profile",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListOpenIDConnectProviders",
+    "resourceName": "arn:aws:iam::123456789012:oidc-provider/token.actions.example.com",
+    "resourceType": "oidc-provider",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "create_date": "2024-01-15T10:00:00Z",
+      "valid_until": "2030-01-01T00:00:00Z"
+    },
+    "methodName": "iam:ListSAMLProviders",
+    "resourceName": "arn:aws:iam::123456789012:saml-provider/example-idp",
+    "resourceType": "saml-provider",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "AccountAccessKeysPresent": 0,
+      "AccountMFAEnabled": 0,
+      "Groups": 1,
+      "Roles": 3,
+      "Users": 2
+    },
+    "methodName": "iam:GetAccountSummary",
+    "resourceName": "account",
+    "resourceType": "account-summary",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "allow_users_to_change_password": true,
+      "expire_passwords": true,
+      "hard_expiry": false,
+      "max_password_age": 90,
+      "minimum_password_length": 14,
+      "password_reuse_prevention": 5,
+      "require_lowercase": true,
+      "require_numbers": true,
+      "require_symbols": true,
+      "require_uppercase": true,
+      "status": "configured"
+    },
+    "methodName": "iam:GetAccountPasswordPolicy",
+    "resourceName": "account",
+    "resourceType": "password-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "enable_date": "2024-01-15T10:10:00Z",
+      "user": "alice"
+    },
+    "methodName": "iam:ListMFADevices",
+    "resourceName": "alice/arn:aws:iam::123456789012:mfa/alice",
+    "resourceType": "mfa-device",
     "serviceName": "IAM"
   },
   {
@@ -1101,6 +1207,32 @@
   },
   {
     "details": {
+      "algorithms": [
+        "AES256"
+      ],
+      "bucket_key_enabled": false,
+      "kms_key_ids": [],
+      "region": "us-west-2",
+      "status": "configured"
+    },
+    "methodName": "s3:GetBucketEncryption",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "mfa_delete": "",
+      "region": "us-west-2",
+      "status": "enabled"
+    },
+    "methodName": "s3:GetBucketVersioning",
+    "resourceName": "example-logs",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
       "findings": [
         "Allow statement with wildcard principal (*)"
       ],
@@ -1157,6 +1289,27 @@
       "status": "none"
     },
     "methodName": "s3:GetPublicAccessBlock",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "region": "us-east-1",
+      "status": "none"
+    },
+    "methodName": "s3:GetBucketEncryption",
+    "resourceName": "example-public-assets",
+    "resourceType": "bucket",
+    "serviceName": "S3"
+  },
+  {
+    "details": {
+      "mfa_delete": "",
+      "region": "us-east-1",
+      "status": "disabled"
+    },
+    "methodName": "s3:GetBucketVersioning",
     "resourceName": "example-public-assets",
     "resourceType": "bucket",
     "serviceName": "S3"

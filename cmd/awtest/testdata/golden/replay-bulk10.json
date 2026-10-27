@@ -273,6 +273,69 @@
   },
   {
     "details": {
+      "arn": "arn:aws:iam::123456789012:instance-profile/example-ec2-profile",
+      "create_date": "2024-03-01T12:00:00Z",
+      "path": "/",
+      "roles": [
+        "example-ec2-instance-role"
+      ]
+    },
+    "methodName": "iam:ListInstanceProfiles",
+    "resourceName": "example-ec2-profile",
+    "resourceType": "instance-profile",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {},
+    "methodName": "iam:ListOpenIDConnectProviders",
+    "resourceName": "arn:aws:iam::123456789012:oidc-provider/token.actions.example.com",
+    "resourceType": "oidc-provider",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "create_date": "2024-01-15T10:00:00Z",
+      "valid_until": "2030-01-01T00:00:00Z"
+    },
+    "methodName": "iam:ListSAMLProviders",
+    "resourceName": "arn:aws:iam::123456789012:saml-provider/example-idp",
+    "resourceType": "saml-provider",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "AccountAccessKeysPresent": 0,
+      "AccountMFAEnabled": 0,
+      "Groups": 1,
+      "Roles": 3,
+      "Users": 2
+    },
+    "methodName": "iam:GetAccountSummary",
+    "resourceName": "account",
+    "resourceType": "account-summary",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
+      "allow_users_to_change_password": true,
+      "expire_passwords": true,
+      "hard_expiry": false,
+      "max_password_age": 90,
+      "minimum_password_length": 14,
+      "password_reuse_prevention": 5,
+      "require_lowercase": true,
+      "require_numbers": true,
+      "require_symbols": true,
+      "require_uppercase": true,
+      "status": "configured"
+    },
+    "methodName": "iam:GetAccountPasswordPolicy",
+    "resourceName": "account",
+    "resourceType": "password-policy",
+    "serviceName": "IAM"
+  },
+  {
+    "details": {
       "Region": "us-west-2",
       "StandardsArn": "arn:aws:securityhub:us-west-2::standards/aws-foundational-security-best-practices/v/1.0.0",
       "StandardsStatus": "READY",

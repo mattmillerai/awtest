@@ -1,0 +1,1 @@
+{"taskDefinitionArns":["arn:aws:ecs:us-west-2:123456789012:task-definition/web:1","arn:aws:ecs:us-west-2:123456789012:task-definition/web:2"]}

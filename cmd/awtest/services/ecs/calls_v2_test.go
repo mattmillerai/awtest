@@ -32,6 +32,11 @@ type fakeECS struct {
 	clusters map[string][]map[string]interface{} // region -> described clusters
 	// deny maps region -> AccessDeniedException message for ListClusters.
 	deny map[string]string
+	// services is keyed "<region>|<cluster name>"; taskDefs by region.
+	services     map[string][]string
+	taskDefs     map[string][]string
+	moreServices bool // ListServices always reports a further page
+	taskDefPages int  // > 0: ListTaskDefinitions never ends
 
 	mu   sync.Mutex
 	reqs []recorded
@@ -65,6 +70,26 @@ func (f *fakeECS) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{"clusterArns": arns})
 	case "DescribeClusters":
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{"clusters": f.clusters[region]})
+	case "ListServices":
+		cluster, _ := body["cluster"].(string)
+		resp := map[string]interface{}{"serviceArns": f.services[region+"|"+arnName(cluster)]}
+		if f.moreServices {
+			resp["nextToken"] = "more"
+		}
+		_ = json.NewEncoder(w).Encode(resp)
+	case "ListTaskDefinitions":
+		tok, _ := body["nextToken"].(string)
+		defs := f.taskDefs[region]
+		resp := map[string]interface{}{"taskDefinitionArns": defs}
+		if f.taskDefPages > 0 {
+			// Endless pagination: every page claims another follows.
+			resp["nextToken"] = tok + "x"
+		} else if len(defs) > 1 && tok == "" {
+			resp = map[string]interface{}{"taskDefinitionArns": defs[:1], "nextToken": "p2"}
+		} else if tok == "p2" {
+			resp = map[string]interface{}{"taskDefinitionArns": defs[1:]}
+		}
+		_ = json.NewEncoder(w).Encode(resp)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(map[string]string{"__type": "UnknownOperationException", "message": op})
@@ -114,11 +139,115 @@ func newEnv(t *testing.T, f *fakeECS) context.Context {
 }
 
 func TestServiceIsV2Only(t *testing.T) {
-	if len(ECSCalls) != 1 || ECSCalls[0].Name != "ecs:ListClusters" {
+	want := []string{"ecs:ListClusters", "ecs:ListServices", "ecs:ListTaskDefinitions"}
+	if len(ECSCalls) != len(want) {
 		t.Fatalf("unexpected services: %+v", ECSCalls)
 	}
-	if ECSCalls[0].CallV2 == nil {
-		t.Error("want CallV2 set and Call nil")
+	for i, n := range want {
+		if ECSCalls[i].Name != n || ECSCalls[i].CallV2 == nil {
+			t.Errorf("service %d = %q, want %q with CallV2 set", i, ECSCalls[i].Name, n)
+		}
+	}
+}
+
+func TestListServicesAndTaskDefinitions(t *testing.T) {
+	f := &fakeECS{
+		clusters: map[string][]map[string]interface{}{
+			"us-east-1": {{"clusterName": "web"}, {"clusterName": "empty"}},
+			"us-west-1": {{"clusterName": "batch"}},
+		},
+		services: map[string][]string{
+			"us-east-1|web":   {"arn:aws:ecs:us-east-1:1:service/web/api", "arn:aws:ecs:us-east-1:1:service/web/worker"},
+			"us-west-1|batch": {"arn:aws:ecs:us-west-1:1:service/batch/etl"},
+		},
+		taskDefs: map[string][]string{
+			"us-east-1": {"arn:aws:ecs:us-east-1:1:task-definition/api:3", "arn:aws:ecs:us-east-1:1:task-definition/api:4"},
+		},
+	}
+	ctx := newEnv(t, f)
+	regions := types.RegionsFor(ctx)
+
+	svc := ECSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	var names []string
+	for _, r := range res {
+		if r.Error != nil || r.MethodName != "ecs:ListServices" || r.ResourceType != "service" {
+			t.Errorf("unexpected result %+v", r)
+		}
+		names = append(names, r.Details["region"].(string)+":"+r.ResourceName)
+	}
+	if want := []string{"us-east-1:web/api", "us-east-1:web/worker", "us-west-1:batch/etl"}; !reflect.DeepEqual(names, want) {
+		t.Errorf("services = %v, want %v", names, want)
+	}
+	if got := f.regionsOf("ListServices"); !reflect.DeepEqual(got, []string{"us-east-1", "us-east-1", "us-west-1"}) {
+		t.Errorf("ListServices regions = %v", got)
+	}
+
+	svc = ECSCalls[2]
+	out, err = svc.Invoke(ctx)
+	res = svc.Process(out, err, false)
+	if len(res) != 2 || res[0].ResourceName != "api:3" || res[1].ResourceName != "api:4" || res[0].ResourceType != "task-definition" ||
+		res[0].Details["region"] != "us-east-1" {
+		t.Errorf("task definitions = %+v", res)
+	}
+	if got := f.regionsOf("ListTaskDefinitions"); len(got) != len(regions)+1 {
+		t.Errorf("ListTaskDefinitions calls = %v (want one per region plus the second us-east-1 page)", got)
+	}
+	if got := f.reqs[len(f.reqs)-1]; got.body["status"] != nil && got.body["status"] != "ACTIVE" {
+		t.Errorf("status = %v", got.body["status"])
+	}
+}
+
+func TestListServicesAndTaskDefinitionsCaps(t *testing.T) {
+	f := &fakeECS{
+		clusters:     map[string][]map[string]interface{}{"us-east-1": {{"clusterName": "web"}}},
+		services:     map[string][]string{"us-east-1|web": {"arn:aws:ecs:us-east-1:1:service/web/api"}},
+		taskDefs:     map[string][]string{"us-east-1": {"arn:aws:ecs:us-east-1:1:task-definition/a:1"}},
+		moreServices: true,
+		taskDefPages: 1,
+	}
+	ctx := newEnv(t, f)
+	svc := ECSCalls[1]
+	out, err := svc.Invoke(ctx)
+	res := svc.Process(out, err, false)
+	var notes int
+	for _, r := range res {
+		if r.ResourceType == "note" {
+			notes++
+		}
+	}
+	if len(res) != 2 || notes != 1 {
+		t.Errorf("services results = %+v", res)
+	}
+
+	svc = ECSCalls[2]
+	out, err = svc.Invoke(ctx)
+	res = svc.Process(out, err, false)
+	notes = 0
+	for _, r := range res {
+		if r.ResourceType == "note" {
+			notes++
+		}
+	}
+	if notes != len(types.RegionsFor(ctx)) {
+		t.Errorf("task definition notes = %d, want one per region", notes)
+	}
+	// Each region read exactly maxTaskDefPages pages.
+	if got := len(f.regionsOf("ListTaskDefinitions")); got != maxTaskDefPages*len(types.RegionsFor(ctx)) {
+		t.Errorf("ListTaskDefinitions calls = %d", got)
+	}
+}
+
+func TestListServicesDenied(t *testing.T) {
+	f := &fakeECS{deny: map[string]string{"us-east-1": "nope"}}
+	ctx := newEnv(t, f)
+	for _, svc := range ECSCalls[1:2] {
+		out, err := svc.Invoke(ctx)
+		res := svc.Process(out, err, false)
+		if len(res) != 1 || res[0].Error == nil || !strings.HasPrefix(res[0].Error.Error(), "AccessDeniedException") {
+			t.Errorf("%s: results = %+v", svc.Name, res)
+		}
 	}
 }
 
