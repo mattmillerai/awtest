@@ -3,7 +3,9 @@ version: 2
 updates:
   - package-ecosystem: "gomod"
     directory: "/"
-    vendor: true
+    # No `vendor: true` here: GitHub's Dependabot config parser rejects that key for gomod
+    # (additional property "vendor"), which made the whole file invalid. Go modules
+    # are vendored automatically when vendor/modules.txt exists (Dependabot runs `go mod vendor`).
     schedule:
       interval: "weekly"
     groups:
