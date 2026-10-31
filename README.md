@@ -505,7 +505,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, including:
 
 ## Support the Project
 
-If you find this project helpful, please consider supporting its development:
+If awtest saves you time, you can support it on [Buy Me a Coffee](https://www.buymeacoffee.com/yOd1JU9MQe).
 
 [![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/yOd1JU9MQe)
 
