@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/Miller-Media/awtest-private/compare/v1.8.0...v1.8.1) (2026-11-01)
+
+
+### Dependencies
+
+* apply safe go-minor-patch bumps; pin macie2 and config/credentials ([#56](https://github.com/Miller-Media/awtest-private/issues/56)) ([f8437cf](https://github.com/Miller-Media/awtest-private/commit/f8437cf5d2d999d94355b332aa2e27ec9b01eb7a))
+
 ## [1.8.0](https://github.com/Miller-Media/awtest-private/compare/v1.7.0...v1.8.0) (2026-10-27)
 
 
