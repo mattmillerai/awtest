@@ -70,7 +70,7 @@ Recent releases of many `github.com/aws/aws-sdk-go-v2/service/*` modules include
 
 Upstream tracking issue: [aws/aws-sdk-go-v2#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601).
 
-So every service module below is pinned to the **last release that has no `schemas` package**. Modules not listed (for example `s3`, `iam`, `ec2`, `sts`, `rds`, `sns`) have no schema-bearing release yet and track upstream normally. `aws-sdk-go-v2` core (`v1.47.4`), `config`, `credentials`, `smithy-go` and `aws/protocol/eventstream` are pinned separately and must not move with these.
+So every service module below is pinned to the **last release that has no `schemas` package**. Modules not listed (for example `s3`, `iam`, `ec2`, `sts`, `rds`, `sns`) have no schema-bearing release yet and track upstream normally; `macie2` crossed into schema-era at `v1.60.0` and is pinned at `v1.59.5`. `config` and `credentials` are also pinned (and ignored by Dependabot) so updates cannot pull schema-era `service/sso`, `service/ssooidc`, or `service/signin`. `aws-sdk-go-v2` core, `smithy-go`, and `aws/protocol/eventstream` may move in patch/minor as needed for those tracking modules, as long as `TestNoSDKSchemasPackages` and the size guard stay green.
 
 Guards:
 
@@ -82,7 +82,7 @@ Notes: `cloudwatch` is also held back because v1.53+ uses the CBOR protocol, whi
 
 ### Adding or bumping a service module
 
-Pick the newest version of the module that has no `schemas` directory in its module zip (`go mod download -json <module>@<version>`, then check `<Dir>/schemas`). Then run `go get <module>@<version>`, `go mod tidy`, `go mod vendor`, and verify the core/config/credentials/smithy pins in `go.mod` did not move.
+Pick the newest version of the module that has no `schemas` directory in its module zip (`go mod download -json <module>@<version>`, then check `<Dir>/schemas`). Then run `go get <module>@<version>`, `go mod tidy`, `go mod vendor`, and verify `config`/`credentials` (and any newly schema-bearing service) did not move; re-run `TestNoSDKSchemasPackages` and the size guard.
 
 ### Unpinning
 
@@ -136,6 +136,7 @@ When upstream fixes [#3601](https://github.com/aws/aws-sdk-go-v2/issues/3601) (s
 | `kinesis` | `v1.54.0` |
 | `kms` | `v1.52.0` |
 | `lambda` | `v1.108.0` |
+| `macie2` | `v1.59.5` |
 | `mediaconvert` | `v1.104.0` |
 | `opensearch` | `v1.80.0` |
 | `organizations` | `v1.56.1` |

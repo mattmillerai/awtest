@@ -23,6 +23,10 @@ updates:
       # (~+14 MB binary, +30 ms startup): https://github.com/aws/aws-sdk-go-v2/issues/3601
       # To unpin: see CONTRIBUTING.md "Pinned aws-sdk-go-v2 service modules" (remove the
       # entry here and the module from the pin table once upstream fixes the issue).
+      # config/credentials stay pinned so Dependabot cannot pull schema-era
+      # service/sso, service/ssooidc, or service/signin (aws/aws-sdk-go-v2#3601).
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/config"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/credentials"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/account"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/acm"
@@ -62,6 +66,7 @@ updates:
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/kinesis"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/kms"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/lambda"
+      - dependency-name: "github.com/aws/aws-sdk-go-v2/service/macie2"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/mediaconvert"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/opensearch"
       - dependency-name: "github.com/aws/aws-sdk-go-v2/service/organizations"
